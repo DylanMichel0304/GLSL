@@ -5,11 +5,16 @@
 #include <glm/gtc/type_ptr.hpp>
 #include <random>
 #include <vector>
+#include <cstring> // For strstr function
 
 // Include OpenGL headers for macOS
 #ifdef __APPLE__
 #include <OpenGL/gl3.h>
 #endif
+
+// Define STB_IMAGE_IMPLEMENTATION before including to create the implementation
+#define STB_IMAGE_IMPLEMENTATION
+#include "stb_image.h" // Add this header file for texture loading
 
 #include "shader.h"
 #include "camera.h"
@@ -28,6 +33,9 @@ bool firstMouse = true;
 float deltaTime = 0.0f;
 float lastFrame = 0.0f;
 float gameTime = 0.0f; // Global time for animations
+bool pauseTime = false; // Whether time is paused
+float timeOfDay = 8.0f; // Start at 8 AM
+float timeSpeed = 0.05f; // How quickly time passes (hours per second)
 
 // Player state
 bool isInAir = false;
@@ -48,6 +56,108 @@ const int NUM_FLOWERS = 120;
 const int NUM_PALMS = 30;
 const int NUM_BEACH_PLANTS = 60;
 const int NUM_SHELLS = 40;
+
+// Texture variables
+unsigned int sandTexture, grassTexture, rockTexture, waterTexture;
+
+// Function to load a texture from file
+unsigned int loadTexture(const char* path) {
+    unsigned int textureID;
+    glGenTextures(1, &textureID);
+    
+    // Bind the texture
+    glBindTexture(GL_TEXTURE_2D, textureID);
+    
+    // Set texture parameters
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR_MIPMAP_LINEAR);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+    
+    // Create a default procedural texture instead of loading from file
+    // This avoids the STB image loading issues
+    int width = 256;
+    int height = 256;
+    unsigned char* data = new unsigned char[width * height * 3];
+    
+    // Generate a simple procedural texture based on the path name
+    if (strstr(path, "sand")) {
+        // Sand texture - yellowish with noise
+        for (int y = 0; y < height; y++) {
+            for (int x = 0; x < width; x++) {
+                int idx = (y * width + x) * 3;
+                // Add some noise to the base color
+                int noise = rand() % 20;
+                data[idx + 0] = 200 + noise; // Red
+                data[idx + 1] = 190 + noise; // Green
+                data[idx + 2] = 140 + noise; // Blue
+            }
+        }
+        std::cout << "Created procedural sand texture" << std::endl;
+    } 
+    else if (strstr(path, "grass")) {
+        // Grass texture - greenish with variation
+        for (int y = 0; y < height; y++) {
+            for (int x = 0; x < width; x++) {
+                int idx = (y * width + x) * 3;
+                int noise = rand() % 30;
+                data[idx + 0] = 30 + noise; // Red
+                data[idx + 1] = 150 + noise; // Green
+                data[idx + 2] = 30 + noise;  // Blue
+            }
+        }
+        std::cout << "Created procedural grass texture" << std::endl;
+    }
+    else if (strstr(path, "rock")) {
+        // Rock texture - grayish with noise
+        for (int y = 0; y < height; y++) {
+            for (int x = 0; x < width; x++) {
+                int idx = (y * width + x) * 3;
+                int noise = rand() % 40;
+                int value = 128 + noise;
+                data[idx + 0] = value; // Red
+                data[idx + 1] = value; // Green
+                data[idx + 2] = value; // Blue
+            }
+        }
+        std::cout << "Created procedural rock texture" << std::endl;
+    }
+    else if (strstr(path, "water")) {
+        // Water texture - blueish
+        for (int y = 0; y < height; y++) {
+            for (int x = 0; x < width; x++) {
+                int idx = (y * width + x) * 3;
+                int noise = rand() % 20;
+                data[idx + 0] = 10 + noise;  // Red
+                data[idx + 1] = 100 + noise; // Green
+                data[idx + 2] = 200 + noise; // Blue
+            }
+        }
+        std::cout << "Created procedural water texture" << std::endl;
+    }
+    else {
+        // Default texture - checkerboard pattern
+        for (int y = 0; y < height; y++) {
+            for (int x = 0; x < width; x++) {
+                int idx = (y * width + x) * 3;
+                bool isEven = ((x / 32) + (y / 32)) % 2 == 0;
+                data[idx + 0] = isEven ? 200 : 50; // Red
+                data[idx + 1] = isEven ? 200 : 50; // Green
+                data[idx + 2] = isEven ? 200 : 50; // Blue
+            }
+        }
+        std::cout << "Created procedural default texture" << std::endl;
+    }
+    
+    // Load the generated data into the texture
+    glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB, width, height, 0, GL_RGB, GL_UNSIGNED_BYTE, data);
+    glGenerateMipmap(GL_TEXTURE_2D);
+    
+    // Free memory
+    delete[] data;
+    
+    return textureID;
+}
 
 // Structure to represent a decoration object
 struct DecorationObject {
@@ -123,6 +233,40 @@ void processInput(GLFWwindow* window) {
     if (glfwGetKey(window, GLFW_KEY_SPACE) == GLFW_PRESS && !isInAir) {
         isInAir = true;
         jumpVelocity = JUMP_FORCE;
+    }
+    
+    // Time controls
+    // Toggle pause time
+    static bool pKeyPressed = false;
+    if (glfwGetKey(window, GLFW_KEY_P) == GLFW_PRESS) {
+        if (!pKeyPressed) {
+            pauseTime = !pauseTime;
+            std::cout << (pauseTime ? "Time paused" : "Time resumed") << std::endl;
+            pKeyPressed = true;
+        }
+    } else {
+        pKeyPressed = false;
+    }
+    
+    // Speed up time (right arrow)
+    if (glfwGetKey(window, GLFW_KEY_RIGHT) == GLFW_PRESS) {
+        timeOfDay += deltaTime * 1.0f; // Fast forward
+    }
+    
+    // Rewind time (left arrow)
+    if (glfwGetKey(window, GLFW_KEY_LEFT) == GLFW_PRESS) {
+        timeOfDay -= deltaTime * 1.0f; // Rewind
+        if (timeOfDay < 0.0f) timeOfDay += 24.0f; // Ensure we stay in 24-hour cycle
+    }
+    
+    // Display controls on first run
+    static bool showedControls = false;
+    if (!showedControls) {
+        std::cout << "Controls:" << std::endl;
+        std::cout << "WASD - Move | Space - Jump | P - Pause time" << std::endl;
+        std::cout << "Left/Right Arrows - Rewind/Forward time" << std::endl;
+        std::cout << "Shift - Sprint | Escape - Exit" << std::endl;
+        showedControls = true;
     }
 }
 
@@ -665,7 +809,13 @@ int main() {
     
     // Build and compile shaders
     Shader shader("vertex.glsl", "fragment.glsl");
-
+    
+    // Load textures
+    sandTexture = loadTexture("sand");
+    grassTexture = loadTexture("grass");
+    rockTexture = loadTexture("rock");
+    waterTexture = loadTexture("water");
+    
     // Generate terrain mesh (grid)
     std::vector<float> terrainVertices;
     std::vector<unsigned int> terrainIndices;
@@ -981,10 +1131,34 @@ int main() {
         float currentFrame = static_cast<float>(glfwGetTime());
         deltaTime = currentFrame - lastFrame;
         lastFrame = currentFrame;
-        gameTime += deltaTime; // Update the global time
-
+        
         // Process input
         processInput(window);
+        
+        // Update time if not paused
+        if (!pauseTime) {
+            gameTime += deltaTime;
+            timeOfDay += deltaTime * timeSpeed;
+            // Loop time of day (24-hour cycle)
+            while (timeOfDay >= 24.0f) timeOfDay -= 24.0f;
+        }
+        
+        // Display time of day every 30 seconds of game time
+        static float lastTimeDisplay = 0.0f;
+        if (gameTime - lastTimeDisplay > 0.5f) {
+            std::cout << "Current time: " << timeOfDay << " hours" << std::endl;
+            lastTimeDisplay = gameTime;
+            
+            // Output sun position every 5 in-game hours
+            static float lastSunPosDisplay = 0.0f;
+            if (timeOfDay - lastSunPosDisplay > 0.5f || timeOfDay < lastSunPosDisplay) {
+                float sunAngle = ((timeOfDay - 6.0f) / 12.0f) * 3.14159f; // Sun cycle (rise at 6, set at 18)
+                glm::vec3 sunPos = glm::vec3(cos(sunAngle), sin(sunAngle), 0.0f);
+                std::cout << "Time of day: " << timeOfDay << " hours, Sun position: (" 
+                          << sunPos.x << ", " << sunPos.y << ", " << sunPos.z << ")" << std::endl;
+                lastSunPosDisplay = timeOfDay;
+            }
+        }
         
         // Update player position (jumping/gravity)
         updatePlayerPosition();
@@ -998,6 +1172,64 @@ int main() {
         
         // Pass the time to the shader for water animation
         shader.setFloat("time", gameTime);
+        
+        // Pass light position for dynamic lighting (based on time of day)
+        float sunAngle = ((timeOfDay - 6.0f) / 12.0f) * 3.14159f; // Sun cycle (rise at 6, set at 18)
+        glm::vec3 lightPos = glm::vec3(cos(sunAngle) * 100.0f, sin(sunAngle) * 100.0f, 0.0f);
+        shader.setVec3("lightPos", lightPos);
+        shader.setVec3("viewPos", camera.Position);
+        
+        // Set light color based on time of day
+        glm::vec3 lightColor;
+        if (timeOfDay >= 6.0f && timeOfDay <= 18.0f) {
+            // Daytime - warm sunlight that changes throughout the day
+            float noonFactor = 1.0f - abs((timeOfDay - 12.0f) / 6.0f); // 0 at dawn/dusk, 1 at noon
+            
+            // Morning/evening is more orange, noon is more white
+            lightColor = glm::vec3(
+                1.0f,
+                0.9f + noonFactor * 0.1f,  // More yellow at noon
+                0.7f + noonFactor * 0.3f   // More white at noon
+            );
+        } else {
+            // Night time - dim blue moonlight
+            lightColor = glm::vec3(0.2f, 0.2f, 0.4f);
+        }
+        shader.setVec3("lightColor", lightColor);
+        
+        // Set ambient strength based on time of day
+        float ambientStrength;
+        if (timeOfDay >= 7.0f && timeOfDay <= 17.0f) {
+            // Full daylight
+            ambientStrength = 0.3f;
+        } else if ((timeOfDay >= 6.0f && timeOfDay < 7.0f) || (timeOfDay > 17.0f && timeOfDay <= 18.0f)) {
+            // Dawn or dusk
+            ambientStrength = 0.2f;
+        } else if ((timeOfDay >= 5.0f && timeOfDay < 6.0f) || (timeOfDay > 18.0f && timeOfDay <= 19.0f)) {
+            // Twilight
+            ambientStrength = 0.15f;
+        } else {
+            // Night
+            ambientStrength = 0.1f;
+        }
+        shader.setFloat("ambientStrength", ambientStrength);
+        
+        // Set up textures
+        glActiveTexture(GL_TEXTURE0);
+        glBindTexture(GL_TEXTURE_2D, sandTexture);
+        shader.setInt("sandTexture", 0);
+        
+        glActiveTexture(GL_TEXTURE1);
+        glBindTexture(GL_TEXTURE_2D, grassTexture);
+        shader.setInt("grassTexture", 1);
+        
+        glActiveTexture(GL_TEXTURE2);
+        glBindTexture(GL_TEXTURE_2D, rockTexture);
+        shader.setInt("rockTexture", 2);
+        
+        glActiveTexture(GL_TEXTURE3);
+        glBindTexture(GL_TEXTURE_2D, waterTexture);
+        shader.setInt("waterTexture", 3);
 
         // Create transformations
         glm::mat4 projection = glm::perspective(glm::radians(camera.Zoom), (float)SCR_WIDTH / (float)SCR_HEIGHT, 0.1f, 1000.0f);

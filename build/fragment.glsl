@@ -1,65 +1,138 @@
 #version 330 core
 out vec4 FragColor;
 
-in vec3 ourColor;
+in vec3 Normal;
+in vec3 FragPos;
+in vec4 Color;
 in vec2 TexCoord;
-in float Height;
 
-uniform float time; // Add time uniform for wave animation
+uniform sampler2D rockTexture;
+uniform sampler2D grassTexture;
+uniform sampler2D waterTexture;
+uniform sampler2D sandTexture;
+uniform sampler2D snowTexture;
+
+// Fog parameters
+uniform float fogDensity;
+uniform vec3 fogColor;
+uniform float fogStart;
+uniform float fogEnd;
+
+// Sky color for reflections
+uniform vec3 skyColor;
+
+// Camera position for reflections and fog
+uniform vec3 cameraPos;
+
+// Time of day
+uniform float time;
+
+// Calculate height-based procedural normal for water
+vec3 waterNormal(vec2 uv, float height) {
+    // Create procedural normal based on wave displacement
+    float waveHeight = sin(uv.x * 20.0 + time * 2.0) * 0.05 + 
+                      cos(uv.y * 20.0 + time * 1.5) * 0.05;
+    vec3 tangent = normalize(vec3(1.0, sin(uv.x * 20.0 + time * 2.0) * 0.5, 0.0));
+    vec3 bitangent = normalize(vec3(0.0, cos(uv.y * 20.0 + time * 1.5) * 0.5, 1.0));
+    return normalize(cross(tangent, bitangent));
+}
+
+// Fresnel approximation for water
+float fresnel(vec3 normal, vec3 viewDir, float power) {
+    float fresnelTerm = max(0.0, 1.0 - dot(normal, viewDir));
+    return pow(fresnelTerm, power);
+}
 
 void main() {
-    // Base color from vertex coloring
-    vec3 color = ourColor;
+    // Determine texture and blending based on height
+    float height = FragPos.y;
     
-    // Add subtle variation based on height and texture coordinates
-    // Very subtle terrain detail pattern
-    float pattern = sin(TexCoord.x * 50.0) * sin(TexCoord.y * 50.0) * 0.01;
+    // Get view direction for reflections and fog
+    vec3 viewDir = normalize(cameraPos - FragPos);
     
-    // More subtle enhancement based on height
-    if (Height > 12.0) {
-        // Snowy mountain tops - add a bit of bluish tint to shadows
-        float snowPattern = sin(TexCoord.x * 200.0) * sin(TexCoord.y * 200.0) * 0.05;
-        color = mix(color, vec3(0.95, 0.95, 1.0), min((Height - 12.0) / 16.0 + snowPattern, 0.8));
-    } 
-    else if (Height < -0.5) {
-        // Enhanced water effects with animated waves
-        // Create more interesting wave pattern with time animation
-        float waveTime = time * 0.5; // Slow the animation down a bit
+    // Terrain texturing
+    vec4 terrainColor;
+    vec3 terrainNormal = normalize(Normal);
+    
+    if (height < 5.0) { // Water
+        // Get procedural normal for water
+        vec3 waterNorm = waterNormal(TexCoord, height);
+        terrainNormal = normalize(mix(terrainNormal, waterNorm, 0.7));
         
-        // Multiple overlapping wave patterns at different frequencies and directions
-        float wave1 = sin(TexCoord.x * 30.0 + TexCoord.y * 20.0 + waveTime) * 0.02;
-        float wave2 = sin(TexCoord.x * 15.0 - TexCoord.y * 25.0 + waveTime * 0.7) * 0.015;
-        float wave3 = sin(TexCoord.x * 5.0 + TexCoord.y * 5.0 + waveTime * 0.3) * 0.01;
+        // Sample water texture
+        vec4 water = texture(waterTexture, TexCoord + vec2(sin(time * 0.5 + TexCoord.y * 10.0) * 0.01, 
+                                                         cos(time * 0.4 + TexCoord.x * 10.0) * 0.01));
         
-        // Combine waves
-        float waterEffect = wave1 + wave2 + wave3;
+        // Add fresnel effect for reflections
+        float fresnelFactor = fresnel(terrainNormal, viewDir, 5.0);
         
-        // Apply wave highlight color based on depth
-        vec3 deepWaterColor = vec3(0.0, 0.1, 0.4); // Deep water (dark blue)
-        vec3 shallowWaterColor = vec3(0.0, 0.5, 0.8); // Shallow water (lighter blue)
-        vec3 highlightColor = vec3(0.8, 0.9, 1.0); // Wave highlight (white/light blue)
+        // Mix water color with reflections and underwater color
+        terrainColor = mix(water * vec4(0.0, 0.2, 0.5, 1.0), 
+                          vec4(skyColor * 0.8, 1.0), 
+                          fresnelFactor * 0.7);
         
-        // Mix colors based on depth and wave height
-        float depthFactor = clamp((Height + 5.0) / 5.0, 0.0, 1.0); // 0.0 = deep, 1.0 = shallow
-        vec3 baseWaterColor = mix(deepWaterColor, shallowWaterColor, depthFactor);
+        // Add wave highlights
+        float highlight = pow(max(0.0, dot(reflect(-vec3(0.0, 1.0, 0.0), terrainNormal), viewDir)), 32.0);
+        terrainColor += vec4(highlight, highlight, highlight, 0.0) * 0.3;
+    }
+    else if (height < 7.0) { // Beach/Sand
+        vec4 sand = texture(sandTexture, TexCoord);
+        float blend = smoothstep(5.0, 7.0, height);
         
-        // Add highlights to wave peaks
-        color = mix(baseWaterColor, highlightColor, clamp(waterEffect * 5.0, 0.0, 0.3));
-        
-        // Add subtle transparency/foam near the shore
-        if (Height > -1.5) {
-            // Near shore foam effect
-            float shoreFoam = sin(TexCoord.x * 100.0 + TexCoord.y * 100.0 + waveTime * 2.0) * 0.05;
-            shoreFoam += sin(TexCoord.x * 50.0 - TexCoord.y * 70.0 + waveTime) * 0.05;
-            shoreFoam = clamp(shoreFoam + (Height + 1.5) / 1.5 * 0.3, 0.0, 0.6);
-            
-            // Mix in the shore foam
-            color = mix(color, vec3(0.9, 0.95, 1.0), shoreFoam);
-        }
+        // Blend with water at the shore
+        vec4 water = texture(waterTexture, TexCoord + vec2(sin(time * 0.5) * 0.01, cos(time * 0.4) * 0.01));
+        terrainColor = mix(water * vec4(0.0, 0.2, 0.5, 1.0), sand * vec4(1.0, 0.9, 0.7, 1.0), blend);
+    }
+    else if (height < 20.0) { // Grass
+        vec4 grass = texture(grassTexture, TexCoord);
+        vec4 sand = texture(sandTexture, TexCoord);
+        float blend = smoothstep(7.0, 10.0, height);
+        terrainColor = mix(sand * vec4(1.0, 0.9, 0.7, 1.0), grass * vec4(0.3, 0.7, 0.3, 1.0), blend);
+    }
+    else if (height < 35.0) { // Rock
+        vec4 grass = texture(grassTexture, TexCoord);
+        vec4 rock = texture(rockTexture, TexCoord);
+        float blend = smoothstep(20.0, 25.0, height);
+        terrainColor = mix(grass * vec4(0.3, 0.7, 0.3, 1.0), rock * vec4(0.5, 0.5, 0.5, 1.0), blend);
+    }
+    else { // Snow
+        vec4 rock = texture(rockTexture, TexCoord);
+        vec4 snow = texture(snowTexture, TexCoord);
+        float blend = smoothstep(35.0, 40.0, height);
+        terrainColor = mix(rock * vec4(0.5, 0.5, 0.5, 1.0), snow, blend);
     }
     
-    // Add the subtle pattern without changing the overall color scheme
-    color = mix(color, color + vec3(pattern), 0.1);
-
-    FragColor = vec4(color, 1.0);
+    // Basic lighting calculation
+    vec3 lightDir = normalize(vec3(0.5, 1.0, 0.3)); // Light direction
+    
+    // Ambient light component - varies by time of day
+    vec3 ambient = terrainColor.rgb * 0.3;
+    
+    // Diffuse component
+    float diff = max(dot(terrainNormal, lightDir), 0.0);
+    vec3 diffuse = diff * terrainColor.rgb;
+    
+    // Specular component
+    vec3 reflectDir = reflect(-lightDir, terrainNormal);
+    float spec = pow(max(dot(viewDir, reflectDir), 0.0), 32);
+    vec3 specular = spec * vec3(0.2);
+    
+    // Final color with lighting
+    vec3 result = ambient + diffuse + specular;
+    
+    // Apply fog effect
+    float distanceToCamera = length(cameraPos - FragPos);
+    float fogFactor = 1.0 - exp(-fogDensity * distanceToCamera);
+    fogFactor = clamp(fogFactor, 0.0, 1.0);
+    
+    // Apply distance-based fog
+    result = mix(result, fogColor, fogFactor);
+    
+    // Apply height-based fog for distant mountains
+    if (height > 20.0) {
+        float heightFog = smoothstep(0.0, 1.0, (height - 20.0) / 30.0) * 0.5;
+        result = mix(result, fogColor, min(heightFog * fogFactor * 2.0, 0.8));
+    }
+    
+    FragColor = vec4(result, 1.0);
 } 
