@@ -27,6 +27,7 @@ bool firstMouse = true;
 // Timing
 float deltaTime = 0.0f;
 float lastFrame = 0.0f;
+float gameTime = 0.0f; // Global time for animations
 
 // Player state
 bool isInAir = false;
@@ -41,16 +42,19 @@ const float TERRAIN_HEIGHT = 20.0f;
 const int TERRAIN_VERTICES = 40; // Number of vertices per side for the terrain grid
 
 // Decoration settings
-const int NUM_TREES = 100;
+const int NUM_TREES = 80;
 const int NUM_ROCKS = 50;
-const int NUM_FLOWERS = 200;
+const int NUM_FLOWERS = 120;
+const int NUM_PALMS = 30;
+const int NUM_BEACH_PLANTS = 60;
+const int NUM_SHELLS = 40;
 
 // Structure to represent a decoration object
 struct DecorationObject {
     glm::vec3 position;
     glm::vec3 scale;
     float rotation;
-    int type; // 0 = tree, 1 = rock, 2 = flower
+    int type; // 0 = tree, 1 = rock, 2 = flower, 3 = palm, 4 = beach plant, 5 = shell
 };
 
 // Collections of decoration objects
@@ -291,6 +295,182 @@ std::vector<unsigned int> createFlowerIndices() {
     return indices;
 }
 
+// Create a palm tree model vertices
+std::vector<float> createPalmTreeVertices() {
+    std::vector<float> vertices = {
+        // Palm trunk (brown, slightly curved) - positions, colors, texcoords
+        -0.1f, 0.0f, 0.0f,   0.6f, 0.4f, 0.2f,   0.0f, 0.0f,
+         0.1f, 0.0f, 0.0f,   0.6f, 0.4f, 0.2f,   1.0f, 0.0f,
+         0.2f, 2.0f, 0.0f,   0.5f, 0.3f, 0.1f,   1.0f, 1.0f,
+         0.0f, 2.0f, 0.0f,   0.5f, 0.3f, 0.1f,   0.0f, 1.0f,
+        
+        -0.1f, 0.0f, 0.1f,   0.6f, 0.4f, 0.2f,   0.0f, 0.0f,
+         0.1f, 0.0f, 0.1f,   0.6f, 0.4f, 0.2f,   1.0f, 0.0f,
+         0.2f, 2.0f, 0.1f,   0.5f, 0.3f, 0.1f,   1.0f, 1.0f,
+         0.0f, 2.0f, 0.1f,   0.5f, 0.3f, 0.1f,   0.0f, 1.0f,
+        
+        // Palm leaves (green, 4 angled fronds) - use triangles
+        // Frond 1 - angles up/right
+         0.0f, 2.0f, 0.0f,   0.0f, 0.8f, 0.3f,   0.0f, 0.0f,
+         0.8f, 2.5f, 0.0f,   0.0f, 0.7f, 0.2f,   0.5f, 0.5f,
+         1.2f, 3.2f, 0.2f,   0.0f, 0.8f, 0.3f,   1.0f, 0.0f,
+        
+        // Frond 2 - angles down/right
+         0.0f, 2.0f, 0.0f,   0.0f, 0.8f, 0.3f,   0.0f, 0.0f,
+         0.8f, 1.7f, 0.0f,   0.0f, 0.7f, 0.2f,   0.5f, 0.5f,
+         1.5f, 1.2f, -0.2f,  0.0f, 0.8f, 0.3f,   1.0f, 0.0f,
+        
+        // Frond 3 - angles up/left
+         0.0f, 2.0f, 0.0f,   0.0f, 0.8f, 0.3f,   0.0f, 0.0f,
+        -0.8f, 2.3f, 0.0f,   0.0f, 0.7f, 0.2f,   0.5f, 0.5f,
+        -1.3f, 3.0f, 0.2f,   0.0f, 0.8f, 0.3f,   1.0f, 0.0f,
+        
+        // Frond 4 - angles down/left
+         0.0f, 2.0f, 0.0f,   0.0f, 0.8f, 0.3f,   0.0f, 0.0f,
+        -0.8f, 1.6f, 0.0f,   0.0f, 0.7f, 0.2f,   0.5f, 0.5f,
+        -1.4f, 1.0f, -0.2f,  0.0f, 0.8f, 0.3f,   1.0f, 0.0f,
+        
+        // Frond 5 - angles forward
+         0.0f, 2.0f, 0.0f,   0.0f, 0.8f, 0.3f,   0.0f, 0.0f,
+         0.0f, 2.0f, 0.8f,   0.0f, 0.7f, 0.2f,   0.5f, 0.5f,
+         0.2f, 2.5f, 1.5f,   0.0f, 0.8f, 0.3f,   1.0f, 0.0f,
+        
+        // Frond 6 - angles backward
+         0.0f, 2.0f, 0.0f,   0.0f, 0.8f, 0.3f,   0.0f, 0.0f,
+         0.0f, 2.0f, -0.8f,  0.0f, 0.7f, 0.2f,   0.5f, 0.5f,
+        -0.2f, 2.5f, -1.5f,  0.0f, 0.8f, 0.3f,   1.0f, 0.0f
+    };
+    
+    return vertices;
+}
+
+// Create a beach plant model vertices (small beach grass/shrub)
+std::vector<float> createBeachPlantVertices() {
+    std::vector<float> vertices = {
+        // Base stem
+        -0.05f, 0.0f, 0.0f,  0.7f, 0.7f, 0.6f,   0.0f, 0.0f,
+         0.05f, 0.0f, 0.0f,  0.7f, 0.7f, 0.6f,   1.0f, 0.0f,
+         0.05f, 0.2f, 0.0f,  0.7f, 0.7f, 0.5f,   1.0f, 1.0f,
+        -0.05f, 0.2f, 0.0f,  0.7f, 0.7f, 0.5f,   0.0f, 1.0f,
+        
+        // Beach grass blades - implementing as crossed planes
+        // Blade 1 (tall, center)
+        -0.05f, 0.0f, 0.0f,  0.8f, 0.8f, 0.4f,   0.0f, 0.0f,
+         0.05f, 0.0f, 0.0f,  0.8f, 0.8f, 0.4f,   1.0f, 0.0f,
+         0.1f,  0.8f, 0.0f,  0.7f, 0.8f, 0.3f,   1.0f, 1.0f,
+        -0.1f,  0.8f, 0.0f,  0.7f, 0.8f, 0.3f,   0.0f, 1.0f,
+        
+        // Blade 2 (right side)
+         0.05f, 0.0f, -0.05f, 0.8f, 0.7f, 0.3f,   0.0f, 0.0f,
+         0.15f, 0.0f,  0.05f, 0.8f, 0.7f, 0.3f,   1.0f, 0.0f,
+         0.3f,  0.6f,  0.1f,  0.7f, 0.8f, 0.2f,   1.0f, 1.0f,
+         0.2f,  0.6f, -0.1f,  0.7f, 0.8f, 0.2f,   0.0f, 1.0f,
+        
+        // Blade 3 (left side)
+        -0.15f, 0.0f, -0.05f, 0.7f, 0.8f, 0.3f,   0.0f, 0.0f,
+        -0.05f, 0.0f,  0.05f, 0.7f, 0.8f, 0.3f,   1.0f, 0.0f,
+        -0.2f,  0.7f,  0.1f,  0.6f, 0.8f, 0.2f,   1.0f, 1.0f,
+        -0.3f,  0.7f, -0.1f,  0.6f, 0.8f, 0.2f,   0.0f, 1.0f,
+        
+        // Blade 4 (back)
+        -0.05f, 0.0f, -0.15f, 0.7f, 0.7f, 0.3f,   0.0f, 0.0f,
+         0.05f, 0.0f, -0.05f, 0.7f, 0.7f, 0.3f,   1.0f, 0.0f,
+         0.1f,  0.5f, -0.3f,  0.6f, 0.7f, 0.2f,   1.0f, 1.0f,
+        -0.1f,  0.5f, -0.4f,  0.6f, 0.7f, 0.2f,   0.0f, 1.0f,
+        
+        // Blade 5 (front)
+        -0.05f, 0.0f,  0.05f, 0.8f, 0.8f, 0.4f,   0.0f, 0.0f,
+         0.05f, 0.0f,  0.15f, 0.8f, 0.8f, 0.4f,   1.0f, 0.0f,
+         0.1f,  0.6f,  0.4f,  0.7f, 0.9f, 0.3f,   1.0f, 1.0f,
+        -0.1f,  0.6f,  0.3f,  0.7f, 0.9f, 0.3f,   0.0f, 1.0f
+    };
+    
+    return vertices;
+}
+
+// Create a shell model vertices
+std::vector<float> createShellVertices() {
+    std::vector<float> vertices = {
+        // Shell base (circular, pale color)
+        // Center point
+         0.0f, 0.05f, 0.0f,   0.9f, 0.85f, 0.75f,  0.5f, 0.5f,
+        
+        // Points around the circle - 8 points for a simple shell
+        -0.1f, 0.0f, -0.1f,   0.95f, 0.9f, 0.8f,   0.0f, 0.0f,
+         0.1f, 0.0f, -0.1f,   0.9f, 0.85f, 0.75f,  1.0f, 0.0f,
+         0.15f, 0.0f, 0.0f,   0.85f, 0.8f, 0.7f,   1.0f, 0.5f,
+         0.1f, 0.0f, 0.1f,    0.9f, 0.85f, 0.75f,  1.0f, 1.0f,
+        -0.1f, 0.0f, 0.1f,    0.95f, 0.9f, 0.8f,   0.0f, 1.0f,
+        -0.15f, 0.0f, 0.0f,   0.85f, 0.8f, 0.7f,   0.0f, 0.5f,
+        
+        // Spiral top part of shell
+         0.0f, 0.0f, 0.0f,    0.9f, 0.85f, 0.75f,  0.5f, 0.5f,
+         0.05f, 0.1f, 0.05f,  0.85f, 0.8f, 0.7f,   0.6f, 0.6f,
+         0.1f, 0.15f, 0.0f,   0.8f, 0.75f, 0.65f,  0.7f, 0.5f,
+         0.05f, 0.2f, -0.05f, 0.75f, 0.7f, 0.6f,   0.6f, 0.4f
+    };
+    
+    return vertices;
+}
+
+// Palm tree indices for triangle drawing
+std::vector<unsigned int> createPalmTreeIndices() {
+    std::vector<unsigned int> indices = {
+        // Trunk - 6 sides, 2 triangles each
+        0, 1, 2, 2, 3, 0,     // Front face
+        4, 5, 6, 6, 7, 4,     // Back face
+        0, 3, 7, 7, 4, 0,     // Left face
+        1, 2, 6, 6, 5, 1,     // Right face
+        3, 2, 6, 6, 7, 3,     // Top face
+        0, 1, 5, 5, 4, 0,     // Bottom face
+        
+        // Leaves - 6 fronds, each a triangle
+        8, 9, 10,             // Frond 1
+        11, 12, 13,           // Frond 2
+        14, 15, 16,           // Frond 3
+        17, 18, 19,           // Frond 4
+        20, 21, 22,           // Frond 5
+        23, 24, 25            // Frond 6
+    };
+    
+    return indices;
+}
+
+// Beach plant indices for triangle drawing
+std::vector<unsigned int> createBeachPlantIndices() {
+    std::vector<unsigned int> indices = {
+        // Base stem
+        0, 1, 2, 2, 3, 0,
+        
+        // Grass blades - each is a quad (2 triangles)
+        4, 5, 6, 6, 7, 4,     // Blade 1
+        8, 9, 10, 10, 11, 8,  // Blade 2
+        12, 13, 14, 14, 15, 12, // Blade 3
+        16, 17, 18, 18, 19, 16, // Blade 4
+        20, 21, 22, 22, 23, 20  // Blade 5
+    };
+    
+    return indices;
+}
+
+// Shell indices for triangle drawing
+std::vector<unsigned int> createShellIndices() {
+    std::vector<unsigned int> indices = {
+        // Base of shell - triangles from center to perimeter
+        0, 1, 2,
+        0, 2, 3,
+        0, 3, 4,
+        0, 4, 5,
+        0, 5, 1,
+        
+        // Spiral top part
+        7, 8, 9,
+        7, 9, 10
+    };
+    
+    return indices;
+}
+
 // Generate random decorations across the terrain
 void generateDecorations() {
     std::random_device rd;
@@ -299,14 +479,14 @@ void generateDecorations() {
     std::uniform_real_distribution<float> scaleDistrib(0.7f, 1.5f);
     std::uniform_real_distribution<float> rotDistrib(0.0f, 360.0f);
     
-    // Generate trees
+    // Generate regular trees (mainly in higher areas)
     for (int i = 0; i < NUM_TREES; i++) {
         float x = posDistrib(gen);
         float z = posDistrib(gen);
         float y = getTerrainHeight(x, z);
         
-        // Don't place trees on steep slopes or in water
-        if (abs(y) > 12.0f || y < -5.0f) continue;
+        // Don't place trees on steep slopes, in water, or on the beach
+        if (abs(y) > 12.0f || y < 0.5f) continue;
         
         DecorationObject tree;
         tree.position = glm::vec3(x, y, z);
@@ -315,6 +495,24 @@ void generateDecorations() {
         tree.type = 0; // Tree
         
         decorations.push_back(tree);
+    }
+    
+    // Generate palm trees (only near water/beach areas)
+    for (int i = 0; i < NUM_PALMS; i++) {
+        float x = posDistrib(gen);
+        float z = posDistrib(gen);
+        float y = getTerrainHeight(x, z);
+        
+        // Only place palm trees near the shoreline on beach areas
+        if (y < -0.5f || y > 2.0f) continue;
+        
+        DecorationObject palm;
+        palm.position = glm::vec3(x, y, z);
+        palm.scale = glm::vec3(scaleDistrib(gen) * 0.8f); // Slightly smaller
+        palm.rotation = rotDistrib(gen);
+        palm.type = 3; // Palm tree
+        
+        decorations.push_back(palm);
     }
     
     // Generate rocks
@@ -332,14 +530,14 @@ void generateDecorations() {
         decorations.push_back(rock);
     }
     
-    // Generate flowers
+    // Generate flowers (only in grassy areas)
     for (int i = 0; i < NUM_FLOWERS; i++) {
         float x = posDistrib(gen);
         float z = posDistrib(gen);
         float y = getTerrainHeight(x, z);
         
         // Only place flowers on relatively flat, grassy areas
-        if (y < -3.0f || y > 8.0f) continue;
+        if (y < 0.5f || y > 8.0f) continue;
         
         DecorationObject flower;
         flower.position = glm::vec3(x, y, z);
@@ -348,6 +546,42 @@ void generateDecorations() {
         flower.type = 2; // Flower
         
         decorations.push_back(flower);
+    }
+    
+    // Generate beach plants (only on beach areas)
+    for (int i = 0; i < NUM_BEACH_PLANTS; i++) {
+        float x = posDistrib(gen);
+        float z = posDistrib(gen);
+        float y = getTerrainHeight(x, z);
+        
+        // Only place beach plants on the beach/shore
+        if (y < -0.5f || y > 1.5f) continue;
+        
+        DecorationObject beachPlant;
+        beachPlant.position = glm::vec3(x, y, z);
+        beachPlant.scale = glm::vec3(scaleDistrib(gen) * 0.7f);
+        beachPlant.rotation = rotDistrib(gen);
+        beachPlant.type = 4; // Beach plant
+        
+        decorations.push_back(beachPlant);
+    }
+    
+    // Generate shells (only on beaches and shallow water)
+    for (int i = 0; i < NUM_SHELLS; i++) {
+        float x = posDistrib(gen);
+        float z = posDistrib(gen);
+        float y = getTerrainHeight(x, z);
+        
+        // Only place shells on beach or in very shallow water
+        if (y < -1.5f || y > 0.5f) continue;
+        
+        DecorationObject shell;
+        shell.position = glm::vec3(x, y + 0.01f, z); // Slightly above ground
+        shell.scale = glm::vec3(scaleDistrib(gen) * 0.4f); // Shells are small
+        shell.rotation = rotDistrib(gen);
+        shell.type = 5; // Shell
+        
+        decorations.push_back(shell);
     }
 }
 
@@ -539,6 +773,16 @@ int main() {
     std::vector<float> flowerVertices = createFlowerVertices();
     std::vector<unsigned int> flowerIndices = createFlowerIndices();
     
+    // Island-specific decorations
+    std::vector<float> palmVertices = createPalmTreeVertices();
+    std::vector<unsigned int> palmIndices = createPalmTreeIndices();
+    
+    std::vector<float> beachPlantVertices = createBeachPlantVertices();
+    std::vector<unsigned int> beachPlantIndices = createBeachPlantIndices();
+    
+    std::vector<float> shellVertices = createShellVertices();
+    std::vector<unsigned int> shellIndices = createShellIndices();
+    
     // Generate random decorations
     generateDecorations();
     std::cout << "Generated " << decorations.size() << " decoration objects" << std::endl;
@@ -647,6 +891,84 @@ int main() {
     glVertexAttribPointer(2, 2, GL_FLOAT, GL_FALSE, 8 * sizeof(float), (void*)(6 * sizeof(float)));
     glEnableVertexAttribArray(2);
 
+    // Set up buffers for palm tree objects
+    unsigned int palmVBO, palmVAO, palmEBO;
+    glGenVertexArrays(1, &palmVAO);
+    glGenBuffers(1, &palmVBO);
+    glGenBuffers(1, &palmEBO);
+
+    glBindVertexArray(palmVAO);
+
+    glBindBuffer(GL_ARRAY_BUFFER, palmVBO);
+    glBufferData(GL_ARRAY_BUFFER, palmVertices.size() * sizeof(float), palmVertices.data(), GL_STATIC_DRAW);
+
+    glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, palmEBO);
+    glBufferData(GL_ELEMENT_ARRAY_BUFFER, palmIndices.size() * sizeof(unsigned int), palmIndices.data(), GL_STATIC_DRAW);
+
+    // Position attribute
+    glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 8 * sizeof(float), (void*)0);
+    glEnableVertexAttribArray(0);
+    
+    // Color attribute
+    glVertexAttribPointer(1, 3, GL_FLOAT, GL_FALSE, 8 * sizeof(float), (void*)(3 * sizeof(float)));
+    glEnableVertexAttribArray(1);
+    
+    // Texture attribute
+    glVertexAttribPointer(2, 2, GL_FLOAT, GL_FALSE, 8 * sizeof(float), (void*)(6 * sizeof(float)));
+    glEnableVertexAttribArray(2);
+    
+    // Set up buffers for beach plant objects
+    unsigned int beachPlantVBO, beachPlantVAO, beachPlantEBO;
+    glGenVertexArrays(1, &beachPlantVAO);
+    glGenBuffers(1, &beachPlantVBO);
+    glGenBuffers(1, &beachPlantEBO);
+
+    glBindVertexArray(beachPlantVAO);
+
+    glBindBuffer(GL_ARRAY_BUFFER, beachPlantVBO);
+    glBufferData(GL_ARRAY_BUFFER, beachPlantVertices.size() * sizeof(float), beachPlantVertices.data(), GL_STATIC_DRAW);
+
+    glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, beachPlantEBO);
+    glBufferData(GL_ELEMENT_ARRAY_BUFFER, beachPlantIndices.size() * sizeof(unsigned int), beachPlantIndices.data(), GL_STATIC_DRAW);
+
+    // Position attribute
+    glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 8 * sizeof(float), (void*)0);
+    glEnableVertexAttribArray(0);
+    
+    // Color attribute
+    glVertexAttribPointer(1, 3, GL_FLOAT, GL_FALSE, 8 * sizeof(float), (void*)(3 * sizeof(float)));
+    glEnableVertexAttribArray(1);
+    
+    // Texture attribute
+    glVertexAttribPointer(2, 2, GL_FLOAT, GL_FALSE, 8 * sizeof(float), (void*)(6 * sizeof(float)));
+    glEnableVertexAttribArray(2);
+    
+    // Set up buffers for shell objects
+    unsigned int shellVBO, shellVAO, shellEBO;
+    glGenVertexArrays(1, &shellVAO);
+    glGenBuffers(1, &shellVBO);
+    glGenBuffers(1, &shellEBO);
+
+    glBindVertexArray(shellVAO);
+
+    glBindBuffer(GL_ARRAY_BUFFER, shellVBO);
+    glBufferData(GL_ARRAY_BUFFER, shellVertices.size() * sizeof(float), shellVertices.data(), GL_STATIC_DRAW);
+
+    glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, shellEBO);
+    glBufferData(GL_ELEMENT_ARRAY_BUFFER, shellIndices.size() * sizeof(unsigned int), shellIndices.data(), GL_STATIC_DRAW);
+
+    // Position attribute
+    glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 8 * sizeof(float), (void*)0);
+    glEnableVertexAttribArray(0);
+    
+    // Color attribute
+    glVertexAttribPointer(1, 3, GL_FLOAT, GL_FALSE, 8 * sizeof(float), (void*)(3 * sizeof(float)));
+    glEnableVertexAttribArray(1);
+    
+    // Texture attribute
+    glVertexAttribPointer(2, 2, GL_FLOAT, GL_FALSE, 8 * sizeof(float), (void*)(6 * sizeof(float)));
+    glEnableVertexAttribArray(2);
+
     // Set initial player height
     float initialTerrainHeight = getTerrainHeight(camera.Position.x, camera.Position.z);
     camera.Position.y = initialTerrainHeight + PLAYER_HEIGHT;
@@ -659,6 +981,7 @@ int main() {
         float currentFrame = static_cast<float>(glfwGetTime());
         deltaTime = currentFrame - lastFrame;
         lastFrame = currentFrame;
+        gameTime += deltaTime; // Update the global time
 
         // Process input
         processInput(window);
@@ -672,6 +995,9 @@ int main() {
 
         // Activate shader
         shader.use();
+        
+        // Pass the time to the shader for water animation
+        shader.setFloat("time", gameTime);
 
         // Create transformations
         glm::mat4 projection = glm::perspective(glm::radians(camera.Zoom), (float)SCR_WIDTH / (float)SCR_HEIGHT, 0.1f, 1000.0f);
@@ -708,6 +1034,18 @@ int main() {
                     glBindVertexArray(flowerVAO);
                     glDrawElements(GL_TRIANGLES, flowerIndices.size(), GL_UNSIGNED_INT, 0);
                     break;
+                case 3: // Palm tree
+                    glBindVertexArray(palmVAO);
+                    glDrawElements(GL_TRIANGLES, palmIndices.size(), GL_UNSIGNED_INT, 0);
+                    break;
+                case 4: // Beach plant
+                    glBindVertexArray(beachPlantVAO);
+                    glDrawElements(GL_TRIANGLES, beachPlantIndices.size(), GL_UNSIGNED_INT, 0);
+                    break;
+                case 5: // Shell
+                    glBindVertexArray(shellVAO);
+                    glDrawElements(GL_TRIANGLES, shellIndices.size(), GL_UNSIGNED_INT, 0);
+                    break;
             }
         }
 
@@ -732,6 +1070,18 @@ int main() {
     glDeleteVertexArrays(1, &flowerVAO);
     glDeleteBuffers(1, &flowerVBO);
     glDeleteBuffers(1, &flowerEBO);
+
+    glDeleteVertexArrays(1, &palmVAO);
+    glDeleteBuffers(1, &palmVBO);
+    glDeleteBuffers(1, &palmEBO);
+    
+    glDeleteVertexArrays(1, &beachPlantVAO);
+    glDeleteBuffers(1, &beachPlantVBO);
+    glDeleteBuffers(1, &beachPlantEBO);
+    
+    glDeleteVertexArrays(1, &shellVAO);
+    glDeleteBuffers(1, &shellVBO);
+    glDeleteBuffers(1, &shellEBO);
 
     glfwTerminate();
     return 0;
