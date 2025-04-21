@@ -3,6 +3,8 @@
 #include <glm/glm.hpp>
 #include <glm/gtc/matrix_transform.hpp>
 #include <glm/gtc/type_ptr.hpp>
+#include <random>
+#include <vector>
 
 // Include OpenGL headers for macOS
 #ifdef __APPLE__
@@ -37,6 +39,22 @@ const float PLAYER_HEIGHT = 1.0f;
 const float TERRAIN_SIZE = 200.0f;
 const float TERRAIN_HEIGHT = 20.0f;
 const int TERRAIN_VERTICES = 40; // Number of vertices per side for the terrain grid
+
+// Decoration settings
+const int NUM_TREES = 100;
+const int NUM_ROCKS = 50;
+const int NUM_FLOWERS = 200;
+
+// Structure to represent a decoration object
+struct DecorationObject {
+    glm::vec3 position;
+    glm::vec3 scale;
+    float rotation;
+    int type; // 0 = tree, 1 = rock, 2 = flower
+};
+
+// Collections of decoration objects
+std::vector<DecorationObject> decorations;
 
 void framebuffer_size_callback(GLFWwindow* window, int width, int height) {
     glViewport(0, 0, width, height);
@@ -114,6 +132,223 @@ float simpleNoise(float x, float z) {
 float getTerrainHeight(float x, float z) {
     // Convert world coordinates to noise function input
     return simpleNoise(x, z);
+}
+
+// Create a tree model vertices
+std::vector<float> createTreeVertices() {
+    std::vector<float> vertices = {
+        // Tree trunk (brown)
+        // positions          // colors           // texture coords
+        -0.2f, 0.0f, -0.2f,   0.5f, 0.3f, 0.0f,   0.0f, 0.0f,
+         0.2f, 0.0f, -0.2f,   0.5f, 0.3f, 0.0f,   1.0f, 0.0f,
+         0.2f, 2.0f, -0.2f,   0.5f, 0.3f, 0.0f,   1.0f, 1.0f,
+        -0.2f, 2.0f, -0.2f,   0.5f, 0.3f, 0.0f,   0.0f, 1.0f,
+        
+        -0.2f, 0.0f,  0.2f,   0.5f, 0.3f, 0.0f,   0.0f, 0.0f,
+         0.2f, 0.0f,  0.2f,   0.5f, 0.3f, 0.0f,   1.0f, 0.0f,
+         0.2f, 2.0f,  0.2f,   0.5f, 0.3f, 0.0f,   1.0f, 1.0f,
+        -0.2f, 2.0f,  0.2f,   0.5f, 0.3f, 0.0f,   0.0f, 1.0f,
+        
+        // Tree leaves (green) - pyramids at different heights
+        // Bottom pyramid
+        -1.0f, 1.0f, -1.0f,   0.0f, 0.6f, 0.0f,   0.0f, 0.0f,
+         1.0f, 1.0f, -1.0f,   0.0f, 0.6f, 0.0f,   1.0f, 0.0f,
+         1.0f, 1.0f,  1.0f,   0.0f, 0.5f, 0.0f,   1.0f, 1.0f,
+        -1.0f, 1.0f,  1.0f,   0.0f, 0.5f, 0.0f,   0.0f, 1.0f,
+         0.0f, 2.5f,  0.0f,   0.0f, 0.7f, 0.0f,   0.5f, 0.5f,
+        
+        // Middle pyramid
+        -0.8f, 2.0f, -0.8f,   0.0f, 0.6f, 0.0f,   0.0f, 0.0f,
+         0.8f, 2.0f, -0.8f,   0.0f, 0.6f, 0.0f,   1.0f, 0.0f,
+         0.8f, 2.0f,  0.8f,   0.0f, 0.5f, 0.0f,   1.0f, 1.0f,
+        -0.8f, 2.0f,  0.8f,   0.0f, 0.5f, 0.0f,   0.0f, 1.0f,
+         0.0f, 3.5f,  0.0f,   0.0f, 0.7f, 0.0f,   0.5f, 0.5f,
+        
+        // Top pyramid
+        -0.6f, 3.0f, -0.6f,   0.0f, 0.6f, 0.0f,   0.0f, 0.0f,
+         0.6f, 3.0f, -0.6f,   0.0f, 0.6f, 0.0f,   1.0f, 0.0f,
+         0.6f, 3.0f,  0.6f,   0.0f, 0.5f, 0.0f,   1.0f, 1.0f,
+        -0.6f, 3.0f,  0.6f,   0.0f, 0.5f, 0.0f,   0.0f, 1.0f,
+         0.0f, 4.5f,  0.0f,   0.0f, 0.7f, 0.0f,   0.5f, 0.5f
+    };
+    
+    return vertices;
+}
+
+// Create a rock model vertices
+std::vector<float> createRockVertices() {
+    std::vector<float> vertices = {
+        // Rock (gray) - irregular shape
+        // positions          // colors           // texture coords
+        -0.5f, 0.0f, -0.5f,   0.5f, 0.5f, 0.5f,   0.0f, 0.0f,
+         0.5f, 0.0f, -0.6f,   0.6f, 0.6f, 0.6f,   1.0f, 0.0f,
+         0.7f, 0.0f,  0.5f,   0.5f, 0.5f, 0.5f,   1.0f, 1.0f,
+        -0.4f, 0.0f,  0.6f,   0.6f, 0.6f, 0.6f,   0.0f, 1.0f,
+         0.0f, 0.8f,  0.0f,   0.7f, 0.7f, 0.7f,   0.5f, 0.5f
+    };
+    
+    return vertices;
+}
+
+// Create a flower model vertices
+std::vector<float> createFlowerVertices() {
+    std::vector<float> vertices = {
+        // Stem (green)
+        // positions          // colors           // texture coords
+        -0.02f, 0.0f, 0.0f,   0.0f, 0.5f, 0.0f,   0.0f, 0.0f,
+         0.02f, 0.0f, 0.0f,   0.0f, 0.5f, 0.0f,   1.0f, 0.0f,
+         0.02f, 0.3f, 0.0f,   0.0f, 0.7f, 0.0f,   1.0f, 1.0f,
+        -0.02f, 0.3f, 0.0f,   0.0f, 0.7f, 0.0f,   0.0f, 1.0f,
+        
+        // Petals (various colors) - implemented as crossed planes
+        -0.1f, 0.25f, -0.1f,  0.9f, 0.2f, 0.2f,   0.0f, 0.0f, // Red flower
+         0.1f, 0.25f,  0.1f,  0.9f, 0.2f, 0.2f,   1.0f, 1.0f,
+        -0.1f, 0.35f, -0.1f,  0.9f, 0.2f, 0.2f,   0.0f, 0.0f,
+         0.1f, 0.35f,  0.1f,  0.9f, 0.2f, 0.2f,   1.0f, 1.0f,
+         
+        -0.1f, 0.25f,  0.1f,  0.9f, 0.5f, 0.1f,   0.0f, 1.0f, // Orange flower
+         0.1f, 0.25f, -0.1f,  0.9f, 0.5f, 0.1f,   1.0f, 0.0f,
+        -0.1f, 0.35f,  0.1f,  0.9f, 0.5f, 0.1f,   0.0f, 1.0f,
+         0.1f, 0.35f, -0.1f,  0.9f, 0.5f, 0.1f,   1.0f, 0.0f,
+        
+        // Flower center (yellow)
+         0.0f, 0.3f,  0.0f,   0.9f, 0.9f, 0.0f,   0.5f, 0.5f,
+        -0.05f, 0.3f,  0.0f,  0.9f, 0.9f, 0.0f,   0.0f, 0.5f,
+         0.05f, 0.3f,  0.0f,  0.9f, 0.9f, 0.0f,   1.0f, 0.5f,
+         0.0f, 0.3f, -0.05f,  0.9f, 0.9f, 0.0f,   0.5f, 0.0f,
+         0.0f, 0.3f,  0.05f,  0.9f, 0.9f, 0.0f,   0.5f, 1.0f
+    };
+    
+    return vertices;
+}
+
+// Tree indices for triangle drawing
+std::vector<unsigned int> createTreeIndices() {
+    std::vector<unsigned int> indices = {
+        // Trunk - 6 sides, 2 triangles each
+        0, 1, 2, 2, 3, 0,     // Front face
+        4, 5, 6, 6, 7, 4,     // Back face
+        0, 3, 7, 7, 4, 0,     // Left face
+        1, 2, 6, 6, 5, 1,     // Right face
+        3, 2, 6, 6, 7, 3,     // Top face
+        0, 1, 5, 5, 4, 0,     // Bottom face
+        
+        // Leaves - 3 pyramids, 4 triangles each
+        // Bottom pyramid
+        8, 9, 14,             // Front face
+        9, 10, 14,            // Right face
+        10, 11, 14,           // Back face
+        11, 8, 14,            // Left face
+        
+        // Middle pyramid
+        15, 16, 19,           // Front face
+        16, 17, 19,           // Right face
+        17, 18, 19,           // Back face
+        18, 15, 19,           // Left face
+        
+        // Top pyramid
+        20, 21, 24,           // Front face
+        21, 22, 24,           // Right face
+        22, 23, 24,           // Back face
+        23, 20, 24            // Left face
+    };
+    
+    return indices;
+}
+
+// Rock indices for triangle drawing
+std::vector<unsigned int> createRockIndices() {
+    std::vector<unsigned int> indices = {
+        // Triangles connecting the base vertices to the peak
+        0, 1, 4,              // Front face
+        1, 2, 4,              // Right face
+        2, 3, 4,              // Back face
+        3, 0, 4,              // Left face
+        // Base quad
+        0, 1, 2, 2, 3, 0      // Base face
+    };
+    
+    return indices;
+}
+
+// Flower indices for triangle drawing
+std::vector<unsigned int> createFlowerIndices() {
+    std::vector<unsigned int> indices = {
+        // Stem
+        0, 1, 2, 2, 3, 0,     // Stem quad
+        
+        // Petals
+        4, 5, 6, 6, 5, 7,     // First crossed plane
+        8, 9, 10, 10, 9, 11,  // Second crossed plane
+        
+        // Center
+        12, 13, 14,           // Center triangles
+        12, 14, 15,
+        12, 15, 16,
+        12, 16, 13
+    };
+    
+    return indices;
+}
+
+// Generate random decorations across the terrain
+void generateDecorations() {
+    std::random_device rd;
+    std::mt19937 gen(rd());
+    std::uniform_real_distribution<float> posDistrib(-TERRAIN_SIZE/2.0f + 10.0f, TERRAIN_SIZE/2.0f - 10.0f);
+    std::uniform_real_distribution<float> scaleDistrib(0.7f, 1.5f);
+    std::uniform_real_distribution<float> rotDistrib(0.0f, 360.0f);
+    
+    // Generate trees
+    for (int i = 0; i < NUM_TREES; i++) {
+        float x = posDistrib(gen);
+        float z = posDistrib(gen);
+        float y = getTerrainHeight(x, z);
+        
+        // Don't place trees on steep slopes or in water
+        if (abs(y) > 12.0f || y < -5.0f) continue;
+        
+        DecorationObject tree;
+        tree.position = glm::vec3(x, y, z);
+        tree.scale = glm::vec3(scaleDistrib(gen));
+        tree.rotation = rotDistrib(gen);
+        tree.type = 0; // Tree
+        
+        decorations.push_back(tree);
+    }
+    
+    // Generate rocks
+    for (int i = 0; i < NUM_ROCKS; i++) {
+        float x = posDistrib(gen);
+        float z = posDistrib(gen);
+        float y = getTerrainHeight(x, z);
+        
+        DecorationObject rock;
+        rock.position = glm::vec3(x, y, z);
+        rock.scale = glm::vec3(scaleDistrib(gen) * 0.8f);
+        rock.rotation = rotDistrib(gen);
+        rock.type = 1; // Rock
+        
+        decorations.push_back(rock);
+    }
+    
+    // Generate flowers
+    for (int i = 0; i < NUM_FLOWERS; i++) {
+        float x = posDistrib(gen);
+        float z = posDistrib(gen);
+        float y = getTerrainHeight(x, z);
+        
+        // Only place flowers on relatively flat, grassy areas
+        if (y < -3.0f || y > 8.0f) continue;
+        
+        DecorationObject flower;
+        flower.position = glm::vec3(x, y, z);
+        flower.scale = glm::vec3(scaleDistrib(gen) * 0.5f);
+        flower.rotation = rotDistrib(gen);
+        flower.type = 2; // Flower
+        
+        decorations.push_back(flower);
+    }
 }
 
 void updatePlayerPosition() {
@@ -198,8 +433,8 @@ int main() {
     Shader shader("vertex.glsl", "fragment.glsl");
 
     // Generate terrain mesh (grid)
-    std::vector<float> vertices;
-    std::vector<unsigned int> indices;
+    std::vector<float> terrainVertices;
+    std::vector<unsigned int> terrainIndices;
     
     // Calculate step size
     float step = TERRAIN_SIZE / static_cast<float>(TERRAIN_VERTICES - 1);
@@ -212,27 +447,62 @@ int main() {
             float yPos = getTerrainHeight(xPos, zPos);
             
             // Position
-            vertices.push_back(xPos);
-            vertices.push_back(yPos);
-            vertices.push_back(zPos);
+            terrainVertices.push_back(xPos);
+            terrainVertices.push_back(yPos);
+            terrainVertices.push_back(zPos);
             
-            // Color - varies based on height
+            // Color - more natural terrain coloring
             float normalizedHeight = (yPos + TERRAIN_HEIGHT) / (2.0f * TERRAIN_HEIGHT);
             
-            // Grass (green) for flat/medium areas
-            float g = glm::clamp(0.4f + normalizedHeight * 0.4f, 0.0f, 0.8f);
-            // Brown for peaks
-            float r = glm::clamp(normalizedHeight * 0.8f, 0.1f, 0.7f);
-            // Blue-ish for valleys
-            float b = glm::clamp(0.1f + (1.0f - normalizedHeight) * 0.3f, 0.0f, 0.4f);
+            // Define natural color ranges
+            float r, g, b;
             
-            vertices.push_back(r);
-            vertices.push_back(g);
-            vertices.push_back(b);
+            if (yPos < -5.0f) {
+                // Deep water (dark blue)
+                r = 0.0f;
+                g = 0.1f;
+                b = 0.4f;
+            } 
+            else if (yPos < -2.0f) {
+                // Shallow water (lighter blue)
+                r = 0.0f;
+                g = 0.2f;
+                b = 0.5f;
+            }
+            else if (yPos < 0.5f) {
+                // Beach/shore (sandy color)
+                r = 0.76f;
+                g = 0.7f;
+                b = 0.5f;
+            }
+            else if (yPos < 8.0f) {
+                // Grass/plains (green)
+                r = 0.2f;
+                g = 0.5f + normalizedHeight * 0.2f;
+                b = 0.1f;
+            }
+            else if (yPos < 12.0f) {
+                // Forest/hill transition (darker green to brown)
+                float t = (yPos - 8.0f) / 4.0f; // 0 to 1 transition factor
+                r = 0.2f + t * 0.3f;
+                g = 0.5f - t * 0.2f;
+                b = 0.1f;
+            }
+            else {
+                // Mountain (gray/white for peaks)
+                float t = glm::clamp((yPos - 12.0f) / 8.0f, 0.0f, 1.0f);
+                r = 0.5f + t * 0.4f;
+                g = 0.5f + t * 0.4f;
+                b = 0.5f + t * 0.4f;
+            }
+            
+            terrainVertices.push_back(r);
+            terrainVertices.push_back(g);
+            terrainVertices.push_back(b);
             
             // Texture coordinates
-            vertices.push_back(static_cast<float>(x) / (TERRAIN_VERTICES - 1));
-            vertices.push_back(static_cast<float>(z) / (TERRAIN_VERTICES - 1));
+            terrainVertices.push_back(static_cast<float>(x) / (TERRAIN_VERTICES - 1));
+            terrainVertices.push_back(static_cast<float>(z) / (TERRAIN_VERTICES - 1));
         }
     }
     
@@ -246,32 +516,124 @@ int main() {
             unsigned int bottomRight = bottomLeft + 1;
             
             // Triangle 1
-            indices.push_back(topLeft);
-            indices.push_back(bottomLeft);
-            indices.push_back(topRight);
+            terrainIndices.push_back(topLeft);
+            terrainIndices.push_back(bottomLeft);
+            terrainIndices.push_back(topRight);
             
             // Triangle 2
-            indices.push_back(topRight);
-            indices.push_back(bottomLeft);
-            indices.push_back(bottomRight);
+            terrainIndices.push_back(topRight);
+            terrainIndices.push_back(bottomLeft);
+            terrainIndices.push_back(bottomRight);
         }
     }
     
-    std::cout << "Terrain generated with " << vertices.size() / 8 << " vertices" << std::endl;
+    std::cout << "Terrain generated with " << terrainVertices.size() / 8 << " vertices" << std::endl;
     
-    // Set up buffers
-    unsigned int VBO, VAO, EBO;
-    glGenVertexArrays(1, &VAO);
-    glGenBuffers(1, &VBO);
-    glGenBuffers(1, &EBO);
+    // Create decoration meshes
+    std::vector<float> treeVertices = createTreeVertices();
+    std::vector<unsigned int> treeIndices = createTreeIndices();
+    
+    std::vector<float> rockVertices = createRockVertices();
+    std::vector<unsigned int> rockIndices = createRockIndices();
+    
+    std::vector<float> flowerVertices = createFlowerVertices();
+    std::vector<unsigned int> flowerIndices = createFlowerIndices();
+    
+    // Generate random decorations
+    generateDecorations();
+    std::cout << "Generated " << decorations.size() << " decoration objects" << std::endl;
+    
+    // Set up buffers for the terrain
+    unsigned int terrainVBO, terrainVAO, terrainEBO;
+    glGenVertexArrays(1, &terrainVAO);
+    glGenBuffers(1, &terrainVBO);
+    glGenBuffers(1, &terrainEBO);
 
-    glBindVertexArray(VAO);
+    glBindVertexArray(terrainVAO);
 
-    glBindBuffer(GL_ARRAY_BUFFER, VBO);
-    glBufferData(GL_ARRAY_BUFFER, vertices.size() * sizeof(float), vertices.data(), GL_STATIC_DRAW);
+    glBindBuffer(GL_ARRAY_BUFFER, terrainVBO);
+    glBufferData(GL_ARRAY_BUFFER, terrainVertices.size() * sizeof(float), terrainVertices.data(), GL_STATIC_DRAW);
 
-    glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, EBO);
-    glBufferData(GL_ELEMENT_ARRAY_BUFFER, indices.size() * sizeof(unsigned int), indices.data(), GL_STATIC_DRAW);
+    glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, terrainEBO);
+    glBufferData(GL_ELEMENT_ARRAY_BUFFER, terrainIndices.size() * sizeof(unsigned int), terrainIndices.data(), GL_STATIC_DRAW);
+
+    // Position attribute
+    glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 8 * sizeof(float), (void*)0);
+    glEnableVertexAttribArray(0);
+    
+    // Color attribute
+    glVertexAttribPointer(1, 3, GL_FLOAT, GL_FALSE, 8 * sizeof(float), (void*)(3 * sizeof(float)));
+    glEnableVertexAttribArray(1);
+    
+    // Texture attribute
+    glVertexAttribPointer(2, 2, GL_FLOAT, GL_FALSE, 8 * sizeof(float), (void*)(6 * sizeof(float)));
+    glEnableVertexAttribArray(2);
+    
+    // Set up buffers for tree objects
+    unsigned int treeVBO, treeVAO, treeEBO;
+    glGenVertexArrays(1, &treeVAO);
+    glGenBuffers(1, &treeVBO);
+    glGenBuffers(1, &treeEBO);
+
+    glBindVertexArray(treeVAO);
+
+    glBindBuffer(GL_ARRAY_BUFFER, treeVBO);
+    glBufferData(GL_ARRAY_BUFFER, treeVertices.size() * sizeof(float), treeVertices.data(), GL_STATIC_DRAW);
+
+    glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, treeEBO);
+    glBufferData(GL_ELEMENT_ARRAY_BUFFER, treeIndices.size() * sizeof(unsigned int), treeIndices.data(), GL_STATIC_DRAW);
+
+    // Position attribute
+    glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 8 * sizeof(float), (void*)0);
+    glEnableVertexAttribArray(0);
+    
+    // Color attribute
+    glVertexAttribPointer(1, 3, GL_FLOAT, GL_FALSE, 8 * sizeof(float), (void*)(3 * sizeof(float)));
+    glEnableVertexAttribArray(1);
+    
+    // Texture attribute
+    glVertexAttribPointer(2, 2, GL_FLOAT, GL_FALSE, 8 * sizeof(float), (void*)(6 * sizeof(float)));
+    glEnableVertexAttribArray(2);
+    
+    // Set up buffers for rock objects
+    unsigned int rockVBO, rockVAO, rockEBO;
+    glGenVertexArrays(1, &rockVAO);
+    glGenBuffers(1, &rockVBO);
+    glGenBuffers(1, &rockEBO);
+
+    glBindVertexArray(rockVAO);
+
+    glBindBuffer(GL_ARRAY_BUFFER, rockVBO);
+    glBufferData(GL_ARRAY_BUFFER, rockVertices.size() * sizeof(float), rockVertices.data(), GL_STATIC_DRAW);
+
+    glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, rockEBO);
+    glBufferData(GL_ELEMENT_ARRAY_BUFFER, rockIndices.size() * sizeof(unsigned int), rockIndices.data(), GL_STATIC_DRAW);
+
+    // Position attribute
+    glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 8 * sizeof(float), (void*)0);
+    glEnableVertexAttribArray(0);
+    
+    // Color attribute
+    glVertexAttribPointer(1, 3, GL_FLOAT, GL_FALSE, 8 * sizeof(float), (void*)(3 * sizeof(float)));
+    glEnableVertexAttribArray(1);
+    
+    // Texture attribute
+    glVertexAttribPointer(2, 2, GL_FLOAT, GL_FALSE, 8 * sizeof(float), (void*)(6 * sizeof(float)));
+    glEnableVertexAttribArray(2);
+    
+    // Set up buffers for flower objects
+    unsigned int flowerVBO, flowerVAO, flowerEBO;
+    glGenVertexArrays(1, &flowerVAO);
+    glGenBuffers(1, &flowerVBO);
+    glGenBuffers(1, &flowerEBO);
+
+    glBindVertexArray(flowerVAO);
+
+    glBindBuffer(GL_ARRAY_BUFFER, flowerVBO);
+    glBufferData(GL_ARRAY_BUFFER, flowerVertices.size() * sizeof(float), flowerVertices.data(), GL_STATIC_DRAW);
+
+    glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, flowerEBO);
+    glBufferData(GL_ELEMENT_ARRAY_BUFFER, flowerIndices.size() * sizeof(unsigned int), flowerIndices.data(), GL_STATIC_DRAW);
 
     // Position attribute
     glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 8 * sizeof(float), (void*)0);
@@ -318,13 +680,36 @@ int main() {
         shader.setMat4("projection", projection);
         shader.setMat4("view", view);
         
-        // Model matrix
+        // Render terrain
         glm::mat4 model = glm::mat4(1.0f);
         shader.setMat4("model", model);
-
-        // Render terrain
-        glBindVertexArray(VAO);
-        glDrawElements(GL_TRIANGLES, indices.size(), GL_UNSIGNED_INT, 0);
+        
+        glBindVertexArray(terrainVAO);
+        glDrawElements(GL_TRIANGLES, terrainIndices.size(), GL_UNSIGNED_INT, 0);
+        
+        // Render decorations
+        for (const auto& decoration : decorations) {
+            model = glm::mat4(1.0f);
+            model = glm::translate(model, decoration.position);
+            model = glm::rotate(model, glm::radians(decoration.rotation), glm::vec3(0.0f, 1.0f, 0.0f));
+            model = glm::scale(model, decoration.scale);
+            shader.setMat4("model", model);
+            
+            switch (decoration.type) {
+                case 0: // Tree
+                    glBindVertexArray(treeVAO);
+                    glDrawElements(GL_TRIANGLES, treeIndices.size(), GL_UNSIGNED_INT, 0);
+                    break;
+                case 1: // Rock
+                    glBindVertexArray(rockVAO);
+                    glDrawElements(GL_TRIANGLES, rockIndices.size(), GL_UNSIGNED_INT, 0);
+                    break;
+                case 2: // Flower
+                    glBindVertexArray(flowerVAO);
+                    glDrawElements(GL_TRIANGLES, flowerIndices.size(), GL_UNSIGNED_INT, 0);
+                    break;
+            }
+        }
 
         // Swap buffers and poll events
         glfwSwapBuffers(window);
@@ -332,9 +717,21 @@ int main() {
     }
 
     // Clean up
-    glDeleteVertexArrays(1, &VAO);
-    glDeleteBuffers(1, &VBO);
-    glDeleteBuffers(1, &EBO);
+    glDeleteVertexArrays(1, &terrainVAO);
+    glDeleteBuffers(1, &terrainVBO);
+    glDeleteBuffers(1, &terrainEBO);
+    
+    glDeleteVertexArrays(1, &treeVAO);
+    glDeleteBuffers(1, &treeVBO);
+    glDeleteBuffers(1, &treeEBO);
+    
+    glDeleteVertexArrays(1, &rockVAO);
+    glDeleteBuffers(1, &rockVBO);
+    glDeleteBuffers(1, &rockEBO);
+    
+    glDeleteVertexArrays(1, &flowerVAO);
+    glDeleteBuffers(1, &flowerVBO);
+    glDeleteBuffers(1, &flowerEBO);
 
     glfwTerminate();
     return 0;
