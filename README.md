@@ -1,4 +1,4 @@
-# 3D GLSL Game TEUB
+# 3D GLSL Game 
 
 A simple 3D environment with WASD movement controls and jumping using OpenGL and GLSL shaders. This project creates a 3D world with a floor that you can navigate around.
 
