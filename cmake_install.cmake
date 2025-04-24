@@ -1,4 +1,4 @@
-# Install script for directory: /home/plouis/Documents/Cours/MA2/Q2/3D/exo/Project/3Dgame
+# Install script for directory: /home/plouis/Documents/Cours/MA2/Q2/3D/exo/Project/GLSL
 
 # Set the install prefix
 if(NOT DEFINED CMAKE_INSTALL_PREFIX)
@@ -50,5 +50,5 @@ endif()
 
 string(REPLACE ";" "\n" CMAKE_INSTALL_MANIFEST_CONTENT
        "${CMAKE_INSTALL_MANIFEST_FILES}")
-file(WRITE "/home/plouis/Documents/Cours/MA2/Q2/3D/exo/Project/3Dgame/${CMAKE_INSTALL_MANIFEST}"
+file(WRITE "/home/plouis/Documents/Cours/MA2/Q2/3D/exo/Project/GLSL/${CMAKE_INSTALL_MANIFEST}"
      "${CMAKE_INSTALL_MANIFEST_CONTENT}")

@@ -43,7 +43,15 @@ include_directories(import/glad/include/
 #set(SOURCES_EX_08_SOL "sol/ex08/sol08.cpp" "camera.h" "shader.h" "object.h")
 #set(SOURCES_EX_09_SOL "sol/ex09/sol09.cpp" "camera.h" "shader.h" "object.h")
 #set(SOURCES_EX_10_SOL "sol/ex10/sol10.cpp" "camera.h" "shader.h" "object.h")
-set(SOURCES_main "main.cpp" "object.h")
+set(SOURCES_main     
+    main.cpp 
+    src/EBO.h src/EBO.cpp
+    src/VAO.h src/VAO.cpp
+    src/VBO.h src/VBO.cpp
+    src/shaderClass.h src/shaderClass.cpp
+    src/Texture.h src/Texture.cpp
+    src/Camera.h src/Camera.cpp
+    src/Mesh.h src/Mesh.cpp)
 set(SOURCES_TEST 
     test.cpp 
     src/EBO.h src/EBO.cpp
@@ -52,6 +60,7 @@ set(SOURCES_TEST
     src/shaderClass.h src/shaderClass.cpp
     src/Texture.h src/Texture.cpp
     src/Camera.h src/Camera.cpp
+    src/Mesh.h src/Mesh.cpp
 )
 
 add_compile_definitions(PATH_TO_OBJECTS="${CMAKE_CURRENT_SOURCE_DIR}/assets/objects")

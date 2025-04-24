@@ -84,6 +84,7 @@ const unsigned int width = 800;
 const unsigned int height = 800;
 
 int main(){
+    /*
     try {
         // Initialize GLFW
         glfwInit();
@@ -221,4 +222,5 @@ int main(){
         std::cerr << "Error: Could not load shader file (errno=" << err << ")." << std::endl;
         return 1;
     }
+        */
 }

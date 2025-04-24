@@ -60,10 +60,10 @@ RM = /usr/bin/cmake -E rm -f
 EQUALS = =
 
 # The top-level source directory on which CMake was run.
-CMAKE_SOURCE_DIR = /home/plouis/Documents/Cours/MA2/Q2/3D/exo/Project/3Dgame
+CMAKE_SOURCE_DIR = /home/plouis/Documents/Cours/MA2/Q2/3D/exo/Project/GLSL
 
 # The top-level build directory on which CMake was run.
-CMAKE_BINARY_DIR = /home/plouis/Documents/Cours/MA2/Q2/3D/exo/Project/3Dgame
+CMAKE_BINARY_DIR = /home/plouis/Documents/Cours/MA2/Q2/3D/exo/Project/GLSL
 
 #=============================================================================
 # Targets provided globally by CMake.
@@ -90,9 +90,9 @@ rebuild_cache/fast: rebuild_cache
 
 # The main all target
 all: cmake_check_build_system
-	$(CMAKE_COMMAND) -E cmake_progress_start /home/plouis/Documents/Cours/MA2/Q2/3D/exo/Project/3Dgame/CMakeFiles /home/plouis/Documents/Cours/MA2/Q2/3D/exo/Project/3Dgame//CMakeFiles/progress.marks
+	$(CMAKE_COMMAND) -E cmake_progress_start /home/plouis/Documents/Cours/MA2/Q2/3D/exo/Project/GLSL/CMakeFiles /home/plouis/Documents/Cours/MA2/Q2/3D/exo/Project/GLSL//CMakeFiles/progress.marks
 	$(MAKE) $(MAKESILENT) -f CMakeFiles/Makefile2 all
-	$(CMAKE_COMMAND) -E cmake_progress_start /home/plouis/Documents/Cours/MA2/Q2/3D/exo/Project/3Dgame/CMakeFiles 0
+	$(CMAKE_COMMAND) -E cmake_progress_start /home/plouis/Documents/Cours/MA2/Q2/3D/exo/Project/GLSL/CMakeFiles 0
 .PHONY : all
 
 # The main clean target
@@ -211,6 +211,7 @@ src/Camera.o: src/Camera.cpp.o
 
 # target to build an object file
 src/Camera.cpp.o:
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/3D_Game_main.dir/build.make CMakeFiles/3D_Game_main.dir/src/Camera.cpp.o
 	$(MAKE) $(MAKESILENT) -f CMakeFiles/3D_Game_test.dir/build.make CMakeFiles/3D_Game_test.dir/src/Camera.cpp.o
 .PHONY : src/Camera.cpp.o
 
@@ -219,6 +220,7 @@ src/Camera.i: src/Camera.cpp.i
 
 # target to preprocess a source file
 src/Camera.cpp.i:
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/3D_Game_main.dir/build.make CMakeFiles/3D_Game_main.dir/src/Camera.cpp.i
 	$(MAKE) $(MAKESILENT) -f CMakeFiles/3D_Game_test.dir/build.make CMakeFiles/3D_Game_test.dir/src/Camera.cpp.i
 .PHONY : src/Camera.cpp.i
 
@@ -227,6 +229,7 @@ src/Camera.s: src/Camera.cpp.s
 
 # target to generate assembly for a file
 src/Camera.cpp.s:
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/3D_Game_main.dir/build.make CMakeFiles/3D_Game_main.dir/src/Camera.cpp.s
 	$(MAKE) $(MAKESILENT) -f CMakeFiles/3D_Game_test.dir/build.make CMakeFiles/3D_Game_test.dir/src/Camera.cpp.s
 .PHONY : src/Camera.cpp.s
 
@@ -235,6 +238,7 @@ src/EBO.o: src/EBO.cpp.o
 
 # target to build an object file
 src/EBO.cpp.o:
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/3D_Game_main.dir/build.make CMakeFiles/3D_Game_main.dir/src/EBO.cpp.o
 	$(MAKE) $(MAKESILENT) -f CMakeFiles/3D_Game_test.dir/build.make CMakeFiles/3D_Game_test.dir/src/EBO.cpp.o
 .PHONY : src/EBO.cpp.o
 
@@ -243,6 +247,7 @@ src/EBO.i: src/EBO.cpp.i
 
 # target to preprocess a source file
 src/EBO.cpp.i:
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/3D_Game_main.dir/build.make CMakeFiles/3D_Game_main.dir/src/EBO.cpp.i
 	$(MAKE) $(MAKESILENT) -f CMakeFiles/3D_Game_test.dir/build.make CMakeFiles/3D_Game_test.dir/src/EBO.cpp.i
 .PHONY : src/EBO.cpp.i
 
@@ -251,14 +256,43 @@ src/EBO.s: src/EBO.cpp.s
 
 # target to generate assembly for a file
 src/EBO.cpp.s:
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/3D_Game_main.dir/build.make CMakeFiles/3D_Game_main.dir/src/EBO.cpp.s
 	$(MAKE) $(MAKESILENT) -f CMakeFiles/3D_Game_test.dir/build.make CMakeFiles/3D_Game_test.dir/src/EBO.cpp.s
 .PHONY : src/EBO.cpp.s
+
+src/Mesh.o: src/Mesh.cpp.o
+.PHONY : src/Mesh.o
+
+# target to build an object file
+src/Mesh.cpp.o:
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/3D_Game_main.dir/build.make CMakeFiles/3D_Game_main.dir/src/Mesh.cpp.o
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/3D_Game_test.dir/build.make CMakeFiles/3D_Game_test.dir/src/Mesh.cpp.o
+.PHONY : src/Mesh.cpp.o
+
+src/Mesh.i: src/Mesh.cpp.i
+.PHONY : src/Mesh.i
+
+# target to preprocess a source file
+src/Mesh.cpp.i:
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/3D_Game_main.dir/build.make CMakeFiles/3D_Game_main.dir/src/Mesh.cpp.i
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/3D_Game_test.dir/build.make CMakeFiles/3D_Game_test.dir/src/Mesh.cpp.i
+.PHONY : src/Mesh.cpp.i
+
+src/Mesh.s: src/Mesh.cpp.s
+.PHONY : src/Mesh.s
+
+# target to generate assembly for a file
+src/Mesh.cpp.s:
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/3D_Game_main.dir/build.make CMakeFiles/3D_Game_main.dir/src/Mesh.cpp.s
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/3D_Game_test.dir/build.make CMakeFiles/3D_Game_test.dir/src/Mesh.cpp.s
+.PHONY : src/Mesh.cpp.s
 
 src/Texture.o: src/Texture.cpp.o
 .PHONY : src/Texture.o
 
 # target to build an object file
 src/Texture.cpp.o:
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/3D_Game_main.dir/build.make CMakeFiles/3D_Game_main.dir/src/Texture.cpp.o
 	$(MAKE) $(MAKESILENT) -f CMakeFiles/3D_Game_test.dir/build.make CMakeFiles/3D_Game_test.dir/src/Texture.cpp.o
 .PHONY : src/Texture.cpp.o
 
@@ -267,6 +301,7 @@ src/Texture.i: src/Texture.cpp.i
 
 # target to preprocess a source file
 src/Texture.cpp.i:
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/3D_Game_main.dir/build.make CMakeFiles/3D_Game_main.dir/src/Texture.cpp.i
 	$(MAKE) $(MAKESILENT) -f CMakeFiles/3D_Game_test.dir/build.make CMakeFiles/3D_Game_test.dir/src/Texture.cpp.i
 .PHONY : src/Texture.cpp.i
 
@@ -275,6 +310,7 @@ src/Texture.s: src/Texture.cpp.s
 
 # target to generate assembly for a file
 src/Texture.cpp.s:
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/3D_Game_main.dir/build.make CMakeFiles/3D_Game_main.dir/src/Texture.cpp.s
 	$(MAKE) $(MAKESILENT) -f CMakeFiles/3D_Game_test.dir/build.make CMakeFiles/3D_Game_test.dir/src/Texture.cpp.s
 .PHONY : src/Texture.cpp.s
 
@@ -283,6 +319,7 @@ src/VAO.o: src/VAO.cpp.o
 
 # target to build an object file
 src/VAO.cpp.o:
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/3D_Game_main.dir/build.make CMakeFiles/3D_Game_main.dir/src/VAO.cpp.o
 	$(MAKE) $(MAKESILENT) -f CMakeFiles/3D_Game_test.dir/build.make CMakeFiles/3D_Game_test.dir/src/VAO.cpp.o
 .PHONY : src/VAO.cpp.o
 
@@ -291,6 +328,7 @@ src/VAO.i: src/VAO.cpp.i
 
 # target to preprocess a source file
 src/VAO.cpp.i:
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/3D_Game_main.dir/build.make CMakeFiles/3D_Game_main.dir/src/VAO.cpp.i
 	$(MAKE) $(MAKESILENT) -f CMakeFiles/3D_Game_test.dir/build.make CMakeFiles/3D_Game_test.dir/src/VAO.cpp.i
 .PHONY : src/VAO.cpp.i
 
@@ -299,6 +337,7 @@ src/VAO.s: src/VAO.cpp.s
 
 # target to generate assembly for a file
 src/VAO.cpp.s:
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/3D_Game_main.dir/build.make CMakeFiles/3D_Game_main.dir/src/VAO.cpp.s
 	$(MAKE) $(MAKESILENT) -f CMakeFiles/3D_Game_test.dir/build.make CMakeFiles/3D_Game_test.dir/src/VAO.cpp.s
 .PHONY : src/VAO.cpp.s
 
@@ -307,6 +346,7 @@ src/VBO.o: src/VBO.cpp.o
 
 # target to build an object file
 src/VBO.cpp.o:
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/3D_Game_main.dir/build.make CMakeFiles/3D_Game_main.dir/src/VBO.cpp.o
 	$(MAKE) $(MAKESILENT) -f CMakeFiles/3D_Game_test.dir/build.make CMakeFiles/3D_Game_test.dir/src/VBO.cpp.o
 .PHONY : src/VBO.cpp.o
 
@@ -315,6 +355,7 @@ src/VBO.i: src/VBO.cpp.i
 
 # target to preprocess a source file
 src/VBO.cpp.i:
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/3D_Game_main.dir/build.make CMakeFiles/3D_Game_main.dir/src/VBO.cpp.i
 	$(MAKE) $(MAKESILENT) -f CMakeFiles/3D_Game_test.dir/build.make CMakeFiles/3D_Game_test.dir/src/VBO.cpp.i
 .PHONY : src/VBO.cpp.i
 
@@ -323,6 +364,7 @@ src/VBO.s: src/VBO.cpp.s
 
 # target to generate assembly for a file
 src/VBO.cpp.s:
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/3D_Game_main.dir/build.make CMakeFiles/3D_Game_main.dir/src/VBO.cpp.s
 	$(MAKE) $(MAKESILENT) -f CMakeFiles/3D_Game_test.dir/build.make CMakeFiles/3D_Game_test.dir/src/VBO.cpp.s
 .PHONY : src/VBO.cpp.s
 
@@ -331,6 +373,7 @@ src/shaderClass.o: src/shaderClass.cpp.o
 
 # target to build an object file
 src/shaderClass.cpp.o:
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/3D_Game_main.dir/build.make CMakeFiles/3D_Game_main.dir/src/shaderClass.cpp.o
 	$(MAKE) $(MAKESILENT) -f CMakeFiles/3D_Game_test.dir/build.make CMakeFiles/3D_Game_test.dir/src/shaderClass.cpp.o
 .PHONY : src/shaderClass.cpp.o
 
@@ -339,6 +382,7 @@ src/shaderClass.i: src/shaderClass.cpp.i
 
 # target to preprocess a source file
 src/shaderClass.cpp.i:
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/3D_Game_main.dir/build.make CMakeFiles/3D_Game_main.dir/src/shaderClass.cpp.i
 	$(MAKE) $(MAKESILENT) -f CMakeFiles/3D_Game_test.dir/build.make CMakeFiles/3D_Game_test.dir/src/shaderClass.cpp.i
 .PHONY : src/shaderClass.cpp.i
 
@@ -347,6 +391,7 @@ src/shaderClass.s: src/shaderClass.cpp.s
 
 # target to generate assembly for a file
 src/shaderClass.cpp.s:
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/3D_Game_main.dir/build.make CMakeFiles/3D_Game_main.dir/src/shaderClass.cpp.s
 	$(MAKE) $(MAKESILENT) -f CMakeFiles/3D_Game_test.dir/build.make CMakeFiles/3D_Game_test.dir/src/shaderClass.cpp.s
 .PHONY : src/shaderClass.cpp.s
 
@@ -397,6 +442,9 @@ help:
 	@echo "... src/EBO.o"
 	@echo "... src/EBO.i"
 	@echo "... src/EBO.s"
+	@echo "... src/Mesh.o"
+	@echo "... src/Mesh.i"
+	@echo "... src/Mesh.s"
 	@echo "... src/Texture.o"
 	@echo "... src/Texture.i"
 	@echo "... src/Texture.s"
