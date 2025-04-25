@@ -1,4 +1,5 @@
 #include"src/Mesh.h"
+#include"src/model.h"
 #include<iostream>
 
 #include <glad/glad.h>
@@ -15,52 +16,44 @@
 const unsigned int width = 800;
 const unsigned int height = 800;
 
+// Utility function to generate a UV sphere
+void generateSphere(float radius, unsigned int sectorCount, unsigned int stackCount, std::vector<Vertex>& vertices, std::vector<GLuint>& indices) {
+    float x, y, z, xy;                              // vertex position
+    float sectorStep = 2 * M_PI / sectorCount;
+    float stackStep = M_PI / stackCount;
+    float sectorAngle, stackAngle;
 
+    for(unsigned int i = 0; i <= stackCount; ++i) {
+        stackAngle = M_PI / 2 - i * stackStep;        // from pi/2 to -pi/2
+        xy = radius * cosf(stackAngle);             // r * cos(u)
+        z = radius * sinf(stackAngle);              // r * sin(u)
 
-// Vertices coordinates
-Vertex vertices[] =
-{ //               COORDINATES           /            COLORS          /           NORMALS         /       TEXTURE COORDINATES    //
-	Vertex{glm::vec3(-1.0f, 0.0f,  1.0f), glm::vec3(0.0f, 1.0f, 0.0f), glm::vec3(1.0f, 1.0f, 1.0f), glm::vec2(0.0f, 0.0f)},
-	Vertex{glm::vec3(-1.0f, 0.0f, -1.0f), glm::vec3(0.0f, 1.0f, 0.0f), glm::vec3(1.0f, 1.0f, 1.0f), glm::vec2(0.0f, 1.0f)},
-	Vertex{glm::vec3( 1.0f, 0.0f, -1.0f), glm::vec3(0.0f, 1.0f, 0.0f), glm::vec3(1.0f, 1.0f, 1.0f), glm::vec2(1.0f, 1.0f)},
-	Vertex{glm::vec3( 1.0f, 0.0f,  1.0f), glm::vec3(0.0f, 1.0f, 0.0f), glm::vec3(1.0f, 1.0f, 1.0f), glm::vec2(1.0f, 0.0f)}
-};
+        for(unsigned int j = 0; j <= sectorCount; ++j) {
+            sectorAngle = j * sectorStep;           // from 0 to 2pi
+            x = xy * cosf(sectorAngle);             // r * cos(u) * cos(v)
+            y = xy * sinf(sectorAngle);             // r * cos(u) * sin(v)
+            vertices.push_back(Vertex{glm::vec3(x, y, z)});
+        }
+    }
 
-// Indices for vertices order
-GLuint indices[] =
-{
-	0, 1, 2,
-	0, 2, 3
-};
+    for(unsigned int i = 0; i < stackCount; ++i) {
+        unsigned int k1 = i * (sectorCount + 1);     // beginning of current stack
+        unsigned int k2 = k1 + sectorCount + 1;      // beginning of next stack
 
-Vertex lightVertices[] =
-{ //     COORDINATES     //
-	Vertex{glm::vec3(-0.1f, -0.1f,  0.1f)},
-	Vertex{glm::vec3(-0.1f, -0.1f, -0.1f)},
-	Vertex{glm::vec3(0.1f, -0.1f, -0.1f)},
-	Vertex{glm::vec3(0.1f, -0.1f,  0.1f)},
-	Vertex{glm::vec3(-0.1f,  0.1f,  0.1f)},
-	Vertex{glm::vec3(-0.1f,  0.1f, -0.1f)},
-	Vertex{glm::vec3(0.1f,  0.1f, -0.1f)},
-	Vertex{glm::vec3(0.1f,  0.1f,  0.1f)}
-};
-
-GLuint lightIndices[] =
-{
-	0, 1, 2,
-	0, 2, 3,
-	0, 4, 7,
-	0, 7, 3,
-	3, 7, 6,
-	3, 6, 2,
-	2, 6, 5,
-	2, 5, 1,
-	1, 5, 4,
-	1, 4, 0,
-	4, 5, 6,
-	4, 6, 7
-};
-
+        for(unsigned int j = 0; j < sectorCount; ++j, ++k1, ++k2) {
+            if(i != 0) {
+                indices.push_back(k1);
+                indices.push_back(k2);
+                indices.push_back(k1 + 1);
+            }
+            if(i != (stackCount-1)) {
+                indices.push_back(k1 + 1);
+                indices.push_back(k2);
+                indices.push_back(k2 + 1);
+            }
+        }
+    }
+}
 
 int main()
 {
@@ -93,20 +86,13 @@ int main()
 	// In this case the viewport goes from x = 0, y = 0, to x = 800, y = 800
 	glViewport(0, 0, width, height);
 
-
-	/*
-	* I'm doing this relative path thing in order to centralize all the resources into one folder and not
-	* duplicate them between tutorial folders. You can just copy paste the resources from the 'Resources'
-	* folder and then give a relative path from this folder to whatever resource you want to get to.
-	* Also note that this requires C++17, so go to Project Properties, C/C++, Language, and select C++17
-	*/
 	std::string texPath = "assets/textures/"; // Path to the textures
 
 	// Texture data
 	Texture textures[]
 	{
 		Texture((texPath + "planks.png").c_str(), "diffuse", 0, GL_RGBA, GL_UNSIGNED_BYTE),
-		Texture((texPath + "planksSpec.png").c_str(), "specular", 1, GL_RGB, GL_UNSIGNED_BYTE)
+		Texture((texPath + "planksSpec.png").c_str(), "specular", 1, GL_RED, GL_UNSIGNED_BYTE)
 	};
 
 
@@ -114,52 +100,56 @@ int main()
 	// Generates Shader object using shaders default.vert and default.frag
 	Shader shaderProgram("default.vert", "default.frag");
 	// Store mesh data in vectors for the mesh
-	std::vector <Vertex> verts(vertices, vertices + sizeof(vertices) / sizeof(Vertex));
-	std::vector <GLuint> ind(indices, indices + sizeof(indices) / sizeof(GLuint));
 	std::vector <Texture> tex(textures, textures + sizeof(textures) / sizeof(Texture));
-	// Create floor mesh
-	Mesh floor(verts, ind, tex);
 
 
 	// Shader for light cube
 	Shader lightShader("light.vert", "light.frag");
+
 	// Store mesh data in vectors for the mesh
-	std::vector <Vertex> lightVerts(lightVertices, lightVertices + sizeof(lightVertices) / sizeof(Vertex));
-	std::vector <GLuint> lightInd(lightIndices, lightIndices + sizeof(lightIndices) / sizeof(GLuint));
-	// Create light mesh
+	std::vector<Vertex> lightVerts;
+	std::vector<GLuint> lightInd;
+	generateSphere(15.0f, 32, 16, lightVerts, lightInd);
+
+	// Create light mesh (sphere)
 	Mesh light(lightVerts, lightInd, tex);
 
+	// Store mesh data in vectors for the mesh
+	Model model("assets/objects/desert_city.obj");
 
 
+	glm::vec4 lightColor = glm::vec4(1.50f, 1.50f, 1.50f, 0.50f);
+	glm::vec3 lightPos = glm::vec3(0.0f, 50.0f, 0.0f);
+	glm::mat4 lightModel = glm::mat4(2.0f); // Fix: use identity matrix
+	lightModel = glm::translate(lightModel, lightPos); // Translate to light position
+	lightModel = glm::scale(lightModel, glm::vec3(100.0f, 100.0f, 100.0f)); // Reasonable scale for marker
 
-
-	glm::vec4 lightColor = glm::vec4(1.0f, 1.0f, 1.0f, 1.0f);
-	glm::vec3 lightPos = glm::vec3(0.5f, 0.5f, 0.5f);
-	glm::mat4 lightModel = glm::mat4(1.0f);
-	lightModel = glm::translate(lightModel, lightPos);
-
-	glm::vec3 objectPos = glm::vec3(0.0f, 0.0f, 0.0f);
-	glm::mat4 objectModel = glm::mat4(1.0f);
-	objectModel = glm::translate(objectModel, objectPos);
+	// Model matrix for the bunny
+	glm::mat4 bunnyModel = glm::mat4(1.0f);
+	bunnyModel = glm::translate(bunnyModel, glm::vec3(0.0f, 0.0f, 0.0f)); // Centered at origin
+	bunnyModel = glm::scale(bunnyModel, glm::vec3(1.0f, 1.0f, 1.0f)); // Adjust scale if needed
 
 
 	lightShader.Activate();
 	glUniformMatrix4fv(glGetUniformLocation(lightShader.ID, "model"), 1, GL_FALSE, glm::value_ptr(lightModel));
 	glUniform4f(glGetUniformLocation(lightShader.ID, "lightColor"), lightColor.x, lightColor.y, lightColor.z, lightColor.w);
 	shaderProgram.Activate();
-	glUniformMatrix4fv(glGetUniformLocation(shaderProgram.ID, "model"), 1, GL_FALSE, glm::value_ptr(objectModel));
 	glUniform4f(glGetUniformLocation(shaderProgram.ID, "lightColor"), lightColor.x, lightColor.y, lightColor.z, lightColor.w);
 	glUniform3f(glGetUniformLocation(shaderProgram.ID, "lightPos"), lightPos.x, lightPos.y, lightPos.z);
 
-
-
-	
-
 	// Enables the Depth Buffer
 	glEnable(GL_DEPTH_TEST);
+	//glDepthFunc(GL_LESS);
 
 	// Creates camera object
-	Camera camera(width, height, glm::vec3(0.0f, 0.0f, 2.0f));
+	// Camera camera(width, height, glm::vec3(0.0f, 0.0f, 2.0f));
+	Camera camera(width, height, glm::vec3(0.0f, 2.0f, 2.0f)); // Position plus haute et reculée
+
+	// Sun (light) animation parameters
+	float sunRadius = 200.0f;
+	float sunHeight = 1000.0f; // Increased from 5.0f to 10.0f
+	float sunSpeed = 0.1f; // radians per second
+	float sunAngle = 0.0f;
 
 	// Main while loop
 	while (!glfwWindowShouldClose(window))
@@ -175,10 +165,40 @@ int main()
 		// Updates and exports the camera matrix to the Vertex Shader
 		camera.updateMatrix(45.0f, 0.1f, 100.0f);
 
+		// Animate sun position (day/night cycle)
+		float time = glfwGetTime();
+		sunAngle = fmod(time * sunSpeed, 2.0f * M_PI);
+		lightPos = glm::vec3(
+			sunRadius * cos(sunAngle),
+			sunHeight * sin(sunAngle),
+			sunRadius * sin(sunAngle)
+		);
 
-		// Draws different meshes
-		floor.Draw(shaderProgram, camera);
+		// Light color transitions: yellowish during day, bluish at night
+		float intensity = glm::clamp(sin(sunAngle), 0.0f, 1.5f);
+		glm::vec4 dayColor = glm::vec4(1.4f, 1.1f, 0.8f, 1.0f);
+		glm::vec4 nightColor = glm::vec4(0.1f, 0.2f, 0.4f, 1.0f);
+		lightColor = glm::mix(nightColor, dayColor, intensity);
+
+		// Update light model matrix for the sphere marker
+		lightModel = glm::mat4(1.0f);
+		lightModel = glm::translate(lightModel, lightPos);
+		lightModel = glm::scale(lightModel, glm::vec3(5.0f, 5.0f, 5.0f)); // Increased size
+
+
+		// Draw the light marker (sphere)
+		lightShader.Activate();
+		glUniformMatrix4fv(glGetUniformLocation(lightShader.ID, "model"), 1, GL_FALSE, glm::value_ptr(lightModel));
+		glUniform4f(glGetUniformLocation(lightShader.ID, "lightColor"), lightColor.x, lightColor.y, lightColor.z, lightColor.w);
 		light.Draw(lightShader, camera);
+
+
+		// Met à jour les uniforms du shader principal (pour l'éclairage)
+		shaderProgram.Activate();
+		glUniform4f(glGetUniformLocation(shaderProgram.ID, "lightColor"), lightColor.x, lightColor.y, lightColor.z, lightColor.w);
+		glUniform3f(glGetUniformLocation(shaderProgram.ID, "lightPos"), lightPos.x, lightPos.y, lightPos.z);
+		glUniformMatrix4fv(glGetUniformLocation(shaderProgram.ID, "model"), 1, GL_FALSE, glm::value_ptr(bunnyModel));
+		model.Draw(shaderProgram, camera);
 
 
 		// Swap the back buffer with the front buffer

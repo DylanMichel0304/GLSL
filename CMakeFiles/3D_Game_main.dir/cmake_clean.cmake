@@ -13,6 +13,8 @@ file(REMOVE_RECURSE
   "CMakeFiles/3D_Game_main.dir/src/VAO.cpp.o.d"
   "CMakeFiles/3D_Game_main.dir/src/VBO.cpp.o"
   "CMakeFiles/3D_Game_main.dir/src/VBO.cpp.o.d"
+  "CMakeFiles/3D_Game_main.dir/src/model.cpp.o"
+  "CMakeFiles/3D_Game_main.dir/src/model.cpp.o.d"
   "CMakeFiles/3D_Game_main.dir/src/shaderClass.cpp.o"
   "CMakeFiles/3D_Game_main.dir/src/shaderClass.cpp.o.d"
   "bin/3D_Game_main"

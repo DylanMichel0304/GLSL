@@ -398,6 +398,8 @@ CMakeFiles/3D_Game_main.dir/main.cpp.o: \
  /usr/include/c++/11/bits/fstream.tcc /usr/include/c++/11/sstream \
  /usr/include/c++/11/bits/sstream.tcc /usr/include/c++/11/iostream \
  /home/plouis/Documents/Cours/MA2/Q2/3D/exo/Project/GLSL/src/Texture.h \
+ /home/plouis/Documents/Cours/MA2/Q2/3D/exo/Project/GLSL/src/model.h \
+ /home/plouis/Documents/Cours/MA2/Q2/3D/exo/Project/GLSL/src/Mesh.h \
  /home/plouis/Documents/Cours/MA2/Q2/3D/exo/Project/GLSL/import/stb/stb_image.h \
  /usr/include/c++/11/stdlib.h /usr/include/c++/11/math.h \
  /usr/lib/gcc/x86_64-linux-gnu/11/include/emmintrin.h \

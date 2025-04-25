@@ -32,12 +32,13 @@ vec4 pointLight()
 
 	// intensity of light with respect to distance
 	float dist = length(lightVec);
-	float a = 3.0;
-	float b = 0.7;
+	float a = 3.0;   // Atténuation quadratique
+	float b = 0.7;   // Atténuation linéaire
 	float inten = 1.0f / (a * dist * dist + b * dist + 1.0f);
 
 	// ambient lighting
-	float ambient = 0.20f;
+	// float ambient = 0.20f;
+	float ambient = 0.40f; // Plus de lumière ambiante
 
 	// diffuse lighting
 	vec3 normal = normalize(Normal);
@@ -46,6 +47,7 @@ vec4 pointLight()
 
 	// specular lighting
 	float specularLight = 0.50f;
+	// float specularLight = 1.0f; // Plus de lumière spéculaire si tu veux
 	vec3 viewDirection = normalize(camPos - crntPos);
 	vec3 reflectionDirection = reflect(-lightDirection, normal);
 	float specAmount = pow(max(dot(viewDirection, reflectionDirection), 0.0f), 16);
@@ -57,7 +59,7 @@ vec4 pointLight()
 vec4 direcLight()
 {
 	// ambient lighting
-	float ambient = 0.20f;
+	float ambient = 0.50f;
 
 	// diffuse lighting
 	vec3 normal = normalize(Normal);
@@ -101,7 +103,14 @@ vec4 spotLight()
 
 	return (texture(diffuse0, texCoord) * (diffuse * inten + ambient) + texture(specular0, texCoord).r * specular * inten) * lightColor;
 }
-
+float linearrizeDepth(float depth)
+{
+	// converts the depth value to a linear value
+	float z = depth * 2.0f - 1.0f;
+	float zNear = 0.1f;
+	float zFar = 100.0f;
+	return (2.0f * zNear * zFar) / (zFar + zNear - z * (zFar - zNear));
+}
 
 void main()
 {

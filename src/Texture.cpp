@@ -17,6 +17,7 @@ Texture::Texture(const char* image, const char* texType, GLenum slot, GLenum for
 	glGenTextures(1, &ID);
 	// Assigns the texture to a Texture Unit
 	glActiveTexture(slot);
+	unit = slot;
 	glBindTexture(GL_TEXTURE_2D, ID);
 
 	// Configures the type of algorithm that is used to make the image smaller or bigger
@@ -33,8 +34,7 @@ Texture::Texture(const char* image, const char* texType, GLenum slot, GLenum for
 
 	// Assigns the image to the OpenGL Texture object
 	// Correction : choisir le bon format selon le nombre de canaux
-	GLenum internalFormat = (numColCh == 4) ? GL_RGBA : GL_RGB;
-	glTexImage2D(GL_TEXTURE_2D, 0, internalFormat, widthImg, heightImg, 0, format, pixelType, bytes);
+	glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, widthImg, heightImg, 0, format, pixelType, bytes);
 	// Generates MipMaps
 	glGenerateMipmap(GL_TEXTURE_2D);
 
@@ -57,6 +57,7 @@ void Texture::texUnit(Shader& shader, const char* uniform, GLuint unit)
 
 void Texture::Bind()
 {
+	glActiveTexture(GL_TEXTURE0 + unit);
 	glBindTexture(GL_TEXTURE_2D, ID);
 }
 

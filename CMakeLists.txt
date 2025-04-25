@@ -51,7 +51,8 @@ set(SOURCES_main
     src/shaderClass.h src/shaderClass.cpp
     src/Texture.h src/Texture.cpp
     src/Camera.h src/Camera.cpp
-    src/Mesh.h src/Mesh.cpp)
+    src/Mesh.h src/Mesh.cpp
+    src/model.h src/model.cpp)
 set(SOURCES_TEST 
     test.cpp 
     src/EBO.h src/EBO.cpp
@@ -61,6 +62,7 @@ set(SOURCES_TEST
     src/Texture.h src/Texture.cpp
     src/Camera.h src/Camera.cpp
     src/Mesh.h src/Mesh.cpp
+    src/model.h src/model.cpp
 )
 
 add_compile_definitions(PATH_TO_OBJECTS="${CMAKE_CURRENT_SOURCE_DIR}/assets/objects")

@@ -15,6 +15,7 @@ set(CMAKE_DEPENDS_DEPENDENCY_FILES
   "/home/plouis/Documents/Cours/MA2/Q2/3D/exo/Project/GLSL/src/Texture.cpp" "CMakeFiles/3D_Game_main.dir/src/Texture.cpp.o" "gcc" "CMakeFiles/3D_Game_main.dir/src/Texture.cpp.o.d"
   "/home/plouis/Documents/Cours/MA2/Q2/3D/exo/Project/GLSL/src/VAO.cpp" "CMakeFiles/3D_Game_main.dir/src/VAO.cpp.o" "gcc" "CMakeFiles/3D_Game_main.dir/src/VAO.cpp.o.d"
   "/home/plouis/Documents/Cours/MA2/Q2/3D/exo/Project/GLSL/src/VBO.cpp" "CMakeFiles/3D_Game_main.dir/src/VBO.cpp.o" "gcc" "CMakeFiles/3D_Game_main.dir/src/VBO.cpp.o.d"
+  "/home/plouis/Documents/Cours/MA2/Q2/3D/exo/Project/GLSL/src/model.cpp" "CMakeFiles/3D_Game_main.dir/src/model.cpp.o" "gcc" "CMakeFiles/3D_Game_main.dir/src/model.cpp.o.d"
   "/home/plouis/Documents/Cours/MA2/Q2/3D/exo/Project/GLSL/src/shaderClass.cpp" "CMakeFiles/3D_Game_main.dir/src/shaderClass.cpp.o" "gcc" "CMakeFiles/3D_Game_main.dir/src/shaderClass.cpp.o.d"
   )
 
