@@ -91,7 +91,7 @@ int main()
 	// Texture data
 	Texture textures[]
 	{
-		Texture((texPath + "planks.png").c_str(), "diffuse", 0, GL_RGBA, GL_UNSIGNED_BYTE),
+		Texture((texPath + "GRASS.png").c_str(), "diffuse", 0, GL_RGBA, GL_UNSIGNED_BYTE),
 		Texture((texPath + "planksSpec.png").c_str(), "specular", 1, GL_RED, GL_UNSIGNED_BYTE)
 	};
 
@@ -115,7 +115,8 @@ int main()
 	Mesh light(lightVerts, lightInd, tex);
 
 	// Store mesh data in vectors for the mesh
-	Model model("assets/objects/desert_city.obj");
+	Model model("assets/objects/terrain.obj");
+	std::cout << "Loaded terrain model successfully" << std::endl;
 
 
 	glm::vec4 lightColor = glm::vec4(1.50f, 1.50f, 1.50f, 0.50f);
@@ -124,10 +125,12 @@ int main()
 	lightModel = glm::translate(lightModel, lightPos); // Translate to light position
 	lightModel = glm::scale(lightModel, glm::vec3(100.0f, 100.0f, 100.0f)); // Reasonable scale for marker
 
-	// Model matrix for the bunny
-	glm::mat4 bunnyModel = glm::mat4(1.0f);
-	bunnyModel = glm::translate(bunnyModel, glm::vec3(0.0f, 0.0f, 0.0f)); // Centered at origin
-	bunnyModel = glm::scale(bunnyModel, glm::vec3(1.0f, 1.0f, 1.0f)); // Adjust scale if needed
+	// Model matrix for the terrain
+	glm::mat4 terrainModel = glm::mat4(1.0f);
+	// Position the terrain lower (negative Y) since terrain is typically below the camera
+	terrainModel = glm::translate(terrainModel, glm::vec3(0.0f, -20.0f, 0.0f)); 
+	// Make the terrain much larger
+	terrainModel = glm::scale(terrainModel, glm::vec3(100.0f, 100.0f, 100.0f));
 
 
 	lightShader.Activate();
@@ -141,9 +144,11 @@ int main()
 	glEnable(GL_DEPTH_TEST);
 	//glDepthFunc(GL_LESS);
 
-	// Creates camera object
-	// Camera camera(width, height, glm::vec3(0.0f, 0.0f, 2.0f));
-	Camera camera(width, height, glm::vec3(0.0f, 2.0f, 2.0f)); // Position plus haute et reculée
+	// Position camera much higher and further back to view the larger terrain
+	Camera camera(width, height, glm::vec3(0.0f, 200.0f, 500.0f));
+	
+	// Increase camera speed to move around the much larger terrain
+	camera.speed = 10.0f;
 
 	// Sun (light) animation parameters
 	float sunRadius = 200.0f;
@@ -155,7 +160,7 @@ int main()
 	while (!glfwWindowShouldClose(window))
 	{
 		// Specify the color of the background
-		glClearColor(0.07f, 0.13f, 0.17f, 1.0f);
+		glClearColor(0.3f, 0.1f, 0.1f, 1.0f); // Dark red/brown to contrast with the terrain
 		// Clean the back buffer and depth buffer
 		glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
@@ -163,7 +168,7 @@ int main()
 		// Handles camera inputs
 		camera.Inputs(window);
 		// Updates and exports the camera matrix to the Vertex Shader
-		camera.updateMatrix(45.0f, 0.1f, 100.0f);
+		camera.updateMatrix(45.0f, 1.0f, 100000.0f);
 
 		// Animate sun position (day/night cycle)
 		float time = glfwGetTime();
@@ -197,7 +202,7 @@ int main()
 		shaderProgram.Activate();
 		glUniform4f(glGetUniformLocation(shaderProgram.ID, "lightColor"), lightColor.x, lightColor.y, lightColor.z, lightColor.w);
 		glUniform3f(glGetUniformLocation(shaderProgram.ID, "lightPos"), lightPos.x, lightPos.y, lightPos.z);
-		glUniformMatrix4fv(glGetUniformLocation(shaderProgram.ID, "model"), 1, GL_FALSE, glm::value_ptr(bunnyModel));
+		glUniformMatrix4fv(glGetUniformLocation(shaderProgram.ID, "model"), 1, GL_FALSE, glm::value_ptr(terrainModel));
 		model.Draw(shaderProgram, camera);
 
 

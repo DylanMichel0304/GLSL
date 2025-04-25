@@ -29,6 +29,9 @@ void Model::loadOBJ(const char* file) {
         std::cerr << "Cannot open OBJ file: " << file << std::endl;
         return;
     }
+    
+    std::cout << "Started loading OBJ file: " << file << std::endl;
+    
     std::string line;
     while (std::getline(in, line)) {
         std::istringstream iss(line);
@@ -82,5 +85,10 @@ void Model::loadOBJ(const char* file) {
         }
     }
     std::vector<Texture> textures; // You can load textures as needed
+    
+    std::cout << "Finished loading OBJ with " << positions.size() << " vertices, " 
+              << normals.size() << " normals, " << texUVs.size() << " texture coordinates, "
+              << indices.size() << " indices" << std::endl;
+    
     meshes.push_back(Mesh(vertices, indices, textures));
 }
