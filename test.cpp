@@ -151,10 +151,6 @@ int main()
 	glUniform4f(glGetUniformLocation(shaderProgram.ID, "lightColor"), lightColor.x, lightColor.y, lightColor.z, lightColor.w);
 	glUniform3f(glGetUniformLocation(shaderProgram.ID, "lightPos"), lightPos.x, lightPos.y, lightPos.z);
 
-
-
-	
-
 	// Enables the Depth Buffer
 	glEnable(GL_DEPTH_TEST);
 	glDepthFunc(GL_LESS);
