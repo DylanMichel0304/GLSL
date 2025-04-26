@@ -114,27 +114,36 @@ int main()
 	// Create light mesh (sphere)
 	Mesh light(lightVerts, lightInd, tex);
 
-	// Store mesh data in vectors for the mesh
-	Model model("assets/objects/terrain.obj");
+	// Load terrain model
+	Model terrainModel("assets/objects/terrain.obj");
 	std::cout << "Loaded terrain model successfully" << std::endl;
-
+	
+	// Load the tree model
+	Model treeModel("assets/objects/Tree 02/Tree.obj");
+	std::cout << "Loaded tree model successfully" << std::endl;
 
 	glm::vec4 lightColor = glm::vec4(1.50f, 1.50f, 1.50f, 0.50f);
 	glm::vec3 lightPos = glm::vec3(0.0f, 50.0f, 0.0f);
-	glm::mat4 lightModel = glm::mat4(2.0f); // Fix: use identity matrix
-	lightModel = glm::translate(lightModel, lightPos); // Translate to light position
-	lightModel = glm::scale(lightModel, glm::vec3(100.0f, 100.0f, 100.0f)); // Reasonable scale for marker
+	glm::mat4 lightModelMatrix = glm::mat4(2.0f); // Fix: use identity matrix
+	lightModelMatrix = glm::translate(lightModelMatrix, lightPos); // Translate to light position
+	lightModelMatrix = glm::scale(lightModelMatrix, glm::vec3(100.0f, 100.0f, 100.0f)); // Reasonable scale for marker
 
 	// Model matrix for the terrain
-	glm::mat4 terrainModel = glm::mat4(1.0f);
+	glm::mat4 terrainModelMatrix = glm::mat4(1.0f);
 	// Position the terrain lower (negative Y) since terrain is typically below the camera
-	terrainModel = glm::translate(terrainModel, glm::vec3(0.0f, -20.0f, 0.0f)); 
+	terrainModelMatrix = glm::translate(terrainModelMatrix, glm::vec3(0.0f, -20.0f, 0.0f)); 
 	// Make the terrain much larger
-	terrainModel = glm::scale(terrainModel, glm::vec3(100.0f, 100.0f, 100.0f));
-
+	terrainModelMatrix = glm::scale(terrainModelMatrix, glm::vec3(100.0f, 100.0f, 100.0f));
+	
+	// Model matrix for the tree
+	glm::mat4 treeModelMatrix = glm::mat4(1.0f);
+	// Position the tree to be visible on the terrain
+	treeModelMatrix = glm::translate(treeModelMatrix, glm::vec3(20.0f, -10.0f, 0.0f));
+	// Scale the tree to be more visible
+	treeModelMatrix = glm::scale(treeModelMatrix, glm::vec3(10.0f, 10.0f, 10.0f));
 
 	lightShader.Activate();
-	glUniformMatrix4fv(glGetUniformLocation(lightShader.ID, "model"), 1, GL_FALSE, glm::value_ptr(lightModel));
+	glUniformMatrix4fv(glGetUniformLocation(lightShader.ID, "model"), 1, GL_FALSE, glm::value_ptr(lightModelMatrix));
 	glUniform4f(glGetUniformLocation(lightShader.ID, "lightColor"), lightColor.x, lightColor.y, lightColor.z, lightColor.w);
 	shaderProgram.Activate();
 	glUniform4f(glGetUniformLocation(shaderProgram.ID, "lightColor"), lightColor.x, lightColor.y, lightColor.z, lightColor.w);
@@ -186,33 +195,42 @@ int main()
 		lightColor = glm::mix(nightColor, dayColor, intensity);
 
 		// Update light model matrix for the sphere marker
-		lightModel = glm::mat4(1.0f);
-		lightModel = glm::translate(lightModel, lightPos);
-		lightModel = glm::scale(lightModel, glm::vec3(5.0f, 5.0f, 5.0f)); // Increased size
+		lightModelMatrix = glm::mat4(1.0f);
+		lightModelMatrix = glm::translate(lightModelMatrix, lightPos);
+		lightModelMatrix = glm::scale(lightModelMatrix, glm::vec3(5.0f, 5.0f, 5.0f)); // Increased size
 
 
 		// Draw the light marker (sphere)
 		lightShader.Activate();
-		glUniformMatrix4fv(glGetUniformLocation(lightShader.ID, "model"), 1, GL_FALSE, glm::value_ptr(lightModel));
+		glUniformMatrix4fv(glGetUniformLocation(lightShader.ID, "model"), 1, GL_FALSE, glm::value_ptr(lightModelMatrix));
 		glUniform4f(glGetUniformLocation(lightShader.ID, "lightColor"), lightColor.x, lightColor.y, lightColor.z, lightColor.w);
 		light.Draw(lightShader, camera);
 
 
-		// Met à jour les uniforms du shader principal (pour l'éclairage)
+		// Update uniforms for the main shader (lighting)
 		shaderProgram.Activate();
 		glUniform4f(glGetUniformLocation(shaderProgram.ID, "lightColor"), lightColor.x, lightColor.y, lightColor.z, lightColor.w);
 		glUniform3f(glGetUniformLocation(shaderProgram.ID, "lightPos"), lightPos.x, lightPos.y, lightPos.z);
-		glUniformMatrix4fv(glGetUniformLocation(shaderProgram.ID, "model"), 1, GL_FALSE, glm::value_ptr(terrainModel));
-		model.Draw(shaderProgram, camera);
-
+		
+		// Default material properties for models
+		glUniform3f(glGetUniformLocation(shaderProgram.ID, "material.ambient"), 0.2f, 0.2f, 0.2f);
+		glUniform3f(glGetUniformLocation(shaderProgram.ID, "material.diffuse"), 1.0f, 1.0f, 1.0f);
+		glUniform3f(glGetUniformLocation(shaderProgram.ID, "material.specular"), 0.5f, 0.5f, 0.5f);
+		glUniform1f(glGetUniformLocation(shaderProgram.ID, "material.shininess"), 32.0f);
+		
+		// Draw terrain
+		glUniformMatrix4fv(glGetUniformLocation(shaderProgram.ID, "model"), 1, GL_FALSE, glm::value_ptr(terrainModelMatrix));
+		terrainModel.Draw(shaderProgram, camera);
+		
+		// Draw tree
+		glUniformMatrix4fv(glGetUniformLocation(shaderProgram.ID, "model"), 1, GL_FALSE, glm::value_ptr(treeModelMatrix));
+		treeModel.Draw(shaderProgram, camera);
 
 		// Swap the back buffer with the front buffer
 		glfwSwapBuffers(window);
 		// Take care of all GLFW events
 		glfwPollEvents();
 	}
-
-
 
 	// Delete all the objects we've created
 	shaderProgram.Delete();

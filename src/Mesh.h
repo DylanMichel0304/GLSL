@@ -14,6 +14,8 @@ public:
 	std::vector <Vertex> vertices;
 	std::vector <GLuint> indices;
 	std::vector <Texture> textures;
+	std::string materialName; // Store the name of the material used for this mesh
+	
 	// Store VAO in public so it can be used in the Draw function
 	VAO vao;
 
