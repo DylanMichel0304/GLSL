@@ -25,7 +25,7 @@ uniform vec3 lightPos;
 uniform vec3 camPos;
 
 // Tiling factor for the textures
-const float tiling = 1.0; // Increased to make texture visible again
+const float tiling = 200.0; // Increased to make texture visible again
 
 // Sample texture with tiling
 vec4 sampleDiffuseTexture() {

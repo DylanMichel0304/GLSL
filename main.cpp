@@ -91,8 +91,8 @@ int main()
 	// Texture data
 	Texture textures[]
 	{
-		Texture((texPath + "GRASS.png").c_str(), "diffuse", 0, GL_RGBA, GL_UNSIGNED_BYTE),
-		Texture((texPath + "planksSpec.png").c_str(), "specular", 1, GL_RED, GL_UNSIGNED_BYTE)
+		Texture((texPath + "newgrass.jpg").c_str(), "diffuse", 0, GL_RGBA, GL_UNSIGNED_BYTE),
+		//Texture((texPath + "planksSpec.png").c_str(), "specular", 1, GL_RED, GL_UNSIGNED_BYTE)
 	};
 
 
@@ -145,7 +145,7 @@ int main()
 	//glDepthFunc(GL_LESS);
 
 	// Position camera much higher and further back to view the larger terrain
-	Camera camera(width, height, glm::vec3(0.0f, 200.0f, 500.0f));
+	Camera camera(width, height, glm::vec3(0.0f, 20.0f, 50.0f));
 	
 	// Increase camera speed to move around the much larger terrain
 	camera.speed = 10.0f;
