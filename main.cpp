@@ -145,7 +145,7 @@ int main()
 	//glDepthFunc(GL_LESS);
 
 	// Position camera much higher and further back to view the larger terrain
-	Camera camera(width, height, glm::vec3(0.0f, 200.0f, 500.0f));
+	Camera camera(width, height, glm::vec3(0.0f, 20.0f, 50.0f));
 	
 	// Increase camera speed to move around the much larger terrain
 	camera.speed = 10.0f;
