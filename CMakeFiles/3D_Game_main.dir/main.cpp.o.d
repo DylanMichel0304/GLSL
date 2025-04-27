@@ -1101,4 +1101,6 @@ CMakeFiles/3D_Game_main.dir/main.cpp.o: \
   /Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX.sdk/usr/include/c++/v1/iostream \
   /Users/dylanmichel/Desktop/Jeu3D/GLSL/src/Texture.h \
   /Users/dylanmichel/Desktop/Jeu3D/GLSL/src/model.h \
+  /Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX.sdk/usr/include/c++/v1/map \
+  /Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX.sdk/usr/include/c++/v1/__tree \
   /Users/dylanmichel/Desktop/Jeu3D/GLSL/import/stb/stb_image.h

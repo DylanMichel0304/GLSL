@@ -12,7 +12,13 @@ in vec3 color;
 // Imports the texture coordinates from the Vertex Shader
 in vec2 texCoord;
 
-
+// Material struct to hold properties from MTL file
+struct Material {
+    vec3 ambient;  // Ka
+    vec3 diffuse;  // Kd
+    vec3 specular; // Ks
+    float shininess; // Ns
+};
 
 // Gets the Texture Units from the main function
 uniform sampler2D diffuse0;
@@ -23,18 +29,32 @@ uniform vec4 lightColor;
 uniform vec3 lightPos;
 // Gets the position of the camera from the main function
 uniform vec3 camPos;
+// Material properties
+uniform Material material;
 
 // Tiling factor for the textures
-const float tiling = 200.0; // Increased to make texture visible again
+const float tiling = 1.0; // Reset to 1.0 to respect texture coords in model
 
 // Sample texture with tiling
 vec4 sampleDiffuseTexture() {
-    return texture(diffuse0, texCoord * tiling);
+    vec4 texColor = texture(diffuse0, texCoord * tiling);
+    // Mix with material's diffuse color
+    if (texColor.a == 0.0) {
+        return vec4(material.diffuse, 1.0);
+    }
+    
+    // If has texture, multiply by material diffuse
+    return texColor * vec4(material.diffuse, 1.0);
 }
 
 // Sample specular texture with tiling
 float sampleSpecularTexture() {
-    return texture(specular0, texCoord * tiling).r;
+    // Use material's specular if no texture
+    float texSpec = texture(specular0, texCoord * tiling).r;
+    if (texSpec == 0.0) {
+        return length(material.specular);
+    }
+    return texSpec * length(material.specular);
 }
 
 vec4 pointLight()
@@ -48,21 +68,20 @@ vec4 pointLight()
 	float b = 0.7;   // Atténuation linéaire
 	float inten = 1.0f / (a * dist * dist + b * dist + 1.0f);
 
-	// ambient lighting
-	// float ambient = 0.20f;
-	float ambient = 0.40f; // Plus de lumière ambiante
+	// ambient lighting - use material ambient
+	float ambient = length(material.ambient) * 0.5;
+	if (ambient < 0.2) ambient = 0.2; // Minimum ambient
 
 	// diffuse lighting
 	vec3 normal = normalize(Normal);
 	vec3 lightDirection = normalize(lightVec);
 	float diffuse = max(dot(normal, lightDirection), 0.0f);
 
-	// specular lighting
+	// specular lighting - use material shininess
 	float specularLight = 0.50f;
-	// float specularLight = 1.0f; // Plus de lumière spéculaire si tu veux
 	vec3 viewDirection = normalize(camPos - crntPos);
 	vec3 reflectionDirection = reflect(-lightDirection, normal);
-	float specAmount = pow(max(dot(viewDirection, reflectionDirection), 0.0f), 16);
+	float specAmount = pow(max(dot(viewDirection, reflectionDirection), 0.0f), material.shininess);
 	float specular = specAmount * specularLight;
 
 	return (sampleDiffuseTexture() * (diffuse * inten + ambient) + sampleSpecularTexture() * specular * inten) * lightColor;
@@ -70,19 +89,20 @@ vec4 pointLight()
 
 vec4 direcLight()
 {
-	// ambient lighting
-	float ambient = 0.50f;
+	// ambient lighting - use material ambient
+	float ambient = length(material.ambient) * 0.5;
+	if (ambient < 0.2) ambient = 0.2; // Minimum ambient
 
 	// diffuse lighting
 	vec3 normal = normalize(Normal);
 	vec3 lightDirection = normalize(vec3(1.0f, 1.0f, 0.0f));
 	float diffuse = max(dot(normal, lightDirection), 0.0f);
 
-	// specular lighting
+	// specular lighting - use material shininess
 	float specularLight = 0.50f;
 	vec3 viewDirection = normalize(camPos - crntPos);
 	vec3 reflectionDirection = reflect(-lightDirection, normal);
-	float specAmount = pow(max(dot(viewDirection, reflectionDirection), 0.0f), 16);
+	float specAmount = pow(max(dot(viewDirection, reflectionDirection), 0.0f), material.shininess);
 	float specular = specAmount * specularLight;
 
 	return (sampleDiffuseTexture() * (diffuse + ambient) + sampleSpecularTexture() * specular) * lightColor;
@@ -94,19 +114,20 @@ vec4 spotLight()
 	float outerCone = 0.90f;
 	float innerCone = 0.95f;
 
-	// ambient lighting
-	float ambient = 0.20f;
+	// ambient lighting - use material ambient
+	float ambient = length(material.ambient) * 0.5;
+	if (ambient < 0.2) ambient = 0.2; // Minimum ambient
 
 	// diffuse lighting
 	vec3 normal = normalize(Normal);
 	vec3 lightDirection = normalize(lightPos - crntPos);
 	float diffuse = max(dot(normal, lightDirection), 0.0f);
 
-	// specular lighting
+	// specular lighting - use material shininess
 	float specularLight = 0.50f;
 	vec3 viewDirection = normalize(camPos - crntPos);
 	vec3 reflectionDirection = reflect(-lightDirection, normal);
-	float specAmount = pow(max(dot(viewDirection, reflectionDirection), 0.0f), 16);
+	float specAmount = pow(max(dot(viewDirection, reflectionDirection), 0.0f), material.shininess);
 	float specular = specAmount * specularLight;
 
 	// calculates the intensity of the crntPos based on its angle to the center of the light cone
@@ -115,6 +136,7 @@ vec4 spotLight()
 
 	return (sampleDiffuseTexture() * (diffuse * inten + ambient) + sampleSpecularTexture() * specular * inten) * lightColor;
 }
+
 float linearrizeDepth(float depth)
 {
 	// converts the depth value to a linear value
@@ -127,5 +149,5 @@ float linearrizeDepth(float depth)
 void main()
 {
 	// outputs final color
-	FragColor = spotLight();
+	FragColor = pointLight();
 }
