@@ -53,7 +53,7 @@ int main()
 	// Texture data
 	Texture textures[]
 	{
-		Texture((texPath + "newgrass.jpg").c_str(), "diffuse", 0, GL_RGBA, GL_UNSIGNED_BYTE),
+		Texture((texPath + "herbe.png").c_str(), "diffuse", 0, GL_RGB, GL_UNSIGNED_BYTE),
 		//Texture((texPath + "planksSpec.png").c_str(), "specular", 1, GL_RED, GL_UNSIGNED_BYTE)
 	};
 
@@ -82,6 +82,21 @@ int main()
 	Model treeModel("assets/objects/Tree 02/Tree.obj");
 	std::cout << "Loaded tree model successfully" << std::endl;
 
+	// Load the Farmhouse model (farmhouse textures are in the same directory as the .obj)
+	Model farmhouseModel("assets/textures/newhouse/farmhouse_obj.obj");
+	if (farmhouseModel.IsLoaded()) {
+		std::cout << "Loaded Farmhouse model successfully" << std::endl;
+	} else {
+		std::cout << "ERROR: Failed to load Farmhouse model!" << std::endl;
+	}
+
+	// Material properties for farmhouse
+	glm::vec3 farmhouseMaterial[] = {
+		glm::vec3(1.0f, 0.0f, 0.0f), // ambient - bright red 
+		glm::vec3(1.0f, 0.0f, 0.0f), // diffuse - bright red
+		glm::vec3(1.0f, 1.0f, 1.0f)  // specular
+	};
+	
 	glm::vec4 lightColor = glm::vec4(1.50f, 1.50f, 1.50f, 0.50f);
 	glm::vec3 lightPos = glm::vec3(0.0f, 50.0f, 0.0f);
 	glm::mat4 lightModelMatrix = glm::mat4(2.0f); // Fix: use identity matrix
@@ -102,6 +117,20 @@ int main()
 	// Scale the tree to be more visible
 	treeModelMatrix = glm::scale(treeModelMatrix, glm::vec3(10.0f, 10.0f, 10.0f));
 
+	// Model matrix for the farmhouse
+	glm::mat4 farmhouseModelMatrix = glm::mat4(1.0f);
+	// Position the farmhouse where the old house was
+	farmhouseModelMatrix = glm::translate(farmhouseModelMatrix, glm::vec3(40.0f, -10.0f, 10.0f));
+	// Rotate the farmhouse to face a different direction
+	farmhouseModelMatrix = glm::rotate(farmhouseModelMatrix, glm::radians(45.0f), glm::vec3(0.0f, 1.0f, 0.0f));
+	// Scale the farmhouse appropriately
+	farmhouseModelMatrix = glm::scale(farmhouseModelMatrix, glm::vec3(0.5f, 0.5f, 0.5f));
+	
+	// Default tiling values for different objects
+	float terrainTiling = 50.0f;  // High tiling for terrain (small pattern)
+	float treeTiling = 1.0f;       // Default tiling for tree
+	float farmhouseTiling = 1.0f;  // Default tiling for farmhouse
+	
 	lightShader.Activate();
 	glUniformMatrix4fv(glGetUniformLocation(lightShader.ID, "model"), 1, GL_FALSE, glm::value_ptr(lightModelMatrix));
 	glUniform4f(glGetUniformLocation(lightShader.ID, "lightColor"), lightColor.x, lightColor.y, lightColor.z, lightColor.w);
@@ -172,19 +201,33 @@ int main()
 		glUniform4f(glGetUniformLocation(shaderProgram.ID, "lightColor"), lightColor.x, lightColor.y, lightColor.z, lightColor.w);
 		glUniform3f(glGetUniformLocation(shaderProgram.ID, "lightPos"), lightPos.x, lightPos.y, lightPos.z);
 		
-		// Default material properties for models
+		// Draw terrain
+		glUniformMatrix4fv(glGetUniformLocation(shaderProgram.ID, "model"), 1, GL_FALSE, glm::value_ptr(terrainModelMatrix));
+		// Set terrain texture tiling
+		glUniform1f(glGetUniformLocation(shaderProgram.ID, "textureTiling"), terrainTiling);
+		// Default material properties for terrain
 		glUniform3f(glGetUniformLocation(shaderProgram.ID, "material.ambient"), 0.2f, 0.2f, 0.2f);
 		glUniform3f(glGetUniformLocation(shaderProgram.ID, "material.diffuse"), 1.0f, 1.0f, 1.0f);
 		glUniform3f(glGetUniformLocation(shaderProgram.ID, "material.specular"), 0.5f, 0.5f, 0.5f);
 		glUniform1f(glGetUniformLocation(shaderProgram.ID, "material.shininess"), 32.0f);
-		
-		// Draw terrain
-		glUniformMatrix4fv(glGetUniformLocation(shaderProgram.ID, "model"), 1, GL_FALSE, glm::value_ptr(terrainModelMatrix));
 		terrainModel.Draw(shaderProgram, camera);
 		
 		// Draw tree
 		glUniformMatrix4fv(glGetUniformLocation(shaderProgram.ID, "model"), 1, GL_FALSE, glm::value_ptr(treeModelMatrix));
+		// Set tree texture tiling
+		glUniform1f(glGetUniformLocation(shaderProgram.ID, "textureTiling"), treeTiling);
 		treeModel.Draw(shaderProgram, camera);
+		
+		// Draw farmhouse with custom material properties
+		glUniformMatrix4fv(glGetUniformLocation(shaderProgram.ID, "model"), 1, GL_FALSE, glm::value_ptr(farmhouseModelMatrix));
+		// Set farmhouse texture tiling
+		glUniform1f(glGetUniformLocation(shaderProgram.ID, "textureTiling"), farmhouseTiling);
+		// Apply farmhouse material settings
+		glUniform3fv(glGetUniformLocation(shaderProgram.ID, "material.ambient"), 1, glm::value_ptr(farmhouseMaterial[0]));
+		glUniform3fv(glGetUniformLocation(shaderProgram.ID, "material.diffuse"), 1, glm::value_ptr(farmhouseMaterial[1]));
+		glUniform3fv(glGetUniformLocation(shaderProgram.ID, "material.specular"), 1, glm::value_ptr(farmhouseMaterial[2]));
+		glUniform1f(glGetUniformLocation(shaderProgram.ID, "material.shininess"), 32.0f);
+		farmhouseModel.Draw(shaderProgram, camera);
 
 		// Swap the back buffer with the front buffer
 		glfwSwapBuffers(window);
