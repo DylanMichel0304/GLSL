@@ -16,44 +16,6 @@
 const unsigned int width = 800;
 const unsigned int height = 800;
 
-// Utility function to generate a UV sphere
-void generateSphere(float radius, unsigned int sectorCount, unsigned int stackCount, std::vector<Vertex>& vertices, std::vector<GLuint>& indices) {
-    float x, y, z, xy;                              // vertex position
-    float sectorStep = 2 * M_PI / sectorCount;
-    float stackStep = M_PI / stackCount;
-    float sectorAngle, stackAngle;
-
-    for(unsigned int i = 0; i <= stackCount; ++i) {
-        stackAngle = M_PI / 2 - i * stackStep;        // from pi/2 to -pi/2
-        xy = radius * cosf(stackAngle);             // r * cos(u)
-        z = radius * sinf(stackAngle);              // r * sin(u)
-
-        for(unsigned int j = 0; j <= sectorCount; ++j) {
-            sectorAngle = j * sectorStep;           // from 0 to 2pi
-            x = xy * cosf(sectorAngle);             // r * cos(u) * cos(v)
-            y = xy * sinf(sectorAngle);             // r * cos(u) * sin(v)
-            vertices.push_back(Vertex{glm::vec3(x, y, z)});
-        }
-    }
-
-    for(unsigned int i = 0; i < stackCount; ++i) {
-        unsigned int k1 = i * (sectorCount + 1);     // beginning of current stack
-        unsigned int k2 = k1 + sectorCount + 1;      // beginning of next stack
-
-        for(unsigned int j = 0; j < sectorCount; ++j, ++k1, ++k2) {
-            if(i != 0) {
-                indices.push_back(k1);
-                indices.push_back(k2);
-                indices.push_back(k1 + 1);
-            }
-            if(i != (stackCount-1)) {
-                indices.push_back(k1 + 1);
-                indices.push_back(k2);
-                indices.push_back(k2 + 1);
-            }
-        }
-    }
-}
 
 int main()
 {
@@ -109,8 +71,6 @@ int main()
 	// Store mesh data in vectors for the mesh
 	std::vector<Vertex> lightVerts;
 	std::vector<GLuint> lightInd;
-	generateSphere(15.0f, 32, 16, lightVerts, lightInd);
-
 	// Create light mesh (sphere)
 	Mesh light(lightVerts, lightInd, tex);
 
