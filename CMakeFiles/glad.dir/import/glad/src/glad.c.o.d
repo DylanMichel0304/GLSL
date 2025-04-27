@@ -1,5 +1,5 @@
 CMakeFiles/glad.dir/import/glad/src/glad.c.o: \
-  /Users/dylanmichel/Desktop/Jeu3D/GLSL/import/glad/src/glad.c \
+  /Users/dylanmichel/Desktop/jeu/GLSL/import/glad/src/glad.c \
   /Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX.sdk/usr/include/stdio.h \
   /Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX.sdk/usr/include/_stdio.h \
   /Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX.sdk/usr/include/sys/cdefs.h \
@@ -83,7 +83,7 @@ CMakeFiles/glad.dir/import/glad/src/glad.c.o: \
   /Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX.sdk/usr/include/strings.h \
   /Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX.sdk/usr/include/secure/_strings.h \
   /Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX.sdk/usr/include/secure/_string.h \
-  /Users/dylanmichel/Desktop/Jeu3D/GLSL/import/glad/include/glad/glad.h \
-  /Users/dylanmichel/Desktop/Jeu3D/GLSL/import/glad/include/KHR/khrplatform.h \
+  /Users/dylanmichel/Desktop/jeu/GLSL/import/glad/include/glad/glad.h \
+  /Users/dylanmichel/Desktop/jeu/GLSL/import/glad/include/KHR/khrplatform.h \
   /Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX.sdk/usr/include/dlfcn.h \
   /Applications/Xcode.app/Contents/Developer/Toolchains/XcodeDefault.xctoolchain/usr/lib/clang/15.0.0/include/stdbool.h

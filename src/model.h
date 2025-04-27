@@ -24,6 +24,8 @@ public:
     Model(const char* file);
     // Draws the model using the given shader and camera
     void Draw(Shader& shader, Camera& camera);
+    // Check if model has loaded meshes
+    bool IsLoaded() const { return !meshes.empty(); }
     // Destructor
     ~Model();
 

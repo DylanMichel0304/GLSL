@@ -56,10 +56,10 @@ RM = /opt/homebrew/bin/cmake -E rm -f
 EQUALS = =
 
 # The top-level source directory on which CMake was run.
-CMAKE_SOURCE_DIR = /Users/dylanmichel/Desktop/Jeu3D/GLSL
+CMAKE_SOURCE_DIR = /Users/dylanmichel/Desktop/jeu/GLSL
 
 # The top-level build directory on which CMake was run.
-CMAKE_BINARY_DIR = /Users/dylanmichel/Desktop/Jeu3D/GLSL
+CMAKE_BINARY_DIR = /Users/dylanmichel/Desktop/jeu/GLSL
 
 # Include any dependencies generated for this target.
 include CMakeFiles/3D_Game_main.dir/depend.make
@@ -78,128 +78,128 @@ CMakeFiles/3D_Game_main.dir/codegen:
 CMakeFiles/3D_Game_main.dir/main.cpp.o: CMakeFiles/3D_Game_main.dir/flags.make
 CMakeFiles/3D_Game_main.dir/main.cpp.o: main.cpp
 CMakeFiles/3D_Game_main.dir/main.cpp.o: CMakeFiles/3D_Game_main.dir/compiler_depend.ts
-	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green --progress-dir=/Users/dylanmichel/Desktop/Jeu3D/GLSL/CMakeFiles --progress-num=$(CMAKE_PROGRESS_1) "Building CXX object CMakeFiles/3D_Game_main.dir/main.cpp.o"
-	/usr/bin/c++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -MD -MT CMakeFiles/3D_Game_main.dir/main.cpp.o -MF CMakeFiles/3D_Game_main.dir/main.cpp.o.d -o CMakeFiles/3D_Game_main.dir/main.cpp.o -c /Users/dylanmichel/Desktop/Jeu3D/GLSL/main.cpp
+	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green --progress-dir=/Users/dylanmichel/Desktop/jeu/GLSL/CMakeFiles --progress-num=$(CMAKE_PROGRESS_1) "Building CXX object CMakeFiles/3D_Game_main.dir/main.cpp.o"
+	/usr/bin/c++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -MD -MT CMakeFiles/3D_Game_main.dir/main.cpp.o -MF CMakeFiles/3D_Game_main.dir/main.cpp.o.d -o CMakeFiles/3D_Game_main.dir/main.cpp.o -c /Users/dylanmichel/Desktop/jeu/GLSL/main.cpp
 
 CMakeFiles/3D_Game_main.dir/main.cpp.i: cmake_force
 	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green "Preprocessing CXX source to CMakeFiles/3D_Game_main.dir/main.cpp.i"
-	/usr/bin/c++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -E /Users/dylanmichel/Desktop/Jeu3D/GLSL/main.cpp > CMakeFiles/3D_Game_main.dir/main.cpp.i
+	/usr/bin/c++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -E /Users/dylanmichel/Desktop/jeu/GLSL/main.cpp > CMakeFiles/3D_Game_main.dir/main.cpp.i
 
 CMakeFiles/3D_Game_main.dir/main.cpp.s: cmake_force
 	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green "Compiling CXX source to assembly CMakeFiles/3D_Game_main.dir/main.cpp.s"
-	/usr/bin/c++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -S /Users/dylanmichel/Desktop/Jeu3D/GLSL/main.cpp -o CMakeFiles/3D_Game_main.dir/main.cpp.s
+	/usr/bin/c++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -S /Users/dylanmichel/Desktop/jeu/GLSL/main.cpp -o CMakeFiles/3D_Game_main.dir/main.cpp.s
 
 CMakeFiles/3D_Game_main.dir/src/EBO.cpp.o: CMakeFiles/3D_Game_main.dir/flags.make
 CMakeFiles/3D_Game_main.dir/src/EBO.cpp.o: src/EBO.cpp
 CMakeFiles/3D_Game_main.dir/src/EBO.cpp.o: CMakeFiles/3D_Game_main.dir/compiler_depend.ts
-	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green --progress-dir=/Users/dylanmichel/Desktop/Jeu3D/GLSL/CMakeFiles --progress-num=$(CMAKE_PROGRESS_2) "Building CXX object CMakeFiles/3D_Game_main.dir/src/EBO.cpp.o"
-	/usr/bin/c++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -MD -MT CMakeFiles/3D_Game_main.dir/src/EBO.cpp.o -MF CMakeFiles/3D_Game_main.dir/src/EBO.cpp.o.d -o CMakeFiles/3D_Game_main.dir/src/EBO.cpp.o -c /Users/dylanmichel/Desktop/Jeu3D/GLSL/src/EBO.cpp
+	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green --progress-dir=/Users/dylanmichel/Desktop/jeu/GLSL/CMakeFiles --progress-num=$(CMAKE_PROGRESS_2) "Building CXX object CMakeFiles/3D_Game_main.dir/src/EBO.cpp.o"
+	/usr/bin/c++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -MD -MT CMakeFiles/3D_Game_main.dir/src/EBO.cpp.o -MF CMakeFiles/3D_Game_main.dir/src/EBO.cpp.o.d -o CMakeFiles/3D_Game_main.dir/src/EBO.cpp.o -c /Users/dylanmichel/Desktop/jeu/GLSL/src/EBO.cpp
 
 CMakeFiles/3D_Game_main.dir/src/EBO.cpp.i: cmake_force
 	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green "Preprocessing CXX source to CMakeFiles/3D_Game_main.dir/src/EBO.cpp.i"
-	/usr/bin/c++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -E /Users/dylanmichel/Desktop/Jeu3D/GLSL/src/EBO.cpp > CMakeFiles/3D_Game_main.dir/src/EBO.cpp.i
+	/usr/bin/c++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -E /Users/dylanmichel/Desktop/jeu/GLSL/src/EBO.cpp > CMakeFiles/3D_Game_main.dir/src/EBO.cpp.i
 
 CMakeFiles/3D_Game_main.dir/src/EBO.cpp.s: cmake_force
 	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green "Compiling CXX source to assembly CMakeFiles/3D_Game_main.dir/src/EBO.cpp.s"
-	/usr/bin/c++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -S /Users/dylanmichel/Desktop/Jeu3D/GLSL/src/EBO.cpp -o CMakeFiles/3D_Game_main.dir/src/EBO.cpp.s
+	/usr/bin/c++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -S /Users/dylanmichel/Desktop/jeu/GLSL/src/EBO.cpp -o CMakeFiles/3D_Game_main.dir/src/EBO.cpp.s
 
 CMakeFiles/3D_Game_main.dir/src/VAO.cpp.o: CMakeFiles/3D_Game_main.dir/flags.make
 CMakeFiles/3D_Game_main.dir/src/VAO.cpp.o: src/VAO.cpp
 CMakeFiles/3D_Game_main.dir/src/VAO.cpp.o: CMakeFiles/3D_Game_main.dir/compiler_depend.ts
-	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green --progress-dir=/Users/dylanmichel/Desktop/Jeu3D/GLSL/CMakeFiles --progress-num=$(CMAKE_PROGRESS_3) "Building CXX object CMakeFiles/3D_Game_main.dir/src/VAO.cpp.o"
-	/usr/bin/c++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -MD -MT CMakeFiles/3D_Game_main.dir/src/VAO.cpp.o -MF CMakeFiles/3D_Game_main.dir/src/VAO.cpp.o.d -o CMakeFiles/3D_Game_main.dir/src/VAO.cpp.o -c /Users/dylanmichel/Desktop/Jeu3D/GLSL/src/VAO.cpp
+	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green --progress-dir=/Users/dylanmichel/Desktop/jeu/GLSL/CMakeFiles --progress-num=$(CMAKE_PROGRESS_3) "Building CXX object CMakeFiles/3D_Game_main.dir/src/VAO.cpp.o"
+	/usr/bin/c++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -MD -MT CMakeFiles/3D_Game_main.dir/src/VAO.cpp.o -MF CMakeFiles/3D_Game_main.dir/src/VAO.cpp.o.d -o CMakeFiles/3D_Game_main.dir/src/VAO.cpp.o -c /Users/dylanmichel/Desktop/jeu/GLSL/src/VAO.cpp
 
 CMakeFiles/3D_Game_main.dir/src/VAO.cpp.i: cmake_force
 	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green "Preprocessing CXX source to CMakeFiles/3D_Game_main.dir/src/VAO.cpp.i"
-	/usr/bin/c++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -E /Users/dylanmichel/Desktop/Jeu3D/GLSL/src/VAO.cpp > CMakeFiles/3D_Game_main.dir/src/VAO.cpp.i
+	/usr/bin/c++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -E /Users/dylanmichel/Desktop/jeu/GLSL/src/VAO.cpp > CMakeFiles/3D_Game_main.dir/src/VAO.cpp.i
 
 CMakeFiles/3D_Game_main.dir/src/VAO.cpp.s: cmake_force
 	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green "Compiling CXX source to assembly CMakeFiles/3D_Game_main.dir/src/VAO.cpp.s"
-	/usr/bin/c++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -S /Users/dylanmichel/Desktop/Jeu3D/GLSL/src/VAO.cpp -o CMakeFiles/3D_Game_main.dir/src/VAO.cpp.s
+	/usr/bin/c++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -S /Users/dylanmichel/Desktop/jeu/GLSL/src/VAO.cpp -o CMakeFiles/3D_Game_main.dir/src/VAO.cpp.s
 
 CMakeFiles/3D_Game_main.dir/src/VBO.cpp.o: CMakeFiles/3D_Game_main.dir/flags.make
 CMakeFiles/3D_Game_main.dir/src/VBO.cpp.o: src/VBO.cpp
 CMakeFiles/3D_Game_main.dir/src/VBO.cpp.o: CMakeFiles/3D_Game_main.dir/compiler_depend.ts
-	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green --progress-dir=/Users/dylanmichel/Desktop/Jeu3D/GLSL/CMakeFiles --progress-num=$(CMAKE_PROGRESS_4) "Building CXX object CMakeFiles/3D_Game_main.dir/src/VBO.cpp.o"
-	/usr/bin/c++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -MD -MT CMakeFiles/3D_Game_main.dir/src/VBO.cpp.o -MF CMakeFiles/3D_Game_main.dir/src/VBO.cpp.o.d -o CMakeFiles/3D_Game_main.dir/src/VBO.cpp.o -c /Users/dylanmichel/Desktop/Jeu3D/GLSL/src/VBO.cpp
+	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green --progress-dir=/Users/dylanmichel/Desktop/jeu/GLSL/CMakeFiles --progress-num=$(CMAKE_PROGRESS_4) "Building CXX object CMakeFiles/3D_Game_main.dir/src/VBO.cpp.o"
+	/usr/bin/c++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -MD -MT CMakeFiles/3D_Game_main.dir/src/VBO.cpp.o -MF CMakeFiles/3D_Game_main.dir/src/VBO.cpp.o.d -o CMakeFiles/3D_Game_main.dir/src/VBO.cpp.o -c /Users/dylanmichel/Desktop/jeu/GLSL/src/VBO.cpp
 
 CMakeFiles/3D_Game_main.dir/src/VBO.cpp.i: cmake_force
 	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green "Preprocessing CXX source to CMakeFiles/3D_Game_main.dir/src/VBO.cpp.i"
-	/usr/bin/c++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -E /Users/dylanmichel/Desktop/Jeu3D/GLSL/src/VBO.cpp > CMakeFiles/3D_Game_main.dir/src/VBO.cpp.i
+	/usr/bin/c++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -E /Users/dylanmichel/Desktop/jeu/GLSL/src/VBO.cpp > CMakeFiles/3D_Game_main.dir/src/VBO.cpp.i
 
 CMakeFiles/3D_Game_main.dir/src/VBO.cpp.s: cmake_force
 	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green "Compiling CXX source to assembly CMakeFiles/3D_Game_main.dir/src/VBO.cpp.s"
-	/usr/bin/c++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -S /Users/dylanmichel/Desktop/Jeu3D/GLSL/src/VBO.cpp -o CMakeFiles/3D_Game_main.dir/src/VBO.cpp.s
+	/usr/bin/c++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -S /Users/dylanmichel/Desktop/jeu/GLSL/src/VBO.cpp -o CMakeFiles/3D_Game_main.dir/src/VBO.cpp.s
 
 CMakeFiles/3D_Game_main.dir/src/shaderClass.cpp.o: CMakeFiles/3D_Game_main.dir/flags.make
 CMakeFiles/3D_Game_main.dir/src/shaderClass.cpp.o: src/shaderClass.cpp
 CMakeFiles/3D_Game_main.dir/src/shaderClass.cpp.o: CMakeFiles/3D_Game_main.dir/compiler_depend.ts
-	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green --progress-dir=/Users/dylanmichel/Desktop/Jeu3D/GLSL/CMakeFiles --progress-num=$(CMAKE_PROGRESS_5) "Building CXX object CMakeFiles/3D_Game_main.dir/src/shaderClass.cpp.o"
-	/usr/bin/c++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -MD -MT CMakeFiles/3D_Game_main.dir/src/shaderClass.cpp.o -MF CMakeFiles/3D_Game_main.dir/src/shaderClass.cpp.o.d -o CMakeFiles/3D_Game_main.dir/src/shaderClass.cpp.o -c /Users/dylanmichel/Desktop/Jeu3D/GLSL/src/shaderClass.cpp
+	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green --progress-dir=/Users/dylanmichel/Desktop/jeu/GLSL/CMakeFiles --progress-num=$(CMAKE_PROGRESS_5) "Building CXX object CMakeFiles/3D_Game_main.dir/src/shaderClass.cpp.o"
+	/usr/bin/c++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -MD -MT CMakeFiles/3D_Game_main.dir/src/shaderClass.cpp.o -MF CMakeFiles/3D_Game_main.dir/src/shaderClass.cpp.o.d -o CMakeFiles/3D_Game_main.dir/src/shaderClass.cpp.o -c /Users/dylanmichel/Desktop/jeu/GLSL/src/shaderClass.cpp
 
 CMakeFiles/3D_Game_main.dir/src/shaderClass.cpp.i: cmake_force
 	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green "Preprocessing CXX source to CMakeFiles/3D_Game_main.dir/src/shaderClass.cpp.i"
-	/usr/bin/c++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -E /Users/dylanmichel/Desktop/Jeu3D/GLSL/src/shaderClass.cpp > CMakeFiles/3D_Game_main.dir/src/shaderClass.cpp.i
+	/usr/bin/c++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -E /Users/dylanmichel/Desktop/jeu/GLSL/src/shaderClass.cpp > CMakeFiles/3D_Game_main.dir/src/shaderClass.cpp.i
 
 CMakeFiles/3D_Game_main.dir/src/shaderClass.cpp.s: cmake_force
 	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green "Compiling CXX source to assembly CMakeFiles/3D_Game_main.dir/src/shaderClass.cpp.s"
-	/usr/bin/c++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -S /Users/dylanmichel/Desktop/Jeu3D/GLSL/src/shaderClass.cpp -o CMakeFiles/3D_Game_main.dir/src/shaderClass.cpp.s
+	/usr/bin/c++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -S /Users/dylanmichel/Desktop/jeu/GLSL/src/shaderClass.cpp -o CMakeFiles/3D_Game_main.dir/src/shaderClass.cpp.s
 
 CMakeFiles/3D_Game_main.dir/src/Texture.cpp.o: CMakeFiles/3D_Game_main.dir/flags.make
 CMakeFiles/3D_Game_main.dir/src/Texture.cpp.o: src/Texture.cpp
 CMakeFiles/3D_Game_main.dir/src/Texture.cpp.o: CMakeFiles/3D_Game_main.dir/compiler_depend.ts
-	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green --progress-dir=/Users/dylanmichel/Desktop/Jeu3D/GLSL/CMakeFiles --progress-num=$(CMAKE_PROGRESS_6) "Building CXX object CMakeFiles/3D_Game_main.dir/src/Texture.cpp.o"
-	/usr/bin/c++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -MD -MT CMakeFiles/3D_Game_main.dir/src/Texture.cpp.o -MF CMakeFiles/3D_Game_main.dir/src/Texture.cpp.o.d -o CMakeFiles/3D_Game_main.dir/src/Texture.cpp.o -c /Users/dylanmichel/Desktop/Jeu3D/GLSL/src/Texture.cpp
+	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green --progress-dir=/Users/dylanmichel/Desktop/jeu/GLSL/CMakeFiles --progress-num=$(CMAKE_PROGRESS_6) "Building CXX object CMakeFiles/3D_Game_main.dir/src/Texture.cpp.o"
+	/usr/bin/c++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -MD -MT CMakeFiles/3D_Game_main.dir/src/Texture.cpp.o -MF CMakeFiles/3D_Game_main.dir/src/Texture.cpp.o.d -o CMakeFiles/3D_Game_main.dir/src/Texture.cpp.o -c /Users/dylanmichel/Desktop/jeu/GLSL/src/Texture.cpp
 
 CMakeFiles/3D_Game_main.dir/src/Texture.cpp.i: cmake_force
 	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green "Preprocessing CXX source to CMakeFiles/3D_Game_main.dir/src/Texture.cpp.i"
-	/usr/bin/c++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -E /Users/dylanmichel/Desktop/Jeu3D/GLSL/src/Texture.cpp > CMakeFiles/3D_Game_main.dir/src/Texture.cpp.i
+	/usr/bin/c++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -E /Users/dylanmichel/Desktop/jeu/GLSL/src/Texture.cpp > CMakeFiles/3D_Game_main.dir/src/Texture.cpp.i
 
 CMakeFiles/3D_Game_main.dir/src/Texture.cpp.s: cmake_force
 	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green "Compiling CXX source to assembly CMakeFiles/3D_Game_main.dir/src/Texture.cpp.s"
-	/usr/bin/c++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -S /Users/dylanmichel/Desktop/Jeu3D/GLSL/src/Texture.cpp -o CMakeFiles/3D_Game_main.dir/src/Texture.cpp.s
+	/usr/bin/c++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -S /Users/dylanmichel/Desktop/jeu/GLSL/src/Texture.cpp -o CMakeFiles/3D_Game_main.dir/src/Texture.cpp.s
 
 CMakeFiles/3D_Game_main.dir/src/Camera.cpp.o: CMakeFiles/3D_Game_main.dir/flags.make
 CMakeFiles/3D_Game_main.dir/src/Camera.cpp.o: src/Camera.cpp
 CMakeFiles/3D_Game_main.dir/src/Camera.cpp.o: CMakeFiles/3D_Game_main.dir/compiler_depend.ts
-	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green --progress-dir=/Users/dylanmichel/Desktop/Jeu3D/GLSL/CMakeFiles --progress-num=$(CMAKE_PROGRESS_7) "Building CXX object CMakeFiles/3D_Game_main.dir/src/Camera.cpp.o"
-	/usr/bin/c++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -MD -MT CMakeFiles/3D_Game_main.dir/src/Camera.cpp.o -MF CMakeFiles/3D_Game_main.dir/src/Camera.cpp.o.d -o CMakeFiles/3D_Game_main.dir/src/Camera.cpp.o -c /Users/dylanmichel/Desktop/Jeu3D/GLSL/src/Camera.cpp
+	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green --progress-dir=/Users/dylanmichel/Desktop/jeu/GLSL/CMakeFiles --progress-num=$(CMAKE_PROGRESS_7) "Building CXX object CMakeFiles/3D_Game_main.dir/src/Camera.cpp.o"
+	/usr/bin/c++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -MD -MT CMakeFiles/3D_Game_main.dir/src/Camera.cpp.o -MF CMakeFiles/3D_Game_main.dir/src/Camera.cpp.o.d -o CMakeFiles/3D_Game_main.dir/src/Camera.cpp.o -c /Users/dylanmichel/Desktop/jeu/GLSL/src/Camera.cpp
 
 CMakeFiles/3D_Game_main.dir/src/Camera.cpp.i: cmake_force
 	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green "Preprocessing CXX source to CMakeFiles/3D_Game_main.dir/src/Camera.cpp.i"
-	/usr/bin/c++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -E /Users/dylanmichel/Desktop/Jeu3D/GLSL/src/Camera.cpp > CMakeFiles/3D_Game_main.dir/src/Camera.cpp.i
+	/usr/bin/c++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -E /Users/dylanmichel/Desktop/jeu/GLSL/src/Camera.cpp > CMakeFiles/3D_Game_main.dir/src/Camera.cpp.i
 
 CMakeFiles/3D_Game_main.dir/src/Camera.cpp.s: cmake_force
 	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green "Compiling CXX source to assembly CMakeFiles/3D_Game_main.dir/src/Camera.cpp.s"
-	/usr/bin/c++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -S /Users/dylanmichel/Desktop/Jeu3D/GLSL/src/Camera.cpp -o CMakeFiles/3D_Game_main.dir/src/Camera.cpp.s
+	/usr/bin/c++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -S /Users/dylanmichel/Desktop/jeu/GLSL/src/Camera.cpp -o CMakeFiles/3D_Game_main.dir/src/Camera.cpp.s
 
 CMakeFiles/3D_Game_main.dir/src/Mesh.cpp.o: CMakeFiles/3D_Game_main.dir/flags.make
 CMakeFiles/3D_Game_main.dir/src/Mesh.cpp.o: src/Mesh.cpp
 CMakeFiles/3D_Game_main.dir/src/Mesh.cpp.o: CMakeFiles/3D_Game_main.dir/compiler_depend.ts
-	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green --progress-dir=/Users/dylanmichel/Desktop/Jeu3D/GLSL/CMakeFiles --progress-num=$(CMAKE_PROGRESS_8) "Building CXX object CMakeFiles/3D_Game_main.dir/src/Mesh.cpp.o"
-	/usr/bin/c++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -MD -MT CMakeFiles/3D_Game_main.dir/src/Mesh.cpp.o -MF CMakeFiles/3D_Game_main.dir/src/Mesh.cpp.o.d -o CMakeFiles/3D_Game_main.dir/src/Mesh.cpp.o -c /Users/dylanmichel/Desktop/Jeu3D/GLSL/src/Mesh.cpp
+	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green --progress-dir=/Users/dylanmichel/Desktop/jeu/GLSL/CMakeFiles --progress-num=$(CMAKE_PROGRESS_8) "Building CXX object CMakeFiles/3D_Game_main.dir/src/Mesh.cpp.o"
+	/usr/bin/c++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -MD -MT CMakeFiles/3D_Game_main.dir/src/Mesh.cpp.o -MF CMakeFiles/3D_Game_main.dir/src/Mesh.cpp.o.d -o CMakeFiles/3D_Game_main.dir/src/Mesh.cpp.o -c /Users/dylanmichel/Desktop/jeu/GLSL/src/Mesh.cpp
 
 CMakeFiles/3D_Game_main.dir/src/Mesh.cpp.i: cmake_force
 	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green "Preprocessing CXX source to CMakeFiles/3D_Game_main.dir/src/Mesh.cpp.i"
-	/usr/bin/c++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -E /Users/dylanmichel/Desktop/Jeu3D/GLSL/src/Mesh.cpp > CMakeFiles/3D_Game_main.dir/src/Mesh.cpp.i
+	/usr/bin/c++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -E /Users/dylanmichel/Desktop/jeu/GLSL/src/Mesh.cpp > CMakeFiles/3D_Game_main.dir/src/Mesh.cpp.i
 
 CMakeFiles/3D_Game_main.dir/src/Mesh.cpp.s: cmake_force
 	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green "Compiling CXX source to assembly CMakeFiles/3D_Game_main.dir/src/Mesh.cpp.s"
-	/usr/bin/c++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -S /Users/dylanmichel/Desktop/Jeu3D/GLSL/src/Mesh.cpp -o CMakeFiles/3D_Game_main.dir/src/Mesh.cpp.s
+	/usr/bin/c++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -S /Users/dylanmichel/Desktop/jeu/GLSL/src/Mesh.cpp -o CMakeFiles/3D_Game_main.dir/src/Mesh.cpp.s
 
 CMakeFiles/3D_Game_main.dir/src/model.cpp.o: CMakeFiles/3D_Game_main.dir/flags.make
 CMakeFiles/3D_Game_main.dir/src/model.cpp.o: src/model.cpp
 CMakeFiles/3D_Game_main.dir/src/model.cpp.o: CMakeFiles/3D_Game_main.dir/compiler_depend.ts
-	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green --progress-dir=/Users/dylanmichel/Desktop/Jeu3D/GLSL/CMakeFiles --progress-num=$(CMAKE_PROGRESS_9) "Building CXX object CMakeFiles/3D_Game_main.dir/src/model.cpp.o"
-	/usr/bin/c++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -MD -MT CMakeFiles/3D_Game_main.dir/src/model.cpp.o -MF CMakeFiles/3D_Game_main.dir/src/model.cpp.o.d -o CMakeFiles/3D_Game_main.dir/src/model.cpp.o -c /Users/dylanmichel/Desktop/Jeu3D/GLSL/src/model.cpp
+	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green --progress-dir=/Users/dylanmichel/Desktop/jeu/GLSL/CMakeFiles --progress-num=$(CMAKE_PROGRESS_9) "Building CXX object CMakeFiles/3D_Game_main.dir/src/model.cpp.o"
+	/usr/bin/c++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -MD -MT CMakeFiles/3D_Game_main.dir/src/model.cpp.o -MF CMakeFiles/3D_Game_main.dir/src/model.cpp.o.d -o CMakeFiles/3D_Game_main.dir/src/model.cpp.o -c /Users/dylanmichel/Desktop/jeu/GLSL/src/model.cpp
 
 CMakeFiles/3D_Game_main.dir/src/model.cpp.i: cmake_force
 	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green "Preprocessing CXX source to CMakeFiles/3D_Game_main.dir/src/model.cpp.i"
-	/usr/bin/c++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -E /Users/dylanmichel/Desktop/Jeu3D/GLSL/src/model.cpp > CMakeFiles/3D_Game_main.dir/src/model.cpp.i
+	/usr/bin/c++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -E /Users/dylanmichel/Desktop/jeu/GLSL/src/model.cpp > CMakeFiles/3D_Game_main.dir/src/model.cpp.i
 
 CMakeFiles/3D_Game_main.dir/src/model.cpp.s: cmake_force
 	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green "Compiling CXX source to assembly CMakeFiles/3D_Game_main.dir/src/model.cpp.s"
-	/usr/bin/c++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -S /Users/dylanmichel/Desktop/Jeu3D/GLSL/src/model.cpp -o CMakeFiles/3D_Game_main.dir/src/model.cpp.s
+	/usr/bin/c++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -S /Users/dylanmichel/Desktop/jeu/GLSL/src/model.cpp -o CMakeFiles/3D_Game_main.dir/src/model.cpp.s
 
 # Object files for target 3D_Game_main
 3D_Game_main_OBJECTS = \
@@ -230,7 +230,7 @@ bin/3D_Game_main: /Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.pl
 bin/3D_Game_main: /opt/homebrew/lib/libglfw.3.4.dylib
 bin/3D_Game_main: bin/libglad.a
 bin/3D_Game_main: CMakeFiles/3D_Game_main.dir/link.txt
-	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green --bold --progress-dir=/Users/dylanmichel/Desktop/Jeu3D/GLSL/CMakeFiles --progress-num=$(CMAKE_PROGRESS_10) "Linking CXX executable bin/3D_Game_main"
+	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green --bold --progress-dir=/Users/dylanmichel/Desktop/jeu/GLSL/CMakeFiles --progress-num=$(CMAKE_PROGRESS_10) "Linking CXX executable bin/3D_Game_main"
 	$(CMAKE_COMMAND) -E cmake_link_script CMakeFiles/3D_Game_main.dir/link.txt --verbose=$(VERBOSE)
 
 # Rule to build all files generated by this target.
@@ -242,6 +242,6 @@ CMakeFiles/3D_Game_main.dir/clean:
 .PHONY : CMakeFiles/3D_Game_main.dir/clean
 
 CMakeFiles/3D_Game_main.dir/depend:
-	cd /Users/dylanmichel/Desktop/Jeu3D/GLSL && $(CMAKE_COMMAND) -E cmake_depends "Unix Makefiles" /Users/dylanmichel/Desktop/Jeu3D/GLSL /Users/dylanmichel/Desktop/Jeu3D/GLSL /Users/dylanmichel/Desktop/Jeu3D/GLSL /Users/dylanmichel/Desktop/Jeu3D/GLSL /Users/dylanmichel/Desktop/Jeu3D/GLSL/CMakeFiles/3D_Game_main.dir/DependInfo.cmake "--color=$(COLOR)"
+	cd /Users/dylanmichel/Desktop/jeu/GLSL && $(CMAKE_COMMAND) -E cmake_depends "Unix Makefiles" /Users/dylanmichel/Desktop/jeu/GLSL /Users/dylanmichel/Desktop/jeu/GLSL /Users/dylanmichel/Desktop/jeu/GLSL /Users/dylanmichel/Desktop/jeu/GLSL /Users/dylanmichel/Desktop/jeu/GLSL/CMakeFiles/3D_Game_main.dir/DependInfo.cmake "--color=$(COLOR)"
 .PHONY : CMakeFiles/3D_Game_main.dir/depend
 

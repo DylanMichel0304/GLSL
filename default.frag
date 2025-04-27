@@ -31,13 +31,12 @@ uniform vec3 lightPos;
 uniform vec3 camPos;
 // Material properties
 uniform Material material;
-
-// Tiling factor for the textures
-const float tiling = 1.0; // Reset to 1.0 to respect texture coords in model
+// Tiling factor that can be set per object
+uniform float textureTiling;
 
 // Sample texture with tiling
 vec4 sampleDiffuseTexture() {
-    vec4 texColor = texture(diffuse0, texCoord * tiling);
+    vec4 texColor = texture(diffuse0, texCoord * textureTiling);
     // Mix with material's diffuse color
     if (texColor.a == 0.0) {
         return vec4(material.diffuse, 1.0);
@@ -50,7 +49,7 @@ vec4 sampleDiffuseTexture() {
 // Sample specular texture with tiling
 float sampleSpecularTexture() {
     // Use material's specular if no texture
-    float texSpec = texture(specular0, texCoord * tiling).r;
+    float texSpec = texture(specular0, texCoord * textureTiling).r;
     if (texSpec == 0.0) {
         return length(material.specular);
     }
