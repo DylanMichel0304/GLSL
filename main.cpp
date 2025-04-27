@@ -60,13 +60,13 @@ int main()
 
 
 	// Generates Shader object using shaders default.vert and default.frag
-	Shader shaderProgram("default.vert", "default.frag");
+	Shader shaderProgram("shader/default.vert", "shader/default.frag");
 	// Store mesh data in vectors for the mesh
 	std::vector <Texture> tex(textures, textures + sizeof(textures) / sizeof(Texture));
 
 
 	// Shader for light cube
-	Shader lightShader("light.vert", "light.frag");
+	Shader lightShader("shader/light.vert", "sharder/light.frag");
 
 	// Store mesh data in vectors for the mesh
 	std::vector<Vertex> lightVerts;
