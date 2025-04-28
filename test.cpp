@@ -105,8 +105,8 @@ int main()
 	// Texture data
 	Texture textures[]
 	{
-		Texture((texPath + "planks.png").c_str(), "diffuse", 0, GL_RGBA, GL_UNSIGNED_BYTE),
-		Texture((texPath + "planksSpec.png").c_str(), "specular", 1, GL_RED, GL_UNSIGNED_BYTE)
+		Texture((texPath + "planks.png").c_str(), "diffuse", 0),
+		Texture((texPath + "planksSpec.png").c_str(), "specular", 1)
 	};
 
 	std::vector<Light> sceneLights;

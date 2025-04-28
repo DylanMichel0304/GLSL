@@ -93,7 +93,7 @@ int main()
     // Texture data
     Texture textures[]
     {
-        Texture((texPath + "herbe.png").c_str(), "diffuse", 0, GL_RGB, GL_UNSIGNED_BYTE),
+        Texture((texPath + "herbe.png").c_str(), "diffuse", 0),
         //Texture((texPath + "planksSpec.png").c_str(), "specular", 1, GL_RED, GL_UNSIGNED_BYTE)
     };
 

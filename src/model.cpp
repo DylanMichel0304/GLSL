@@ -260,7 +260,7 @@ void Model::loadMTL(const char* file, std::map<std::string, Material>& materials
             std::cout << "  Loading diffuse texture: " << fullTexturePath.string() << std::endl;
             
             // Use auto-detection for texture format (pass 0 for format)
-            Texture diffuseTex(fullTexturePath.string().c_str(), "diffuse", GL_TEXTURE0, 0, GL_UNSIGNED_BYTE);
+            Texture diffuseTex(fullTexturePath.string().c_str(), "diffuse", GL_TEXTURE0);
             materials[currentMaterial].textures.push_back(diffuseTex);
         }
         // You can add support for other texture types like specular, normal maps, etc.
