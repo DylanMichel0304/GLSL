@@ -7,6 +7,7 @@
 #include "Mesh.h"
 #include "shaderClass.h"
 #include "Camera.h"
+#include "Collider.h"
 
 // Structure to hold material properties from MTL files
 struct Material {
@@ -28,6 +29,10 @@ public:
     bool IsLoaded() const { return !meshes.empty(); }
     // Destructor
     ~Model();
+
+    void buildCollider(const glm::mat4& modelMatrix);
+
+    Collider collider;
 
 private:
     std::vector<Mesh> meshes;

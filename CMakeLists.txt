@@ -52,7 +52,10 @@ set(SOURCES_main
     src/Texture.h src/Texture.cpp
     src/Camera.h src/Camera.cpp
     src/Mesh.h src/Mesh.cpp
-    src/model.h src/model.cpp)
+    src/model.h src/model.cpp
+    src/Collider.h
+    src/Player.h src/Player.cpp
+    src/Cubemaps.h src/Cubemaps.cpp)
 set(SOURCES_TEST 
     test.cpp 
     src/EBO.h src/EBO.cpp
@@ -63,6 +66,9 @@ set(SOURCES_TEST
     src/Camera.h src/Camera.cpp
     src/Mesh.h src/Mesh.cpp
     src/model.h src/model.cpp
+    src/Player.h src/Player.cpp
+    src/Collider.h 
+    src/Cubemaps.h src/Cubemaps.cpp
 )
 
 add_compile_definitions(PATH_TO_OBJECTS="${CMAKE_CURRENT_SOURCE_DIR}/assets/objects")

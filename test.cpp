@@ -1,4 +1,6 @@
 #include"src/Mesh.h"
+#include"src/model.h"
+#include"src/Cubemaps.h"
 #include<iostream>
 
 #include <glad/glad.h>
@@ -11,10 +13,9 @@
 #define STB_IMAGE_IMPLEMENTATION
 #include "stb_image.h"
 
+
 const unsigned int width = 1920;
 const unsigned int height = 1080;
-
-
 
 // Vertices coordinates
 Vertex vertices[] =
@@ -60,81 +61,12 @@ GLuint lightIndices[] =
 	4, 6, 7
 };
 
-float skyboxVertices[] =
-{
-	//   Coordinates
-	-1.0f, -1.0f,  1.0f,//        7--------6
-	 1.0f, -1.0f,  1.0f,//       /|       /|
-	 1.0f, -1.0f, -1.0f,//      4--------5 |
-	-1.0f, -1.0f, -1.0f,//      | |      | |
-	-1.0f,  1.0f,  1.0f,//      | 3------|-2
-	 1.0f,  1.0f,  1.0f,//      |/       |/
-	 1.0f,  1.0f, -1.0f,//      0--------1
-	-1.0f,  1.0f, -1.0f
+struct Light {
+    glm::vec3 position;
+    glm::vec3 direction;
+    glm::vec4 color;
+    int type; // 0 = Directional, 1 = Point, 2 = Spot
 };
-
-unsigned int skyboxIndices[] =
-{
-	// Right
-	1, 2, 6,
-	6, 5, 1,
-	// Left
-	0, 4, 7,
-	7, 3, 0,
-	// Top
-	4, 5, 6,
-	6, 7, 4,
-	// Bottom
-	0, 3, 2,
-	2, 1, 0,
-	// Back
-	0, 1, 5,
-	5, 4, 0,
-	// Front
-	3, 7, 6,
-	6, 2, 3
-};
-void skyboxActivate(const std::string facesCubemap[], unsigned int& cubemapTexture, Shader& skyboxShader, const glm::mat4& objectModel)
-{
-	skyboxShader.Activate();
-	glUniformMatrix4fv(glGetUniformLocation(skyboxShader.ID, "skybox"), 1, GL_FALSE, glm::value_ptr(objectModel));
-	glGenTextures(1, &cubemapTexture);
-	glBindTexture(GL_TEXTURE_CUBE_MAP, cubemapTexture);
-	glTexParameteri(GL_TEXTURE_CUBE_MAP, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
-	glTexParameteri(GL_TEXTURE_CUBE_MAP, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
-	glTexParameteri(GL_TEXTURE_CUBE_MAP, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
-	glTexParameteri(GL_TEXTURE_CUBE_MAP, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
-	glTexParameteri(GL_TEXTURE_CUBE_MAP, GL_TEXTURE_WRAP_R, GL_CLAMP_TO_EDGE);
-
-	// Load cubemap textures
-	for (unsigned int i = 0; i < 6; i++)
-	{
-		int width, height, nrChannels;
-		unsigned char* data = stbi_load(facesCubemap[i].c_str(), &width, &height, &nrChannels, 0);
-		if (data)
-		{
-			stbi_set_flip_vertically_on_load(false);
-			glTexImage2D
-			(
-				GL_TEXTURE_CUBE_MAP_POSITIVE_X + i,
-				0,
-				GL_RGB,
-				width,
-				height,
-				0,
-				GL_RGB,
-				GL_UNSIGNED_BYTE,
-				data
-			);
-			stbi_image_free(data);
-		}
-		else
-		{
-			std::cout << "Failed to load texture: " << facesCubemap[i] << std::endl;
-			stbi_image_free(data);
-		}
-	}
-}
 
 
 int main()
@@ -177,22 +109,21 @@ int main()
 		Texture((texPath + "planksSpec.png").c_str(), "specular", 1, GL_RED, GL_UNSIGNED_BYTE)
 	};
 
+	std::vector<Light> sceneLights;
 
-	// Create VAO, VBO, and EBO for the skybox
-	unsigned int skyboxVAO, skyboxVBO, skyboxEBO;
-	glGenVertexArrays(1, &skyboxVAO);
-	glGenBuffers(1, &skyboxVBO);
-	glGenBuffers(1, &skyboxEBO);
-	glBindVertexArray(skyboxVAO);
-	glBindBuffer(GL_ARRAY_BUFFER, skyboxVBO);
-	glBufferData(GL_ARRAY_BUFFER, sizeof(skyboxVertices), &skyboxVertices, GL_STATIC_DRAW);
-	glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, skyboxEBO);
-	glBufferData(GL_ELEMENT_ARRAY_BUFFER, sizeof(skyboxIndices), &skyboxIndices, GL_STATIC_DRAW);
-	glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 3 * sizeof(float), (void*)0);
-	glEnableVertexAttribArray(0);
-	glBindBuffer(GL_ARRAY_BUFFER, 0);
-	glBindVertexArray(0);
-	glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, 0);
+	Light sun;
+	sun.type = 0; // Directional
+	sun.direction = glm::vec3(-0.2f, -1.0f, -0.3f);
+	sun.color = glm::vec4(1.0f, 1.0f, 0.9f, 1.0f); // Soleil jaune
+	sceneLights.push_back(sun);
+
+	Light lamp;
+	lamp.type = 2; // Point light
+	lamp.position = glm::vec3(0.0f, 0.5f, 0.0f);
+	lamp.direction = glm::vec3(0.0f, -1.0f, 0.0f);
+	lamp.color = glm::vec4(1.0f, 1.0f, 1.0f, 1.0f); // Lampe rouge
+	sceneLights.push_back(lamp);
+
 
 	std::string facesCubemap[6] =
 	{
@@ -223,7 +154,8 @@ int main()
 	Mesh light(lightVerts, lightInd, tex);
 
 
-	Shader skyboxShader("shader/skybox.vert", "shader/skybox.frag");
+	// Instantiate the Cubemaps class
+	Cubemaps skybox(facesCubemap, "shader/skybox.vert", "shader/skybox.frag");
 
 
 	glm::vec4 lightColor = glm::vec4(1.0f, 1.0f, 1.0f, 1.0f);
@@ -254,10 +186,9 @@ int main()
 	Camera camera(width, height, glm::vec3(0.0f, 1.0f, 2.0f));
 
 
+	float sunStrength = 1.0f;
+	float fadeSpeed = 0.1f; // plus c'est grand, plus ça descend vite
 
-	// Usage of the function
-	unsigned int cubemapTexture;
-	skyboxActivate(facesCubemap, cubemapTexture, skyboxShader, objectModel);
 
 	// Main while loop
 	while (!glfwWindowShouldClose(window))
@@ -271,13 +202,49 @@ int main()
 		// Handles camera inputs
 		camera.Inputs(window);
 		// Updates and exports the camera matrix to the Vertex Shader
-		camera.updateMatrix(45.0f, 1.0f, 100.0f);
+		camera.updateMatrix(45.0f, 0.1f, 100.0f); // Note: Adjusted near/far planes if needed
+
+		// Activate and configure main shader program
+		shaderProgram.Activate();
+
+		// Envoie le nombre de lumières
+		glUniform1i(glGetUniformLocation(shaderProgram.ID, "lightCount"), sceneLights.size());
+
+		// Diminue la force du soleil progressivement
+		if (sunStrength > 0.0f)
+		sunStrength -= fadeSpeed * glfwGetTime();
+		sunStrength = glm::max(sunStrength, 0.0f); // éviter qu'il passe en négatif
+
+		// Met à jour la couleur du soleil
+		sceneLights[0].color = glm::vec4(1.0f, 1.0f, 0.9f, 1.0f) * sunStrength;
+
+		// Reset glfw time pour éviter qu'il parte trop vite
+		glfwSetTime(0);
+
+
+		// Envoie chaque lumière
+		for (int i = 0; i < sceneLights.size(); i++) {
+			std::string number = std::to_string(i);
+			glUniform3fv(glGetUniformLocation(shaderProgram.ID, ("lights[" + number + "].position").c_str()), 1, glm::value_ptr(sceneLights[i].position));
+			glUniform3fv(glGetUniformLocation(shaderProgram.ID, ("lights[" + number + "].direction").c_str()), 1, glm::value_ptr(sceneLights[i].direction));
+			glUniform4fv(glGetUniformLocation(shaderProgram.ID, ("lights[" + number + "].color").c_str()), 1, glm::value_ptr(sceneLights[i].color));
+			glUniform1i(glGetUniformLocation(shaderProgram.ID, ("lights[" + number + "].type").c_str()), sceneLights[i].type);
+			
+		}
+
+		// Caméra position
+		glUniform3fv(glGetUniformLocation(shaderProgram.ID, "camPos"), 1, glm::value_ptr(camera.Position));
+        // Pass camera matrix to the main shader (replace view/proj lines)
+        camera.Matrix(shaderProgram, "camMatrix");
 
 
 		// Draws different meshes
 		floor.Draw(shaderProgram, camera);
-		light.Draw(lightShader, camera);
-        //skyboxDraw(skyboxShader, camera, skyboxVAO, cubemapTexture);
+		light.Draw(lightShader, camera); // Make sure light.Draw also uses camera.view and camera.projection
+
+        // Draw the skybox using the Cubemaps object
+        skybox.Draw(camera, width, height);
+
 
         glfwSwapBuffers(window);
 		// Take care of all GLFW events
@@ -289,27 +256,11 @@ int main()
 	// Delete all the objects we've created
 	shaderProgram.Delete();
 	lightShader.Delete();
+    skybox.Delete(); // Delete skybox resources
+
 	// Delete window before ending the program
 	glfwDestroyWindow(window);
 	// Terminate GLFW before ending the program
 	glfwTerminate();
 	return 0;
-}
-void skyboxDraw(Shader &skyboxShader, Camera &camera, unsigned int skyboxVAO, unsigned int cubemapTexture)
-{
-    glDepthFunc(GL_LEQUAL);
-    skyboxShader.Activate();
-    glm::mat4 view = glm::mat4(1.0f);
-    glm::mat4 projection = glm::mat4(1.0f);
-    view = glm::mat4(glm::mat3(glm::lookAt(camera.Position, camera.Position + camera.Orientation, camera.Up)));
-    projection = glm::perspective(glm::radians(45.0f), (float)width / (float)height, 0.1f, 100.0f);
-    glUniformMatrix4fv(glGetUniformLocation(skyboxShader.ID, "view"), 1, GL_FALSE, glm::value_ptr(view));
-    glUniformMatrix4fv(glGetUniformLocation(skyboxShader.ID, "projection"), 1, GL_FALSE, glm::value_ptr(projection));
-
-    glBindVertexArray(skyboxVAO);
-    glActiveTexture(GL_TEXTURE0);
-    glBindTexture(GL_TEXTURE_CUBE_MAP, cubemapTexture);
-    glDrawElements(GL_TRIANGLES, 36, GL_UNSIGNED_INT, 0);
-    glBindVertexArray(0);
-    glDepthFunc(GL_LESS);
 }

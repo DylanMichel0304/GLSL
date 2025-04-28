@@ -4,6 +4,8 @@
 
 #include <glad/glad.h>
 #include <glm/glm.hpp>
+#include "src/Player.h"
+#include "src/Collider.h"
 #include<glm/gtc/matrix_transform.hpp>
 #include<glm/gtc/type_ptr.hpp>
 #include <GLFW/glfw3.h>
@@ -95,8 +97,6 @@ int main()
         //Texture((texPath + "planksSpec.png").c_str(), "specular", 1, GL_RED, GL_UNSIGNED_BYTE)
     };
 
-
-
     // Generates Shader object using shaders general.vert and general.frag
     Shader shaderProgram("shader/default.vert", "default.frag");
     // Store mesh data in vectors for the mesh
@@ -130,6 +130,32 @@ int main()
         std::cout << "ERROR: Failed to load Farmhouse model!" << std::endl;
     }
 
+    // Model matrix for the terrain
+    glm::mat4 terrainModelMatrix = glm::mat4(1.0f);
+    terrainModelMatrix = glm::translate(terrainModelMatrix, glm::vec3(0.0f, -20.0f, 0.0f)); 
+    terrainModelMatrix = glm::scale(terrainModelMatrix, glm::vec3(100.0f, 100.0f, 100.0f));
+
+    // Model matrix for the tree
+    glm::mat4 treeModelMatrix = glm::mat4(1.0f);
+    treeModelMatrix = glm::translate(treeModelMatrix, glm::vec3(20.0f, -10.0f, 0.0f));
+    treeModelMatrix = glm::scale(treeModelMatrix, glm::vec3(10.0f, 10.0f, 10.0f));
+
+    // Model matrix for the farmhouse
+    glm::mat4 farmhouseModelMatrix = glm::mat4(1.0f);
+    farmhouseModelMatrix = glm::translate(farmhouseModelMatrix, glm::vec3(40.0f, -10.0f, 10.0f));
+    farmhouseModelMatrix = glm::rotate(farmhouseModelMatrix, glm::radians(45.0f), glm::vec3(0.0f, 1.0f, 0.0f));
+    farmhouseModelMatrix = glm::scale(farmhouseModelMatrix, glm::vec3(0.5f, 0.5f, 0.5f));
+
+    // Build colliders for models
+    treeModel.buildCollider(treeModelMatrix);
+    farmhouseModel.buildCollider(farmhouseModelMatrix);
+
+    // Add colliders to world colliders
+    std::vector<Collider> worldColliders;
+    worldColliders.push_back(treeModel.collider);
+    worldColliders.push_back(farmhouseModel.collider);
+
+
     // Material properties for farmhouse
     glm::vec3 farmhouseMaterial[] = {
         glm::vec3(1.0f, 0.0f, 0.0f), // ambient - bright red 
@@ -143,29 +169,6 @@ int main()
     lightModelMatrix = glm::translate(lightModelMatrix, lightPos); // Translate to light position
     lightModelMatrix = glm::scale(lightModelMatrix, glm::vec3(100.0f, 100.0f, 100.0f)); // Reasonable scale for marker
 
-    // Model matrix for the terrain
-    glm::mat4 terrainModelMatrix = glm::mat4(1.0f);
-    // Position the terrain lower (negative Y) since terrain is typically below the camera
-    terrainModelMatrix = glm::translate(terrainModelMatrix, glm::vec3(0.0f, -20.0f, 0.0f)); 
-    // Make the terrain much larger
-    terrainModelMatrix = glm::scale(terrainModelMatrix, glm::vec3(100.0f, 100.0f, 100.0f));
-    
-    // Model matrix for the tree
-    glm::mat4 treeModelMatrix = glm::mat4(1.0f);
-    // Position the tree to be visible on the terrain
-    treeModelMatrix = glm::translate(treeModelMatrix, glm::vec3(20.0f, -10.0f, 0.0f));
-    // Scale the tree to be more visible
-    treeModelMatrix = glm::scale(treeModelMatrix, glm::vec3(10.0f, 10.0f, 10.0f));
-
-    // Model matrix for the farmhouse
-    glm::mat4 farmhouseModelMatrix = glm::mat4(1.0f);
-    // Position the farmhouse where the old house was
-    farmhouseModelMatrix = glm::translate(farmhouseModelMatrix, glm::vec3(40.0f, -10.0f, 10.0f));
-    // Rotate the farmhouse to face a different direction
-    farmhouseModelMatrix = glm::rotate(farmhouseModelMatrix, glm::radians(45.0f), glm::vec3(0.0f, 1.0f, 0.0f));
-    // Scale the farmhouse appropriately
-    farmhouseModelMatrix = glm::scale(farmhouseModelMatrix, glm::vec3(0.5f, 0.5f, 0.5f));
-    
     // Default tiling values for different objects
     float terrainTiling = 50.0f;  // High tiling for terrain (small pattern)
     float treeTiling = 1.0f;       // Default tiling for tree
@@ -183,10 +186,11 @@ int main()
     //glDepthFunc(GL_LESS);
 
     // Position camera much higher and further back to view the larger terrain
-    Camera camera(width, height, glm::vec3(0.0f, 20.0f, 50.0f));
-    
-    // Increase camera speed to move around the much larger terrain
-    camera.speed = 10.0f;
+    //Camera camera(width, height, glm::vec3(0.0f, 20.0f, 50.0f));
+    //camera.speed = 10.0f;
+    Player player(width, height, glm::vec3(0.0f, 20.0f, 50.0f));
+    player.camera.speed = 10.0f;
+
 
     // Sun (light) animation parameters
     float sunRadius = 200.0f;
@@ -202,11 +206,10 @@ int main()
         // Clean the back buffer and depth buffer
         glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
-
-        // Handles camera inputs
-        camera.Inputs(window);
-        // Updates and exports the camera matrix to the Vertex Shader
-        camera.updateMatrix(45.0f, 1.0f, 100000.0f);
+        // Update du joueur
+        float deltaTime = glfwGetTime(); 
+        glfwSetTime(0); // Remettre à 0 pour le frame suivant
+        player.Update(window, worldColliders, deltaTime); 
 
         // Animate sun position (day/night cycle)
         float time = glfwGetTime();
@@ -233,7 +236,7 @@ int main()
         lightShader.Activate();
         glUniformMatrix4fv(glGetUniformLocation(lightShader.ID, "model"), 1, GL_FALSE, glm::value_ptr(lightModelMatrix));
         glUniform4f(glGetUniformLocation(lightShader.ID, "lightColor"), lightColor.x, lightColor.y, lightColor.z, lightColor.w);
-        light.Draw(lightShader, camera);
+        light.Draw(lightShader, player.camera);
 
 
         // Update uniforms for the main shader (lighting)
@@ -250,13 +253,13 @@ int main()
         glUniform3f(glGetUniformLocation(shaderProgram.ID, "material.diffuse"), 1.0f, 1.0f, 1.0f);
         glUniform3f(glGetUniformLocation(shaderProgram.ID, "material.specular"), 0.5f, 0.5f, 0.5f);
         glUniform1f(glGetUniformLocation(shaderProgram.ID, "material.shininess"), 32.0f);
-        terrainModel.Draw(shaderProgram, camera);
+        terrainModel.Draw(shaderProgram, player.camera);
         
         // Draw tree
         glUniformMatrix4fv(glGetUniformLocation(shaderProgram.ID, "model"), 1, GL_FALSE, glm::value_ptr(treeModelMatrix));
         // Set tree texture tiling
         glUniform1f(glGetUniformLocation(shaderProgram.ID, "textureTiling"), treeTiling);
-        treeModel.Draw(shaderProgram, camera);
+        treeModel.Draw(shaderProgram, player.camera);
         
         // Draw farmhouse with custom material properties
         glUniformMatrix4fv(glGetUniformLocation(shaderProgram.ID, "model"), 1, GL_FALSE, glm::value_ptr(farmhouseModelMatrix));
@@ -267,7 +270,7 @@ int main()
         glUniform3fv(glGetUniformLocation(shaderProgram.ID, "material.diffuse"), 1, glm::value_ptr(farmhouseMaterial[1]));
         glUniform3fv(glGetUniformLocation(shaderProgram.ID, "material.specular"), 1, glm::value_ptr(farmhouseMaterial[2]));
         glUniform1f(glGetUniformLocation(shaderProgram.ID, "material.shininess"), 32.0f);
-        farmhouseModel.Draw(shaderProgram, camera);
+        farmhouseModel.Draw(shaderProgram, player.camera);
 
         // Swap the back buffer with the front buffer
         glfwSwapBuffers(window);

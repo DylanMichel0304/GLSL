@@ -269,3 +269,41 @@ void Model::loadMTL(const char* file, std::map<std::string, Material>& materials
     // Print summary of loaded materials
     std::cout << "Loaded " << materials.size() << " materials from MTL file" << std::endl;
 }
+
+void Model::buildCollider(const glm::mat4& modelMatrix) {
+    if (meshes.empty()) return;
+
+    glm::vec3 min = meshes[0].getMinVertex();
+    glm::vec3 max = meshes[0].getMaxVertex();
+
+    for (size_t i = 1; i < meshes.size(); ++i) {
+        glm::vec3 meshMin = meshes[i].getMinVertex();
+        glm::vec3 meshMax = meshes[i].getMaxVertex();
+        min = glm::min(min, meshMin);
+        max = glm::max(max, meshMax);
+    }
+
+    // Appliquer la transformation du modèle au collider
+    glm::vec3 corners[8] = {
+        glm::vec3(min.x, min.y, min.z),
+        glm::vec3(min.x, min.y, max.z),
+        glm::vec3(min.x, max.y, min.z),
+        glm::vec3(min.x, max.y, max.z),
+        glm::vec3(max.x, min.y, min.z),
+        glm::vec3(max.x, min.y, max.z),
+        glm::vec3(max.x, max.y, min.z),
+        glm::vec3(max.x, max.y, max.z)
+    };
+    glm::vec3 worldMin( std::numeric_limits<float>::max());
+    glm::vec3 worldMax(-std::numeric_limits<float>::max());
+    for (int i = 0; i < 8; ++i) {
+        glm::vec4 transformed = modelMatrix * glm::vec4(corners[i], 1.0f);
+        worldMin = glm::min(worldMin, glm::vec3(transformed));
+        worldMax = glm::max(worldMax, glm::vec3(transformed));
+    }
+    collider = Collider(worldMin, worldMax);
+
+    // Debug print
+    std::cout << "Collider built: min(" << worldMin.x << "," << worldMin.y << "," << worldMin.z
+              << ") max(" << worldMax.x << "," << worldMax.y << "," << worldMax.z << ")" << std::endl;
+}

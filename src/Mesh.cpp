@@ -1,6 +1,7 @@
 #include "Mesh.h"
+#include <vector>
 
-Mesh::Mesh(std::vector <Vertex>& vertices, std::vector <GLuint>& indices, std::vector <Texture>& textures)
+Mesh::Mesh(std::vector<Vertex>& vertices, std::vector<GLuint>& indices, std::vector<Texture>& textures)
 {
 	Mesh::vertices = vertices;
 	Mesh::indices = indices;
@@ -21,7 +22,6 @@ Mesh::Mesh(std::vector <Vertex>& vertices, std::vector <GLuint>& indices, std::v
 	VBO.Unbind();
 	EBO.Unbind();
 }
-
 
 void Mesh::Draw(Shader& shader, Camera& camera)
 {
@@ -54,4 +54,32 @@ void Mesh::Draw(Shader& shader, Camera& camera)
 
 	// Draw the actual mesh
 	glDrawElements(GL_TRIANGLES, indices.size(), GL_UNSIGNED_INT, 0);
+}
+
+// --------- NOUVEAU CODE POUR LE COLLIDER -----------
+
+glm::vec3 Mesh::getMinVertex() const
+{
+	if (vertices.empty())
+		return glm::vec3(0.0f);
+
+	glm::vec3 minVertex = vertices[0].position;
+	for (const Vertex& v : vertices)
+	{
+		minVertex = glm::min(minVertex, v.position);
+	}
+	return minVertex;
+}
+
+glm::vec3 Mesh::getMaxVertex() const
+{
+	if (vertices.empty())
+		return glm::vec3(0.0f);
+
+	glm::vec3 maxVertex = vertices[0].position;
+	for (const Vertex& v : vertices)
+	{
+		maxVertex = glm::max(maxVertex, v.position);
+	}
+	return maxVertex;
 }

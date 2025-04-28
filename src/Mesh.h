@@ -24,5 +24,8 @@ public:
 
 	// Draws the mesh
 	void Draw(Shader& shader, Camera& camera);
+
+	glm::vec3 getMinVertex() const;
+	glm::vec3 getMaxVertex() const;
 };
 #endif
