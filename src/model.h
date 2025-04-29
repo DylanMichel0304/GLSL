@@ -22,7 +22,7 @@ class Model
 {
 public:
     // Loads model from file
-    Model(const char* file);
+    Model(const char* file, bool LoadCollider = true);
     // Draws the model using the given shader and camera
     void Draw(Shader& shader, Camera& camera);
     // Check if model has loaded meshes

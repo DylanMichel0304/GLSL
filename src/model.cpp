@@ -3,46 +3,44 @@
 #include <sstream>
 #include <iostream>
 #include <map>
+#include <string>
 
-// For older C++ standards, use experimental/filesystem or custom path handling
-#if __cplusplus >= 201703L
-    #include <filesystem>
-    namespace fs = std::filesystem;
-#else
-    #include <string>
-    // Simple path class to replace filesystem functionality
-    struct Path {
-        std::string path;
-        Path(const std::string& p) : path(p) {}
-        Path(const char* p) : path(p) {}
-        
-        Path parent_path() const {
-            size_t pos = path.find_last_of("/\\");
-            if (pos != std::string::npos) {
-                return Path(path.substr(0, pos));
-            }
-            return Path("");
+struct Path {
+    std::string path;
+    Path(const std::string& p) : path(p) {}
+    Path(const char* p) : path(p) {}
+    
+    Path parent_path() const {
+        size_t pos = path.find_last_of("/\\");
+        if (pos != std::string::npos) {
+            return Path(path.substr(0, pos));
         }
-        
-        Path operator/(const std::string& other) const {
-            if (path.empty()) return Path(other);
-            if (path.back() == '/' || path.back() == '\\') {
-                return Path(path + other);
-            }
-            return Path(path + "/" + other);
-        }
-        
-        std::string string() const {
-            return path;
-        }
-    };
-    namespace fs {
-        using Path = ::Path;
+        return Path("");
     }
-#endif
+    
+    Path operator/(const std::string& other) const {
+        if (path.empty()) return Path(other);
+        if (path.back() == '/' || path.back() == '\\') {
+            return Path(path + other);
+        }
+        return Path(path + "/" + other);
+    }
+    
+    std::string string() const {
+        return path;
+    }
+};
 
-Model::Model(const char* file) {
+namespace fs {
+    using Path = ::Path;
+}
+
+Model::Model(const char* file,bool LoadCollider) {
     loadOBJ(file);
+    if (LoadCollider) {
+        buildCollider(glm::mat4(1.0f));
+    }
+
 }
 
 Model::~Model() {}
@@ -55,6 +53,7 @@ void Model::Draw(Shader& shader, Camera& camera) {
             
             // Set material uniforms in shader
             shader.Activate();
+            glUniform1f(glGetUniformLocation(shader.ID, "textureTiling"), 1.0f);
             glUniform3fv(glGetUniformLocation(shader.ID, "material.ambient"), 1, glm::value_ptr(material.ambient));
             glUniform3fv(glGetUniformLocation(shader.ID, "material.diffuse"), 1, glm::value_ptr(material.diffuse));
             glUniform3fv(glGetUniformLocation(shader.ID, "material.specular"), 1, glm::value_ptr(material.specular));
@@ -262,8 +261,24 @@ void Model::loadMTL(const char* file, std::map<std::string, Material>& materials
             // Use auto-detection for texture format (pass 0 for format)
             Texture diffuseTex(fullTexturePath.string().c_str(), "diffuse", GL_TEXTURE0);
             materials[currentMaterial].textures.push_back(diffuseTex);
+        } else if (prefix == "map_Ks" && !currentMaterial.empty()) {
+            std::string specPath;
+            iss >> specPath;
+            fs::Path fullPath = mtlDir / specPath;
+            std::cout << "  Loading specular texture: " << fullPath.string() << std::endl;
+            Texture specTex(fullPath.string().c_str(), "specular", GL_TEXTURE1);
+            materials[currentMaterial].textures.push_back(specTex);
         }
-        // You can add support for other texture types like specular, normal maps, etc.
+        else if ((prefix == "map_Bump" || prefix == "bump") && !currentMaterial.empty()) {
+            std::string bumpPath;
+            iss >> bumpPath;
+            fs::Path fullPath = mtlDir / bumpPath;
+            std::cout << "  Loading normal map: " << fullPath.string() << std::endl;
+            Texture normalTex(fullPath.string().c_str(), "normal", GL_TEXTURE2);
+            materials[currentMaterial].textures.push_back(normalTex);
+        }
+        
+        
     }
     
     // Print summary of loaded materials

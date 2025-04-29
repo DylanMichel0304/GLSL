@@ -1,10 +1,12 @@
 #include"src/Mesh.h"
 #include"src/model.h"
-#include"src/Cubemaps.h"
 #include<iostream>
 
 #include <glad/glad.h>
 #include <glm/glm.hpp>
+#include "src/Player.h"
+#include "src/Collider.h"
+#include "src/Light.h"
 #include<glm/gtc/matrix_transform.hpp>
 #include<glm/gtc/type_ptr.hpp>
 #include <GLFW/glfw3.h>
@@ -14,253 +16,192 @@
 #include "stb_image.h"
 
 
-const unsigned int width = 1920;
-const unsigned int height = 1080;
-
-// Vertices coordinates
-Vertex vertices[] =
-{ //               COORDINATES           /            COLORS          /           NORMALS         /       TEXTURE COORDINATES    //
-	Vertex{glm::vec3(-1.0f, 0.0f,  1.0f), glm::vec3(0.0f, 1.0f, 0.0f), glm::vec3(1.0f, 1.0f, 1.0f), glm::vec2(0.0f, 0.0f)},
-	Vertex{glm::vec3(-1.0f, 0.0f, -1.0f), glm::vec3(0.0f, 1.0f, 0.0f), glm::vec3(1.0f, 1.0f, 1.0f), glm::vec2(0.0f, 1.0f)},
-	Vertex{glm::vec3( 1.0f, 0.0f, -1.0f), glm::vec3(0.0f, 1.0f, 0.0f), glm::vec3(1.0f, 1.0f, 1.0f), glm::vec2(1.0f, 1.0f)},
-	Vertex{glm::vec3( 1.0f, 0.0f,  1.0f), glm::vec3(0.0f, 1.0f, 0.0f), glm::vec3(1.0f, 1.0f, 1.0f), glm::vec2(1.0f, 0.0f)}
-};
-
-// Indices for vertices order
-GLuint indices[] =
-{
-	0, 1, 2,
-	0, 2, 3
-};
-
-Vertex lightVertices[] =
-{ //     COORDINATES     //
-	Vertex{glm::vec3(-0.1f, -0.1f,  0.1f)},
-	Vertex{glm::vec3(-0.1f, -0.1f, -0.1f)},
-	Vertex{glm::vec3(0.1f, -0.1f, -0.1f)},
-	Vertex{glm::vec3(0.1f, -0.1f,  0.1f)},
-	Vertex{glm::vec3(-0.1f,  0.1f,  0.1f)},
-	Vertex{glm::vec3(-0.1f,  0.1f, -0.1f)},
-	Vertex{glm::vec3(0.1f,  0.1f, -0.1f)},
-	Vertex{glm::vec3(0.1f,  0.1f,  0.1f)}
-};
-
-GLuint lightIndices[] =
-{
-	0, 1, 2,
-	0, 2, 3,
-	0, 4, 7,
-	0, 7, 3,
-	3, 7, 6,
-	3, 6, 2,
-	2, 6, 5,
-	2, 5, 1,
-	1, 5, 4,
-	1, 4, 0,
-	4, 5, 6,
-	4, 6, 7
-};
-
-struct Light {
-    glm::vec3 position;
-    glm::vec3 direction;
-    glm::vec4 color;
-    int type; // 0 = Directional, 1 = Point, 2 = Spot
-};
+const unsigned int width = 800;
+const unsigned int height = 800;
 
 
 int main()
 {
-	// Initialize GLFW
-	glfwInit();
+    // Initialize GLFW
+    glfwInit();
 
-	// Tell GLFW what version of OpenGL we are using 
-	// In this case we are using OpenGL 3.3
-	glfwWindowHint(GLFW_CONTEXT_VERSION_MAJOR, 3);
-	glfwWindowHint(GLFW_CONTEXT_VERSION_MINOR, 3);
-	// Tell GLFW we are using the CORE profile
-	// So that means we only have the modern functions
-	glfwWindowHint(GLFW_OPENGL_PROFILE, GLFW_OPENGL_CORE_PROFILE);
+    // Tell GLFW what version of OpenGL we are using 
+    // In this case we are using OpenGL 3.3
+    glfwWindowHint(GLFW_CONTEXT_VERSION_MAJOR, 3);
+    glfwWindowHint(GLFW_CONTEXT_VERSION_MINOR, 3);
+    // Tell GLFW we are using the CORE profile
+    // So that means we only have the modern functions
+    glfwWindowHint(GLFW_OPENGL_PROFILE, GLFW_OPENGL_CORE_PROFILE);
 
-	// Create a GLFWwindow object of 800 by 800 pixels, naming it "YoutubeOpenGL"
-	GLFWwindow* window = glfwCreateWindow(width, height, "3D_game", NULL, NULL);
-	// Error check if the window fails to create
-	if (window == NULL)
-	{
-		std::cout << "Failed to create GLFW window" << std::endl;
-		glfwTerminate();
-		return -1;
-	}
-	// Introduce the window into the current context
-	glfwMakeContextCurrent(window);
+    // Create a GLFWwindow object of 800 by 800 pixels, naming it "YoutubeOpenGL"
+    GLFWwindow* window = glfwCreateWindow(width, height, "3D_game", NULL, NULL);
+    // Error check if the window fails to create
+    if (window == NULL)
+    {
+        std::cout << "Failed to create GLFW window" << std::endl;
+        glfwTerminate();
+        return -1;
+    }
+    // Introduce the window into the current context
+    glfwMakeContextCurrent(window);
 
-	// Load GLAD so it configures OpenGL
-	gladLoadGL();
-	// Specify the viewport of OpenGL in the Window
-	// In this case the viewport goes from x = 0, y = 0, to x = 800, y = 800
-	glViewport(0, 0, width, height);
+    // Load GLAD so it configures OpenGL
+    gladLoadGL();
+    // Specify the viewport of OpenGL in the Window
+    // In this case the viewport goes from x = 0, y = 0, to x = 800, y = 800
+    glViewport(0, 0, width, height);
 
-	std::string texPath = "assets/textures/"; // Path to the textures
+    std::string texPath = "assets/textures/"; // Path to the textures
 
-	// Texture data
-	Texture textures[]
-	{
-		Texture((texPath + "planks.png").c_str(), "diffuse", 0),
-		Texture((texPath + "planksSpec.png").c_str(), "specular", 1)
-	};
+    // Texture data
+    Texture textures[]
+    {
+        Texture((texPath + "herbe.png").c_str(), "diffuse", 0),
+        //Texture((texPath + "planksSpec.png").c_str(), "specular", 1, GL_RED, GL_UNSIGNED_BYTE)
+    };
 
-	std::vector<Light> sceneLights;
+    // Load the textures
+    Shader shaderProgram("shader/default.vert", "shader/default.frag");
+    Shader lightShader("shader/light.vert", "shader/light.frag");
 
-	Light sun;
-	sun.type = 0; // Directional
-	sun.direction = glm::vec3(-0.2f, -1.0f, -0.3f);
-	sun.color = glm::vec4(1.0f, 1.0f, 0.9f, 1.0f); // Soleil jaune
-	sceneLights.push_back(sun);
+    // Load the models
+    Model terrainModel("assets/objects/plane.obj");
+    Model treeModel("assets/objects/Tree 02/Tree.obj");
+    Model farmhouseModel("assets/textures/newhouse/farmhouse_obj.obj");
+    Model lightSphereModel("assets/objects/sphere.obj");
 
-	Light lamp;
-	lamp.type = 2; // Point light
-	lamp.position = glm::vec3(0.0f, 0.5f, 0.0f);
-	lamp.direction = glm::vec3(0.0f, -1.0f, 0.0f);
-	lamp.color = glm::vec4(1.0f, 1.0f, 1.0f, 1.0f); // Lampe rouge
-	sceneLights.push_back(lamp);
+    // Model matrix for the terrain
+    glm::mat4 terrainModelMatrix = glm::mat4(1.0f);
+    terrainModelMatrix = glm::translate(terrainModelMatrix, glm::vec3(0.0f, 0.0f, 0.0f)); 
+    terrainModelMatrix = glm::scale(terrainModelMatrix, glm::vec3(100.0f, 100.0f, 100.0f));
 
+    // Model matrix for the tree
+    glm::mat4 treeModelMatrix = glm::mat4(1.0f);
+    treeModelMatrix = glm::translate(treeModelMatrix, glm::vec3(-10.0f, 0.0f, -10.0f));
+    treeModelMatrix = glm::scale(treeModelMatrix, glm::vec3(0.04f, 0.04f, 0.04f));
 
-	std::string facesCubemap[6] =
-	{
-		"assets/cubesmaps/right.jpg",
-		"assets/cubesmaps/left.jpg",
-		"assets/cubesmaps/top.jpg",
-		"assets/cubesmaps/bottom.jpg",
-		"assets/cubesmaps/front.jpg",
-		"assets/cubesmaps/back.jpg"
-	};
+    // Model matrix for the farmhouse
+    glm::mat4 farmhouseModelMatrix = glm::mat4(1.0f);
+    farmhouseModelMatrix = glm::translate(farmhouseModelMatrix, glm::vec3(10.0f, 10.0f, 10.0f));
+    farmhouseModelMatrix = glm::rotate(farmhouseModelMatrix, glm::radians(90.0f), glm::vec3(0.0f, 1.0f, 0.0f));
+    farmhouseModelMatrix = glm::scale(farmhouseModelMatrix, glm::vec3(0.5f, 0.5f, 0.5f));
 
-	// Generates Shader object using shaders default.vert and default.frag
-	Shader shaderProgram("shader/default.vert", "shader/default.frag");
-	// Store mesh data in vectors for the mesh
-	std::vector <Vertex> verts(vertices, vertices + sizeof(vertices) / sizeof(Vertex));
-	std::vector <GLuint> ind(indices, indices + sizeof(indices) / sizeof(GLuint));
-	std::vector <Texture> tex(textures, textures + sizeof(textures) / sizeof(Texture));
-	// Create floor mesh
-	Mesh floor(verts, ind, tex);
+    // Build colliders for models
+    treeModel.buildCollider(treeModelMatrix);
+    farmhouseModel.buildCollider(farmhouseModelMatrix);
 
+    // Add colliders to world colliders
+    std::vector<Collider> worldColliders;
+    worldColliders.push_back(treeModel.collider);
+    worldColliders.push_back(farmhouseModel.collider);
+    
+    glm::vec4 lightColor = glm::vec4(1.50f, 1.50f, 1.50f, 0.50f);
+    glm::vec3 lightPos = glm::vec3(0.0f, 50.0f, 0.0f);
+    glm::mat4 lightModelMatrix = glm::mat4(2.0f); // Fix: use identity matrix
+    lightModelMatrix = glm::translate(lightModelMatrix, lightPos); // Translate to light position
+    lightModelMatrix = glm::scale(lightModelMatrix, glm::vec3(100.0f, 100.0f, 100.0f)); // Reasonable scale for marker
 
-	// Shader for light cube
-	Shader lightShader("shader/light.vert", "shader/light.frag");
-	// Store mesh data in vectors for the mesh
-	std::vector <Vertex> lightVerts(lightVertices, lightVertices + sizeof(lightVertices) / sizeof(Vertex));
-	std::vector <GLuint> lightInd(lightIndices, lightIndices + sizeof(lightIndices) / sizeof(GLuint));
-	// Create light mesh
-	Mesh light(lightVerts, lightInd, tex);
+    // Default tiling values for different objects
+    float terrainTiling = 1.0f;  
+    float treeTiling = 1.0f;       
+    float farmhouseTiling = 1.0f;  
+    
+    lightShader.Activate();
+    glUniformMatrix4fv(glGetUniformLocation(lightShader.ID, "model"), 1, GL_FALSE, glm::value_ptr(lightModelMatrix));
+    glUniform4f(glGetUniformLocation(lightShader.ID, "lightColor"), lightColor.x, lightColor.y, lightColor.z, lightColor.w);
+    shaderProgram.Activate();
+    glUniform4f(glGetUniformLocation(shaderProgram.ID, "lightColor"), lightColor.x, lightColor.y, lightColor.z, lightColor.w);
+    glUniform3f(glGetUniformLocation(shaderProgram.ID, "lightPos"), lightPos.x, lightPos.y, lightPos.z);
 
+    // Enables the Depth Buffer
+    glEnable(GL_DEPTH_TEST);
+    //glDepthFunc(GL_LESS);
 
-	// Instantiate the Cubemaps class
-	Cubemaps skybox(facesCubemap, "shader/skybox.vert", "shader/skybox.frag");
+    Player player(width, height, glm::vec3(0.0f, 20.0f, 50.0f));
+    player.camera.speed = 10.0f;
 
+    // Remplacer la création des lumières :
+    std::vector<Light> sceneLights;
 
-	glm::vec4 lightColor = glm::vec4(1.0f, 1.0f, 1.0f, 1.0f);
-	glm::vec3 lightPos = glm::vec3(0.0f, 0.2f, 0.0f);
-	glm::mat4 lightModel = glm::mat4(1.0f);
-	lightModel = glm::translate(lightModel, lightPos);
+    // Directional light (sun)
+    sceneLights.emplace_back(
+        0, // type
+        glm::vec3(0.0f), // position (inutile pour directionnelle)
+        glm::vec3(-0.2f, -1.0f, -0.3f), // direction
+        glm::vec4(1.0f, 1.0f, 0.9f, 1.0f), // color
+        nullptr // pas de mesh pour le soleil
+    );
 
-	glm::vec3 objectPos = glm::vec3(0.0f, 0.0f, 0.0f);
-	glm::mat4 objectModel = glm::mat4(1.0f);
-	objectModel = glm::translate(objectModel, objectPos);
+    // Spot light (lamp) avec mesh associé
+    sceneLights.emplace_back(
+        2, // type
+        glm::vec3(0.0f, 50.0f, 0.0f), // position
+        glm::vec3(0.0f, -1.0f, 0.0f), // direction
+        glm::vec4(1.0f, 1.0f, 1.0f, 1.0f), // color
+        &lightSphereModel // mesh associé
+    );
 
-
-	lightShader.Activate();
-	glUniformMatrix4fv(glGetUniformLocation(lightShader.ID, "model"), 1, GL_FALSE, glm::value_ptr(lightModel));
-	glUniform4f(glGetUniformLocation(lightShader.ID, "lightColor"), lightColor.x, lightColor.y, lightColor.z, lightColor.w);
-	shaderProgram.Activate();
-	glUniformMatrix4fv(glGetUniformLocation(shaderProgram.ID, "model"), 1, GL_FALSE, glm::value_ptr(objectModel));
-	glUniform4f(glGetUniformLocation(shaderProgram.ID, "lightColor"), lightColor.x, lightColor.y, lightColor.z, lightColor.w);
-	glUniform3f(glGetUniformLocation(shaderProgram.ID, "lightPos"), lightPos.x, lightPos.y, lightPos.z);
-
-
-
-	// Enables the Depth Buffer
-	glEnable(GL_DEPTH_TEST);
-	glDepthFunc(GL_LESS);
-
-	// Creates camera object
-	Camera camera(width, height, glm::vec3(0.0f, 1.0f, 2.0f));
-
-
-	float sunStrength = 1.0f;
-	float fadeSpeed = 0.1f; // plus c'est grand, plus ça descend vite
-
-
-	// Main while loop
-	while (!glfwWindowShouldClose(window))
-	{
-		// Specify the color of the background
-		glClearColor(0.07f, 0.13f, 0.17f, 1.0f);
-		// Clean the back buffer and depth buffer
-		glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+    float sunStrength = 1.0f;
+    float fadeSpeed = 0.1f; // Plus c'est grand, plus ça descend vite
 
 
-		// Handles camera inputs
-		camera.Inputs(window);
-		// Updates and exports the camera matrix to the Vertex Shader
-		camera.updateMatrix(45.0f, 0.1f, 100.0f); // Note: Adjusted near/far planes if needed
+    // Main while loop
+    while (!glfwWindowShouldClose(window))
+    {
+        // Specify the color of the background
+        glClearColor(0.3f, 0.1f, 0.1f, 1.0f); // Dark red/brown to contrast with the terrain
+        // Clean the back buffer and depth buffer
+        glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
-		// Activate and configure main shader program
-		shaderProgram.Activate();
+        // Update du joueur
+        float deltaTime = glfwGetTime(); 
+        glfwSetTime(0); // Remettre à 0 pour le frame suivant
+        player.Update(window, worldColliders, deltaTime);
 
-		// Envoie le nombre de lumières
-		glUniform1i(glGetUniformLocation(shaderProgram.ID, "lightCount"), sceneLights.size());
+        sunStrength = glm::max(sunStrength, 0.0f);
+        sceneLights[0].color = glm::vec4(1.0f, 1.0f, 0.9f, 1.0f) * sunStrength;
 
-		// Diminue la force du soleil progressivement
-		if (sunStrength > 0.0f)
-		sunStrength -= fadeSpeed * glfwGetTime();
-		sunStrength = glm::max(sunStrength, 0.0f); // éviter qu'il passe en négatif
+        // Envoie le nombre de lumières au shader
+        glUniform1i(glGetUniformLocation(shaderProgram.ID, "lightCount"), sceneLights.size());
 
-		// Met à jour la couleur du soleil
-		sceneLights[0].color = glm::vec4(1.0f, 1.0f, 0.9f, 1.0f) * sunStrength;
+        // Envoie chaque lumière au shader via la méthode de la classe
+        for (int i = 0; i < sceneLights.size(); i++) {
+            sceneLights[i].sendToShader(shaderProgram, i);
+        }
 
-		// Reset glfw time pour éviter qu'il parte trop vite
-		glfwSetTime(0);
+        glm::vec4 dayColor = glm::vec4(1.4f, 1.1f, 0.8f, 1.0f);
+        glm::vec4 nightColor = glm::vec4(0.1f, 0.2f, 0.4f, 1.0f);
 
+        // Affichage du mesh associé à la lumière (exemple pour la lampe)
+        glm::mat4 lightModelMatrix = glm::mat4(1.0f);
+        lightModelMatrix = glm::translate(lightModelMatrix, sceneLights[1].position);
+        lightModelMatrix = glm::scale(lightModelMatrix, glm::vec3(5.0f, 5.0f, 5.0f));
+        sceneLights[1].drawMesh(lightShader, player.camera, lightModelMatrix);
 
-		// Envoie chaque lumière
-		for (int i = 0; i < sceneLights.size(); i++) {
-			std::string number = std::to_string(i);
-			glUniform3fv(glGetUniformLocation(shaderProgram.ID, ("lights[" + number + "].position").c_str()), 1, glm::value_ptr(sceneLights[i].position));
-			glUniform3fv(glGetUniformLocation(shaderProgram.ID, ("lights[" + number + "].direction").c_str()), 1, glm::value_ptr(sceneLights[i].direction));
-			glUniform4fv(glGetUniformLocation(shaderProgram.ID, ("lights[" + number + "].color").c_str()), 1, glm::value_ptr(sceneLights[i].color));
-			glUniform1i(glGetUniformLocation(shaderProgram.ID, ("lights[" + number + "].type").c_str()), sceneLights[i].type);
-			
-		}
+        // Draw tree
+        glUniformMatrix4fv(glGetUniformLocation(shaderProgram.ID, "model"), 1, GL_FALSE, glm::value_ptr(treeModelMatrix));
+        //treeModel.Draw(shaderProgram, player.camera);
+        
+        // Draw farmhouse with custom material properties
+        glUniformMatrix4fv(glGetUniformLocation(shaderProgram.ID, "model"), 1, GL_FALSE, glm::value_ptr(farmhouseModelMatrix));
+        farmhouseModel.Draw(shaderProgram, player.camera);
 
-		// Caméra position
-		glUniform3fv(glGetUniformLocation(shaderProgram.ID, "camPos"), 1, glm::value_ptr(camera.Position));
-        // Pass camera matrix to the main shader (replace view/proj lines)
-        camera.Matrix(shaderProgram, "camMatrix");
+		// Draw terrain
+		glUniformMatrix4fv(glGetUniformLocation(shaderProgram.ID, "model"), 1, GL_FALSE, glm::value_ptr(terrainModelMatrix));
+		terrainModel.Draw(shaderProgram, player.camera);
 
-
-		// Draws different meshes
-		floor.Draw(shaderProgram, camera);
-		light.Draw(lightShader, camera); // Make sure light.Draw also uses camera.view and camera.projection
-
-        // Draw the skybox using the Cubemaps object
-        skybox.Draw(camera, width, height);
-
-
+        // Swap the back buffer with the front buffer
         glfwSwapBuffers(window);
-		// Take care of all GLFW events
-		glfwPollEvents();
-	}
+        // Take care of all GLFW events
+        glfwPollEvents();
+    }
 
-
-
-	// Delete all the objects we've created
-	shaderProgram.Delete();
-	lightShader.Delete();
-    skybox.Delete(); // Delete skybox resources
-
-	// Delete window before ending the program
-	glfwDestroyWindow(window);
-	// Terminate GLFW before ending the program
-	glfwTerminate();
-	return 0;
+    // Delete all the objects we've created
+    shaderProgram.Delete();
+    lightShader.Delete();
+    // Delete window before ending the program
+    glfwDestroyWindow(window);
+    // Terminate GLFW before ending the program
+    glfwTerminate();
+    return 0;
 }

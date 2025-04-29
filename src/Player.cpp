@@ -1,10 +1,10 @@
 #include "Player.h"
 
 Player::Player(int width, int height, glm::vec3 startPos)
-    : camera(width, height, startPos), speed(3.0f)
+    : camera(width, height, startPos), speed(8.0f) // vitesse augmentée
 {
-    // Définir un collider autour du joueur (taille à ajuster si besoin)
-    glm::vec3 halfSize(0.25f, 1.0f, 0.25f);
+    // Définir un collider autour du joueur (taille réduite)
+    glm::vec3 halfSize(0.15f, 0.5f, 0.15f); // box plus petite
     collider.min = startPos - halfSize;
     collider.max = startPos + halfSize;
 }
@@ -23,6 +23,8 @@ void Player::Update(GLFWwindow* window, const std::vector<Collider>& worldCollid
         moveDir += glm::normalize(glm::cross(camera.Orientation, camera.Up));
     if (glfwGetKey(window, GLFW_KEY_LEFT_SHIFT) == GLFW_PRESS)
         moveDir += -camera.Up; // Descendre
+    if (glfwGetKey(window, GLFW_KEY_SPACE) == GLFW_PRESS)
+        moveDir += camera.Up; // Monter
 
     if (glm::length(moveDir) > 0.0f)
         moveDir = glm::normalize(moveDir);

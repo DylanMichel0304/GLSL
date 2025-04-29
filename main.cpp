@@ -18,44 +18,17 @@
 const unsigned int width = 800;
 const unsigned int height = 800;
 
-// Utility function to generate a UV sphere
-void generateSphere(float radius, unsigned int sectorCount, unsigned int stackCount, std::vector<Vertex>& vertices, std::vector<GLuint>& indices) {
-    float x, y, z, xy;                              // vertex position
-    float sectorStep = 2 * M_PI / sectorCount;
-    float stackStep = M_PI / stackCount;
-    float sectorAngle, stackAngle;
 
-    for(unsigned int i = 0; i <= stackCount; ++i) {
-        stackAngle = M_PI / 2 - i * stackStep;        // from pi/2 to -pi/2
-        xy = radius * cosf(stackAngle);             // r * cos(u)
-        z = radius * sinf(stackAngle);              // r * sin(u)
+// Ajout de la structure Light et du vecteur sceneLights
+struct Light {
+    glm::vec3 position;
+    glm::vec3 direction;
+    glm::vec4 color;
+    int type; // 0 = Directional, 1 = Point, 2 = Spot
+};
 
-        for(unsigned int j = 0; j <= sectorCount; ++j) {
-            sectorAngle = j * sectorStep;           // from 0 to 2pi
-            x = xy * cosf(sectorAngle);             // r * cos(u) * cos(v)
-            y = xy * sinf(sectorAngle);             // r * cos(u) * sin(v)
-            vertices.push_back(Vertex{glm::vec3(x, y, z)});
-        }
-    }
+std::vector<Light> sceneLights;
 
-    for(unsigned int i = 0; i < stackCount; ++i) {
-        unsigned int k1 = i * (sectorCount + 1);     // beginning of current stack
-        unsigned int k2 = k1 + sectorCount + 1;      // beginning of next stack
-
-        for(unsigned int j = 0; j < sectorCount; ++j, ++k1, ++k2) {
-            if(i != 0) {
-                indices.push_back(k1);
-                indices.push_back(k2);
-                indices.push_back(k1 + 1);
-            }
-            if(i != (stackCount-1)) {
-                indices.push_back(k1 + 1);
-                indices.push_back(k2);
-                indices.push_back(k2 + 1);
-            }
-        }
-    }
-}
 
 int main()
 {
@@ -97,38 +70,14 @@ int main()
         //Texture((texPath + "planksSpec.png").c_str(), "specular", 1, GL_RED, GL_UNSIGNED_BYTE)
     };
 
-    // Generates Shader object using shaders general.vert and general.frag
-    Shader shaderProgram("shader/default.vert", "default.frag");
-    // Store mesh data in vectors for the mesh
-    std::vector <Texture> tex(textures, textures + sizeof(textures) / sizeof(Texture));
-
-
-    // Shader for light cube
+    // Load the textures
+    Shader shaderProgram("shader/default.vert", "shader/default.frag");
     Shader lightShader("shader/light.vert", "shader/light.frag");
 
-    // Store mesh data in vectors for the mesh
-    std::vector<Vertex> lightVerts;
-    std::vector<GLuint> lightInd;
-    generateSphere(15.0f, 32, 16, lightVerts, lightInd);
-
-    // Create light mesh (sphere)
-    Mesh light(lightVerts, lightInd, tex);
-
-    // Load terrain model
-    Model terrainModel("assets/objects/terrain.obj");
-    std::cout << "Loaded terrain model successfully" << std::endl;
-    
-    // Load the tree model
+    // Load the models
+    Model terrainModel("assets/objects/plane.obj");
     Model treeModel("assets/objects/Tree 02/Tree.obj");
-    std::cout << "Loaded tree model successfully" << std::endl;
-
-    // Load the Farmhouse model (farmhouse textures are in the same directory as the .obj)
     Model farmhouseModel("assets/textures/newhouse/farmhouse_obj.obj");
-    if (farmhouseModel.IsLoaded()) {
-        std::cout << "Loaded Farmhouse model successfully" << std::endl;
-    } else {
-        std::cout << "ERROR: Failed to load Farmhouse model!" << std::endl;
-    }
 
     // Model matrix for the terrain
     glm::mat4 terrainModelMatrix = glm::mat4(1.0f);
@@ -158,9 +107,9 @@ int main()
 
     // Material properties for farmhouse
     glm::vec3 farmhouseMaterial[] = {
-        glm::vec3(1.0f, 0.0f, 0.0f), // ambient - bright red 
-        glm::vec3(1.0f, 0.0f, 0.0f), // diffuse - bright red
-        glm::vec3(1.0f, 1.0f, 1.0f)  // specular
+        glm::vec3(1.0f, 0.0f, 0.0f),
+        glm::vec3(1.0f, 0.0f, 0.0f), 
+        glm::vec3(1.0f, 1.0f, 1.0f)  
     };
     
     glm::vec4 lightColor = glm::vec4(1.50f, 1.50f, 1.50f, 0.50f);
@@ -170,9 +119,9 @@ int main()
     lightModelMatrix = glm::scale(lightModelMatrix, glm::vec3(100.0f, 100.0f, 100.0f)); // Reasonable scale for marker
 
     // Default tiling values for different objects
-    float terrainTiling = 50.0f;  // High tiling for terrain (small pattern)
-    float treeTiling = 1.0f;       // Default tiling for tree
-    float farmhouseTiling = 1.0f;  // Default tiling for farmhouse
+    float terrainTiling = 50.0f;  
+    float treeTiling = 1.0f;       
+    float farmhouseTiling = 1.0f;  
     
     lightShader.Activate();
     glUniformMatrix4fv(glGetUniformLocation(lightShader.ID, "model"), 1, GL_FALSE, glm::value_ptr(lightModelMatrix));
@@ -185,18 +134,26 @@ int main()
     glEnable(GL_DEPTH_TEST);
     //glDepthFunc(GL_LESS);
 
-    // Position camera much higher and further back to view the larger terrain
-    //Camera camera(width, height, glm::vec3(0.0f, 20.0f, 50.0f));
-    //camera.speed = 10.0f;
     Player player(width, height, glm::vec3(0.0f, 20.0f, 50.0f));
     player.camera.speed = 10.0f;
 
+    // Initialisation des lumières
+    Light sun;
+    sun.type = 0; // Directional
+    sun.direction = glm::vec3(-0.2f, -1.0f, -0.3f);
+    sun.color = glm::vec4(1.0f, 1.0f, 0.9f, 1.0f); // Soleil jaune
+    sceneLights.push_back(sun);
 
-    // Sun (light) animation parameters
-    float sunRadius = 200.0f;
-    float sunHeight = 1000.0f; // Increased from 5.0f to 10.0f
-    float sunSpeed = 0.1f; // radians per second
-    float sunAngle = 0.0f;
+    Light lamp;
+    lamp.type = 2; // Spot
+    lamp.position = glm::vec3(0.0f, 50.0f, 0.0f);
+    lamp.direction = glm::vec3(0.0f, -1.0f, 0.0f);
+    lamp.color = glm::vec4(1.0f, 1.0f, 1.0f, 1.0f); // Lampe blanche
+    sceneLights.push_back(lamp);
+
+    float sunStrength = 10.0f;
+    float fadeSpeed = 0.1f; // Plus c'est grand, plus ça descend vite
+
 
     // Main while loop
     while (!glfwWindowShouldClose(window))
@@ -209,22 +166,28 @@ int main()
         // Update du joueur
         float deltaTime = glfwGetTime(); 
         glfwSetTime(0); // Remettre à 0 pour le frame suivant
-        player.Update(window, worldColliders, deltaTime); 
+        player.Update(window, worldColliders, deltaTime);
 
-        // Animate sun position (day/night cycle)
-        float time = glfwGetTime();
-        sunAngle = fmod(time * sunSpeed, 2.0f * M_PI);
-        lightPos = glm::vec3(
-            sunRadius * cos(sunAngle),
-            sunHeight * sin(sunAngle),
-            sunRadius * sin(sunAngle)
-        );
+        // Gestion de la lumière du soleil (diminution progressive)
+        if (sunStrength > 0.0f)
+            sunStrength -= fadeSpeed * deltaTime;
+        sunStrength = glm::max(sunStrength, 0.0f);
+        sceneLights[0].color = glm::vec4(1.0f, 1.0f, 0.9f, 1.0f) * sunStrength;
 
-        // Light color transitions: yellowish during day, bluish at night
-        float intensity = glm::clamp(sin(sunAngle), 0.0f, 1.5f);
+        // Envoie le nombre de lumières au shader
+        glUniform1i(glGetUniformLocation(shaderProgram.ID, "lightCount"), sceneLights.size());
+
+        // Envoie chaque lumière au shader
+        for (int i = 0; i < sceneLights.size(); i++) {
+            std::string number = std::to_string(i);
+            glUniform3fv(glGetUniformLocation(shaderProgram.ID, ("lights[" + number + "].position").c_str()), 1, glm::value_ptr(sceneLights[i].position));
+            glUniform3fv(glGetUniformLocation(shaderProgram.ID, ("lights[" + number + "].direction").c_str()), 1, glm::value_ptr(sceneLights[i].direction));
+            glUniform4fv(glGetUniformLocation(shaderProgram.ID, ("lights[" + number + "].color").c_str()), 1, glm::value_ptr(sceneLights[i].color));
+            glUniform1i(glGetUniformLocation(shaderProgram.ID, ("lights[" + number + "].type").c_str()), sceneLights[i].type);
+        }
+
         glm::vec4 dayColor = glm::vec4(1.4f, 1.1f, 0.8f, 1.0f);
         glm::vec4 nightColor = glm::vec4(0.1f, 0.2f, 0.4f, 1.0f);
-        lightColor = glm::mix(nightColor, dayColor, intensity);
 
         // Update light model matrix for the sphere marker
         lightModelMatrix = glm::mat4(1.0f);
@@ -236,19 +199,17 @@ int main()
         lightShader.Activate();
         glUniformMatrix4fv(glGetUniformLocation(lightShader.ID, "model"), 1, GL_FALSE, glm::value_ptr(lightModelMatrix));
         glUniform4f(glGetUniformLocation(lightShader.ID, "lightColor"), lightColor.x, lightColor.y, lightColor.z, lightColor.w);
-        light.Draw(lightShader, player.camera);
+        //light.Draw(lightShader, player.camera);
 
 
-        // Update uniforms for the main shader (lighting)
+
         shaderProgram.Activate();
         glUniform4f(glGetUniformLocation(shaderProgram.ID, "lightColor"), lightColor.x, lightColor.y, lightColor.z, lightColor.w);
         glUniform3f(glGetUniformLocation(shaderProgram.ID, "lightPos"), lightPos.x, lightPos.y, lightPos.z);
         
         // Draw terrain
         glUniformMatrix4fv(glGetUniformLocation(shaderProgram.ID, "model"), 1, GL_FALSE, glm::value_ptr(terrainModelMatrix));
-        // Set terrain texture tiling
         glUniform1f(glGetUniformLocation(shaderProgram.ID, "textureTiling"), terrainTiling);
-        // Default material properties for terrain
         glUniform3f(glGetUniformLocation(shaderProgram.ID, "material.ambient"), 0.2f, 0.2f, 0.2f);
         glUniform3f(glGetUniformLocation(shaderProgram.ID, "material.diffuse"), 1.0f, 1.0f, 1.0f);
         glUniform3f(glGetUniformLocation(shaderProgram.ID, "material.specular"), 0.5f, 0.5f, 0.5f);
@@ -257,15 +218,12 @@ int main()
         
         // Draw tree
         glUniformMatrix4fv(glGetUniformLocation(shaderProgram.ID, "model"), 1, GL_FALSE, glm::value_ptr(treeModelMatrix));
-        // Set tree texture tiling
         glUniform1f(glGetUniformLocation(shaderProgram.ID, "textureTiling"), treeTiling);
         treeModel.Draw(shaderProgram, player.camera);
         
         // Draw farmhouse with custom material properties
         glUniformMatrix4fv(glGetUniformLocation(shaderProgram.ID, "model"), 1, GL_FALSE, glm::value_ptr(farmhouseModelMatrix));
-        // Set farmhouse texture tiling
         glUniform1f(glGetUniformLocation(shaderProgram.ID, "textureTiling"), farmhouseTiling);
-        // Apply farmhouse material settings
         glUniform3fv(glGetUniformLocation(shaderProgram.ID, "material.ambient"), 1, glm::value_ptr(farmhouseMaterial[0]));
         glUniform3fv(glGetUniformLocation(shaderProgram.ID, "material.diffuse"), 1, glm::value_ptr(farmhouseMaterial[1]));
         glUniform3fv(glGetUniformLocation(shaderProgram.ID, "material.specular"), 1, glm::value_ptr(farmhouseMaterial[2]));
