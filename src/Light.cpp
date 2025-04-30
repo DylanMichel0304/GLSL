@@ -12,10 +12,9 @@ void Light::sendToShader(const Shader& shader, int index) const {
     glUniform1i(glGetUniformLocation(shader.ID, ("lights[" + number + "].type").c_str()), type);
 }
 
-void Light::drawMesh( Shader& shader, Camera& camera, const glm::mat4& modelMatrix) const {
+void Light::drawMesh( Shader& shader, Camera& camera,const glm::mat4& modelMatrix) const {
     if (mesh) {
         shader.Activate();
-        glUniformMatrix4fv(glGetUniformLocation(shader.ID, "model"), 1, GL_FALSE, glm::value_ptr(modelMatrix));
-        mesh->Draw(shader, camera);
+        mesh->Draw(shader, camera, modelMatrix);
     }
 }

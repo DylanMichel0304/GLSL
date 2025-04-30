@@ -45,7 +45,7 @@ Model::Model(const char* file,bool LoadCollider) {
 
 Model::~Model() {}
 
-void Model::Draw(Shader& shader, Camera& camera) {
+void Model::Draw(Shader& shader, Camera& camera, const glm::mat4& modelMatrix) {
     for (auto& mesh : meshes) {
         // Set material properties for this mesh
         if (!mesh.materialName.empty() && materials.find(mesh.materialName) != materials.end()) {
@@ -53,6 +53,7 @@ void Model::Draw(Shader& shader, Camera& camera) {
             
             // Set material uniforms in shader
             shader.Activate();
+            glUniformMatrix4fv(glGetUniformLocation(shader.ID, "model"), 1, GL_FALSE, glm::value_ptr(modelMatrix));
             glUniform1f(glGetUniformLocation(shader.ID, "textureTiling"), 1.0f);
             glUniform3fv(glGetUniformLocation(shader.ID, "material.ambient"), 1, glm::value_ptr(material.ambient));
             glUniform3fv(glGetUniformLocation(shader.ID, "material.diffuse"), 1, glm::value_ptr(material.diffuse));
@@ -261,21 +262,7 @@ void Model::loadMTL(const char* file, std::map<std::string, Material>& materials
             // Use auto-detection for texture format (pass 0 for format)
             Texture diffuseTex(fullTexturePath.string().c_str(), "diffuse", GL_TEXTURE0);
             materials[currentMaterial].textures.push_back(diffuseTex);
-        } else if (prefix == "map_Ks" && !currentMaterial.empty()) {
-            std::string specPath;
-            iss >> specPath;
-            fs::Path fullPath = mtlDir / specPath;
-            std::cout << "  Loading specular texture: " << fullPath.string() << std::endl;
-            Texture specTex(fullPath.string().c_str(), "specular", GL_TEXTURE1);
-            materials[currentMaterial].textures.push_back(specTex);
-        }
-        else if ((prefix == "map_Bump" || prefix == "bump") && !currentMaterial.empty()) {
-            std::string bumpPath;
-            iss >> bumpPath;
-            fs::Path fullPath = mtlDir / bumpPath;
-            std::cout << "  Loading normal map: " << fullPath.string() << std::endl;
-            Texture normalTex(fullPath.string().c_str(), "normal", GL_TEXTURE2);
-            materials[currentMaterial].textures.push_back(normalTex);
+
         }
         
         

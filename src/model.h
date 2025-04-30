@@ -24,7 +24,7 @@ public:
     // Loads model from file
     Model(const char* file, bool LoadCollider = true);
     // Draws the model using the given shader and camera
-    void Draw(Shader& shader, Camera& camera);
+    void Draw(Shader& shader, Camera& camera, const glm::mat4& modelMatrix);
     // Check if model has loaded meshes
     bool IsLoaded() const { return !meshes.empty(); }
     // Destructor

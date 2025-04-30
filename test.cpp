@@ -179,16 +179,13 @@ int main()
         sceneLights[1].drawMesh(lightShader, player.camera, lightModelMatrix);
 
         // Draw tree
-        glUniformMatrix4fv(glGetUniformLocation(shaderProgram.ID, "model"), 1, GL_FALSE, glm::value_ptr(treeModelMatrix));
         //treeModel.Draw(shaderProgram, player.camera);
         
         // Draw farmhouse with custom material properties
-        glUniformMatrix4fv(glGetUniformLocation(shaderProgram.ID, "model"), 1, GL_FALSE, glm::value_ptr(farmhouseModelMatrix));
-        farmhouseModel.Draw(shaderProgram, player.camera);
+        farmhouseModel.Draw(shaderProgram, player.camera, farmhouseModelMatrix);
 
 		// Draw terrain
-		glUniformMatrix4fv(glGetUniformLocation(shaderProgram.ID, "model"), 1, GL_FALSE, glm::value_ptr(terrainModelMatrix));
-		terrainModel.Draw(shaderProgram, player.camera);
+		terrainModel.Draw(shaderProgram, player.camera, terrainModelMatrix);
 
         // Swap the back buffer with the front buffer
         glfwSwapBuffers(window);
