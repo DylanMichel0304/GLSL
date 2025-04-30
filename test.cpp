@@ -69,6 +69,9 @@ int main()
     Model treeModel("assets/objects/Tree 02/Tree.obj");
     Model farmhouseModel("assets/textures/newhouse/farmhouse_obj.obj");
     Model lightSphereModel("assets/objects/sphere.obj");
+    Model wallModel("assets/objects/plane.obj");
+
+    std::vector <Texture> tex(textures, textures + sizeof(textures) / sizeof(Texture));
 
     // Model matrix for the terrain
     glm::mat4 terrainModelMatrix = glm::mat4(1.0f);
@@ -85,6 +88,10 @@ int main()
     farmhouseModelMatrix = glm::translate(farmhouseModelMatrix, glm::vec3(10.0f, 10.0f, 10.0f));
     farmhouseModelMatrix = glm::rotate(farmhouseModelMatrix, glm::radians(90.0f), glm::vec3(0.0f, 1.0f, 0.0f));
     farmhouseModelMatrix = glm::scale(farmhouseModelMatrix, glm::vec3(0.5f, 0.5f, 0.5f));
+
+    glm::mat4 wallModelMatrix = glm::mat4(1.0f);
+    wallModelMatrix = glm::translate(wallModelMatrix, glm::vec3(1.0f, 5.0f, 1.0f));
+    wallModelMatrix = glm::rotate(farmhouseModelMatrix, glm::radians(90.0f), glm::vec3(1.0f, 0.0f, 0.0f));
 
     // Build colliders for models
     treeModel.buildCollider(treeModelMatrix);
