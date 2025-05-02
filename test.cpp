@@ -72,26 +72,30 @@ int main()
     Model wallModel("assets/objects/plane.obj");
 
     std::vector <Texture> tex(textures, textures + sizeof(textures) / sizeof(Texture));
+    std::vector <Texture> tex2(textures, textures + sizeof(textures) / sizeof(Texture));
 
     // Model matrix for the terrain
     glm::mat4 terrainModelMatrix = glm::mat4(1.0f);
     terrainModelMatrix = glm::translate(terrainModelMatrix, glm::vec3(0.0f, 0.0f, 0.0f)); 
     terrainModelMatrix = glm::scale(terrainModelMatrix, glm::vec3(100.0f, 100.0f, 100.0f));
+    terrainModel.AddTexture(tex[0]);
 
     // Model matrix for the tree
     glm::mat4 treeModelMatrix = glm::mat4(1.0f);
     treeModelMatrix = glm::translate(treeModelMatrix, glm::vec3(-10.0f, 0.0f, -10.0f));
-    treeModelMatrix = glm::scale(treeModelMatrix, glm::vec3(0.04f, 0.04f, 0.04f));
+    treeModelMatrix = glm::scale(treeModelMatrix, glm::vec3(10.0f, 10.0f, 10.0f));
+
 
     // Model matrix for the farmhouse
     glm::mat4 farmhouseModelMatrix = glm::mat4(1.0f);
-    farmhouseModelMatrix = glm::translate(farmhouseModelMatrix, glm::vec3(10.0f, 10.0f, 10.0f));
+    farmhouseModelMatrix = glm::translate(farmhouseModelMatrix, glm::vec3(10.0f, 0.0f, 10.0f));
     farmhouseModelMatrix = glm::rotate(farmhouseModelMatrix, glm::radians(90.0f), glm::vec3(0.0f, 1.0f, 0.0f));
     farmhouseModelMatrix = glm::scale(farmhouseModelMatrix, glm::vec3(0.5f, 0.5f, 0.5f));
 
     glm::mat4 wallModelMatrix = glm::mat4(1.0f);
     wallModelMatrix = glm::translate(wallModelMatrix, glm::vec3(1.0f, 5.0f, 1.0f));
     wallModelMatrix = glm::rotate(farmhouseModelMatrix, glm::radians(90.0f), glm::vec3(1.0f, 0.0f, 0.0f));
+    wallModel.AddTexture(tex2[0]);
 
     // Build colliders for models
     treeModel.buildCollider(treeModelMatrix);
@@ -108,10 +112,7 @@ int main()
     lightModelMatrix = glm::translate(lightModelMatrix, lightPos); // Translate to light position
     lightModelMatrix = glm::scale(lightModelMatrix, glm::vec3(100.0f, 100.0f, 100.0f)); // Reasonable scale for marker
 
-    // Default tiling values for different objects
-    float terrainTiling = 1.0f;  
-    float treeTiling = 1.0f;       
-    float farmhouseTiling = 1.0f;  
+
     
     lightShader.Activate();
     glUniformMatrix4fv(glGetUniformLocation(lightShader.ID, "model"), 1, GL_FALSE, glm::value_ptr(lightModelMatrix));
@@ -186,7 +187,7 @@ int main()
         sceneLights[1].drawMesh(lightShader, player.camera, lightModelMatrix);
 
         // Draw tree
-        //treeModel.Draw(shaderProgram, player.camera);
+        treeModel.Draw(shaderProgram, player.camera, treeModelMatrix);
         
         // Draw farmhouse with custom material properties
         farmhouseModel.Draw(shaderProgram, player.camera, farmhouseModelMatrix);

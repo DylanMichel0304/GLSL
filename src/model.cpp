@@ -65,6 +65,17 @@ void Model::Draw(Shader& shader, Camera& camera, const glm::mat4& modelMatrix) {
     }
 }
 
+void Model::AddTexture(const Texture& texture)
+{
+    for (auto& mesh : meshes)
+    {
+        mesh.textures.clear();          // Vide les textures existantes
+        mesh.textures.push_back(texture);  // Ajoute la nouvelle texture
+    }
+}
+
+
+
 void Model::loadOBJ(const char* file) {
     std::vector<glm::vec3> positions;
     std::vector<glm::vec3> normals;

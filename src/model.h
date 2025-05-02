@@ -31,11 +31,13 @@ public:
     ~Model();
 
     void buildCollider(const glm::mat4& modelMatrix);
+    void AddTexture(const Texture& texture);
 
     Collider collider;
+    std::vector<Mesh> meshes;
 
 private:
-    std::vector<Mesh> meshes;
+    
     std::map<std::string, Material> materials;
     
     // Loads an OBJ file

@@ -56,7 +56,7 @@ void Mesh::Draw(Shader& shader, Camera& camera)
 	glDrawElements(GL_TRIANGLES, indices.size(), GL_UNSIGNED_INT, 0);
 }
 
-// --------- NOUVEAU CODE POUR LE COLLIDER -----------
+// --------- CODE POUR LE COLLIDER -----------
 
 glm::vec3 Mesh::getMinVertex() const
 {
