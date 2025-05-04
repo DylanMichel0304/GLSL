@@ -1,2 +1,0 @@
-/usr/bin/ar qc /Users/dylanmichel/Desktop/jeu/GLSL/bin/libglad.a CMakeFiles/glad.dir/import/glad/src/glad.c.o
-/usr/bin/ranlib /Users/dylanmichel/Desktop/jeu/GLSL/bin/libglad.a
