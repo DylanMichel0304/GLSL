@@ -377,7 +377,7 @@ The test application follows these steps:
    Model terrainModel("assets/objects/plane.obj");
    Model treeModel("assets/objects/Tree 02/Tree.obj");
    Model farmhouseModel("assets/textures/newhouse/farmhouse_obj.obj");
-   ```
+```
 
 3. **Scene Setup**:
    ```cpp
@@ -486,7 +486,7 @@ The test application follows these steps:
    customShader.setVec3("camPos", camera.Position);
    // Set other uniforms
    model.Draw(customShader);
-   ```
+```
 
 ## Advanced Features
 

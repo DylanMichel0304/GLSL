@@ -42,7 +42,7 @@ public:
     // Box properties
     glm::vec3 min;
     glm::vec3 max;
-    
+
     // Cylinder specific properties
     glm::vec3 center;  // Base center position of the cylinder
     float radius;      // Radius of the cylinder

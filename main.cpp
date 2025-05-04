@@ -54,9 +54,11 @@ int main()
 {
     GLFWwindow* window = init_window();
     std::string texPath = "assets/textures/"; // Path to the textures
-    Player player(width, height, glm::vec3(0.0f, 20.0f, 50.0f));
-    player.camera.speed = 100.0f;
-
+    
+    // Initialize player at a reasonable height above ground
+    Player player(width, height, glm::vec3(0.0f, 1.7f, 0.0f));
+    player.speed = 5.0f;  // More realistic movement speed for first-person
+    
     // Texture data
     Texture textures[]
     {

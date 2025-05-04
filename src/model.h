@@ -42,7 +42,7 @@ public:
     std::vector<Collider> getAllComponentColliders() const;
     
     void AddTexture(const Texture& texture);
-    
+
     // Set the texture tiling factor for this model
     void SetTextureTiling(float tiling) { textureTiling = tiling; }
     // Get the current texture tiling factor
