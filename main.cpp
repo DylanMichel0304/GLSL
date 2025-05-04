@@ -13,7 +13,7 @@
 #include <cmath>
 
 #define STB_IMAGE_IMPLEMENTATION
-#include "stb_image.h"
+#include "import/stb/stb_image.h"
 
 
 const unsigned int width = 800;

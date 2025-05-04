@@ -31,14 +31,32 @@ public:
     ~Model();
 
     void buildCollider(const glm::mat4& modelMatrix);
+    
+    // Build separate colliders for each material/component
+    void buildComponentColliders(const glm::mat4& modelMatrix);
+    
+    // Get a specific component collider by material name
+    Collider* getComponentCollider(const std::string& materialName);
+    
+    // Get all component colliders
+    std::vector<Collider> getAllComponentColliders() const;
+    
     void AddTexture(const Texture& texture);
+    
+    // Set the texture tiling factor for this model
+    void SetTextureTiling(float tiling) { textureTiling = tiling; }
+    // Get the current texture tiling factor
+    float GetTextureTiling() const { return textureTiling; }
 
-    Collider collider;
+    Collider collider;  // Main collider (whole model)
     std::vector<Mesh> meshes;
 
 private:
+    // Default texture tiling factor (50.0f is the original value)
+    float textureTiling = 50.0f;
     
     std::map<std::string, Material> materials;
+    std::map<std::string, Collider> componentColliders;  // Colliders for individual components
     
     // Loads an OBJ file
     void loadOBJ(const char* file);

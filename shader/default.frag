@@ -10,6 +10,9 @@ in vec3 crntPos;
 uniform sampler2D tex0; // diffuse map
 uniform sampler2D tex1; // specular map
 
+// Texture tiling factor
+uniform float textureTiling;
+
 float outerCutOff = cos(radians(20.0));
 float innerCutOff = cos(radians(15.0));
 
@@ -33,8 +36,9 @@ uniform int lightCount;
 void main()
 {
     vec3 norm = normalize(Normal);
-    vec4 texColor = texture(tex0, texCoord);
-    vec4 specMap = texture(tex1, texCoord);
+    // Apply texture tiling factor to the texture coordinates
+    vec4 texColor = texture(tex0, texCoord * textureTiling);
+    vec4 specMap = texture(tex1, texCoord * textureTiling);
 
     vec3 viewDir = normalize(camPos - crntPos);
 

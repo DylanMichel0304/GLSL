@@ -56,6 +56,7 @@ set(SOURCES_COMMON
     src/Light.h src/Light.cpp
     src/Player.h src/Player.cpp
     src/Cubemaps.h src/Cubemaps.cpp
+    src/Collider.cpp
 )
 
 set(SOURCES_main

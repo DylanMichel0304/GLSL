@@ -12,8 +12,9 @@
 #include <GLFW/glfw3.h>
 #include <cmath>
 
+// Define this before including stb_image.h
 #define STB_IMAGE_IMPLEMENTATION
-#include "stb_image.h"
+#include "import/stb/stb_image.h"
 
 
 const unsigned int width = 800;
@@ -71,6 +72,12 @@ int main()
     Model lightSphereModel("assets/objects/sphere.obj");
     Model wallModel("assets/objects/plane.obj");
 
+    // Set different texture tiling for each model
+    terrainModel.SetTextureTiling(150.0f);  
+    treeModel.SetTextureTiling(1.0f);     
+    farmhouseModel.SetTextureTiling(1.0f); 
+    wallModel.SetTextureTiling(1.0f);     
+
     std::vector <Texture> tex(textures, textures + sizeof(textures) / sizeof(Texture));
     std::vector <Texture> tex2(textures, textures + sizeof(textures) / sizeof(Texture));
 
@@ -97,13 +104,57 @@ int main()
     wallModelMatrix = glm::rotate(farmhouseModelMatrix, glm::radians(90.0f), glm::vec3(1.0f, 0.0f, 0.0f));
     wallModel.AddTexture(tex2[0]);
 
-    // Build colliders for models
-    treeModel.buildCollider(treeModelMatrix);
+    // Build component-specific colliders for the tree
+    treeModel.buildComponentColliders(treeModelMatrix);
+    
+    // Get the trunk collider specifically (Trank_bark is the material name for the trunk)
+    Collider* trunkCollider = treeModel.getComponentCollider("Trank_bark");
+    
+    // Build regular collider for farmhouse
     farmhouseModel.buildCollider(farmhouseModelMatrix);
 
     // Add colliders to world colliders
     std::vector<Collider> worldColliders;
-    worldColliders.push_back(treeModel.collider);
+    
+    // Always use the trunk collider - if it exists, create a cylinder collider
+    if (trunkCollider != nullptr) {
+        std::cout << "Using cylinder collider for the tree trunk" << std::endl;
+        
+        // Get the original min/max points
+        glm::vec3 originalMin = trunkCollider->getMin();
+        glm::vec3 originalMax = trunkCollider->getMax();
+        
+        // Calculate the center position for the cylinder (base center)
+        glm::vec3 trunkCenter = glm::vec3(
+            (originalMin.x + originalMax.x) * 0.5f,  // Center X
+            originalMin.y,                           // Base of trunk (Y)
+            (originalMin.z + originalMax.z) * 0.5f   // Center Z
+        );
+        
+        // Calculate cylinder dimensions
+        float trunkHeight = originalMax.y - originalMin.y;
+        
+        // Calculate trunk radius (use a fraction of the width/depth of the bounding box)
+        float boxWidth = originalMax.x - originalMin.x;
+        float boxDepth = originalMax.z - originalMin.z;
+        float trunkRadius = std::min(boxWidth, boxDepth) * 0.1f; 
+        
+        // Create a cylindrical collider
+        Collider cylinderCollider(trunkCenter, trunkRadius, trunkHeight);
+        
+        // Debug output
+        std::cout << "Original trunk box: min(" << originalMin.x << "," << originalMin.y << "," << originalMin.z 
+                  << ") max(" << originalMax.x << "," << originalMax.y << "," << originalMax.z << ")" << std::endl;
+        std::cout << "Cylinder collider: center(" << trunkCenter.x << "," << trunkCenter.y << "," << trunkCenter.z 
+                  << ") radius=" << trunkRadius << " height=" << trunkHeight << std::endl;
+        
+        // Add the cylinder collider for the trunk
+        worldColliders.push_back(cylinderCollider);
+    } else {
+        // If trunk collider not found, log a warning but don't add any tree collider
+        std::cout << "WARNING: Trunk collider not found for tree, no tree collision will be applied" << std::endl;
+    }
+    
     worldColliders.push_back(farmhouseModel.collider);
     
     glm::vec4 lightColor = glm::vec4(1.50f, 1.50f, 1.50f, 0.50f);
@@ -126,7 +177,7 @@ int main()
     //glDepthFunc(GL_LESS);
 
     Player player(width, height, glm::vec3(0.0f, 20.0f, 50.0f));
-    player.camera.speed = 10.0f;
+    player.camera.speed = 50.0f;
 
     // Remplacer la création des lumières :
     std::vector<Light> sceneLights;

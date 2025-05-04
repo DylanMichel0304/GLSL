@@ -54,7 +54,9 @@ void Model::Draw(Shader& shader, Camera& camera, const glm::mat4& modelMatrix) {
             // Set material uniforms in shader
             shader.Activate();
             glUniformMatrix4fv(glGetUniformLocation(shader.ID, "model"), 1, GL_FALSE, glm::value_ptr(modelMatrix));
-            glUniform1f(glGetUniformLocation(shader.ID, "textureTiling"), 1.0f);
+            // Debug output to verify tiling factor
+            std::cout << "Applying texture tiling: " << textureTiling << " for material: " << mesh.materialName << std::endl;
+            glUniform1f(glGetUniformLocation(shader.ID, "textureTiling"), textureTiling);
             glUniform3fv(glGetUniformLocation(shader.ID, "material.ambient"), 1, glm::value_ptr(material.ambient));
             glUniform3fv(glGetUniformLocation(shader.ID, "material.diffuse"), 1, glm::value_ptr(material.diffuse));
             glUniform3fv(glGetUniformLocation(shader.ID, "material.specular"), 1, glm::value_ptr(material.specular));
@@ -319,4 +321,65 @@ void Model::buildCollider(const glm::mat4& modelMatrix) {
     // Debug print
     std::cout << "Collider built: min(" << worldMin.x << "," << worldMin.y << "," << worldMin.z
               << ") max(" << worldMax.x << "," << worldMax.y << "," << worldMax.z << ")" << std::endl;
+}
+
+// Add implementation for buildComponentColliders
+void Model::buildComponentColliders(const glm::mat4& modelMatrix) {
+    componentColliders.clear();
+    
+    // First create a collider for each mesh/material separately
+    for (auto& mesh : meshes) {
+        if (mesh.materialName.empty()) continue;
+        
+        // Get min/max vertices for this mesh only
+        glm::vec3 meshMin = mesh.getMinVertex();
+        glm::vec3 meshMax = mesh.getMaxVertex();
+        
+        // Transform them by the model matrix
+        glm::vec3 corners[8] = {
+            glm::vec3(meshMin.x, meshMin.y, meshMin.z),
+            glm::vec3(meshMin.x, meshMin.y, meshMax.z),
+            glm::vec3(meshMin.x, meshMax.y, meshMin.z),
+            glm::vec3(meshMin.x, meshMax.y, meshMax.z),
+            glm::vec3(meshMax.x, meshMin.y, meshMin.z),
+            glm::vec3(meshMax.x, meshMin.y, meshMax.z),
+            glm::vec3(meshMax.x, meshMax.y, meshMin.z),
+            glm::vec3(meshMax.x, meshMax.y, meshMax.z)
+        };
+        
+        glm::vec3 worldMin(std::numeric_limits<float>::max());
+        glm::vec3 worldMax(-std::numeric_limits<float>::max());
+        
+        for (int i = 0; i < 8; ++i) {
+            glm::vec4 transformed = modelMatrix * glm::vec4(corners[i], 1.0f);
+            worldMin = glm::min(worldMin, glm::vec3(transformed));
+            worldMax = glm::max(worldMax, glm::vec3(transformed));
+        }
+        
+        // Create a collider for this specific material/component
+        componentColliders[mesh.materialName] = Collider(worldMin, worldMax);
+        
+        // Debug output
+        std::cout << "Component collider for " << mesh.materialName << ": "
+                  << "min(" << worldMin.x << "," << worldMin.y << "," << worldMin.z << ") "
+                  << "max(" << worldMax.x << "," << worldMax.y << "," << worldMax.z << ")" << std::endl;
+    }
+}
+
+// Get a specific component collider by material name
+Collider* Model::getComponentCollider(const std::string& materialName) {
+    auto it = componentColliders.find(materialName);
+    if (it != componentColliders.end()) {
+        return &(it->second);
+    }
+    return nullptr;
+}
+
+// Get all component colliders
+std::vector<Collider> Model::getAllComponentColliders() const {
+    std::vector<Collider> result;
+    for (const auto& pair : componentColliders) {
+        result.push_back(pair.second);
+    }
+    return result;
 }
