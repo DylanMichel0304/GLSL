@@ -54,8 +54,6 @@ void Model::Draw(Shader& shader, Camera& camera, const glm::mat4& modelMatrix) {
             // Set material uniforms in shader
             shader.Activate();
             glUniformMatrix4fv(glGetUniformLocation(shader.ID, "model"), 1, GL_FALSE, glm::value_ptr(modelMatrix));
-            // Debug output to verify tiling factor
-            std::cout << "Applying texture tiling: " << textureTiling << " for material: " << mesh.materialName << std::endl;
             glUniform1f(glGetUniformLocation(shader.ID, "textureTiling"), textureTiling);
             glUniform3fv(glGetUniformLocation(shader.ID, "material.ambient"), 1, glm::value_ptr(material.ambient));
             glUniform3fv(glGetUniformLocation(shader.ID, "material.diffuse"), 1, glm::value_ptr(material.diffuse));
@@ -248,41 +246,33 @@ void Model::loadMTL(const char* file, std::map<std::string, Material>& materials
             float r, g, b;
             iss >> r >> g >> b;
             materials[currentMaterial].ambient = glm::vec3(r, g, b);
-            std::cout << "  Ambient: " << r << ", " << g << ", " << b << std::endl;
         } else if (prefix == "Kd" && !currentMaterial.empty()) {
             float r, g, b;
             iss >> r >> g >> b;
             materials[currentMaterial].diffuse = glm::vec3(r, g, b);
-            std::cout << "  Diffuse: " << r << ", " << g << ", " << b << std::endl;
         } else if (prefix == "Ks" && !currentMaterial.empty()) {
             float r, g, b;
             iss >> r >> g >> b;
             materials[currentMaterial].specular = glm::vec3(r, g, b);
-            std::cout << "  Specular: " << r << ", " << g << ", " << b << std::endl;
         } else if (prefix == "Ns" && !currentMaterial.empty()) {
             float shininess;
             iss >> shininess;
             materials[currentMaterial].shininess = shininess;
-            std::cout << "  Shininess: " << shininess << std::endl;
         } else if (prefix == "map_Kd" && !currentMaterial.empty()) {
             std::string texturePath;
             iss >> texturePath;
             
             // Construct full path to texture
             fs::Path fullTexturePath = mtlDir / texturePath;
-            std::cout << "  Loading diffuse texture: " << fullTexturePath.string() << std::endl;
             
             // Use auto-detection for texture format (pass 0 for format)
             Texture diffuseTex(fullTexturePath.string().c_str(), "diffuse", GL_TEXTURE0);
             materials[currentMaterial].textures.push_back(diffuseTex);
-
         }
-        
-        
     }
     
-    // Print summary of loaded materials
-    std::cout << "Loaded " << materials.size() << " materials from MTL file" << std::endl;
+    // Print summary in a single line instead of full details
+    std::cout << "Loaded " << materials.size() << " materials" << std::endl;
 }
 
 void Model::buildCollider(const glm::mat4& modelMatrix) {
