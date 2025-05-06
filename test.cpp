@@ -71,12 +71,14 @@ int main()
     Model farmhouseModel("assets/textures/newhouse/farmhouse_obj.obj");
     Model lightSphereModel("assets/objects/sphere.obj");
     Model wallModel("assets/objects/plane.obj");
+    Model lampModel("assets/objects/LAMP/rv_lamp_post_4.obj", true); // Load lamp with collider
 
     // Set different texture tiling for each model
     terrainModel.SetTextureTiling(150.0f);  
     treeModel.SetTextureTiling(1.0f);     
     farmhouseModel.SetTextureTiling(1.0f); 
-    wallModel.SetTextureTiling(1.0f);     
+    wallModel.SetTextureTiling(1.0f);
+    lampModel.SetTextureTiling(1.0f);
 
     std::vector <Texture> tex(textures, textures + sizeof(textures) / sizeof(Texture));
     std::vector <Texture> tex2(textures, textures + sizeof(textures) / sizeof(Texture));
@@ -104,6 +106,15 @@ int main()
     wallModelMatrix = glm::rotate(farmhouseModelMatrix, glm::radians(90.0f), glm::vec3(1.0f, 0.0f, 0.0f));
     wallModel.AddTexture(tex2[0]);
 
+    // Model matrix for the lamp post
+    glm::mat4 lampModelMatrix = glm::mat4(1.0f);
+    lampModelMatrix = glm::translate(lampModelMatrix, glm::vec3(-5.0f, 0.0f, 20.0f)); // Position it near the center
+    lampModelMatrix = glm::rotate(lampModelMatrix, glm::radians(45.0f), glm::vec3(0.0f, 1.0f, 0.0f));
+    lampModelMatrix = glm::scale(lampModelMatrix, glm::vec3(0.7f, 0.7f, 0.7f)); // Scale it down to appropriate size
+    
+    // Build collider for the lamp
+    lampModel.buildCollider(lampModelMatrix);
+    
     // Build component-specific colliders for the tree
     treeModel.buildComponentColliders(treeModelMatrix);
     
@@ -118,6 +129,9 @@ int main()
 
     // Add colliders to world colliders
     std::vector<Collider> worldColliders;
+    
+    // Add lamp collider to world colliders
+    worldColliders.push_back(lampModel.collider);
     
     // Always use the trunk collider - if it exists, create a cylinder collider
     if (trunkCollider != nullptr) {
@@ -183,8 +197,8 @@ int main()
     //glDepthFunc(GL_LESS);
 
     // Initialize player with proper ground-level starting position
-    Player player(width, height, glm::vec3(0.0f, 1.7f, 0.0f));
-    player.speed = 5.0f;  // More realistic movement speed for first-person
+    Player player(width, height, glm::vec3(20.0f, 1.7f, 20.0f));
+    player.speed = 10.0f;  // More realistic movement speed for first-person
 
     // Remplacer la création des lumières :
     std::vector<Light> sceneLights;
@@ -201,10 +215,10 @@ int main()
     // Spot light (lamp) avec mesh associé
     sceneLights.emplace_back(
         2, // type
-        glm::vec3(0.0f, 50.0f, 0.0f), // position
-        glm::vec3(0.0f, -1.0f, 0.0f), // direction
-        glm::vec4(1.0f, 1.0f, 1.0f, 1.0f), // color
-        &lightSphereModel // mesh associé
+        glm::vec3(5.0f, 3.0f, 5.0f), // position (match the top of lamp post)
+        glm::vec3(0.0f, -1.0f, 0.0f), // direction (points down)
+        glm::vec4(1.0f, 0.9f, 0.7f, 1.0f), // warm light color
+        nullptr // no mesh, we'll draw the actual lamp model
     );
 
     float sunStrength = 1.0f;
@@ -249,6 +263,9 @@ int main()
         
         // Draw farmhouse with custom material properties
         farmhouseModel.Draw(shaderProgram, player.camera, farmhouseModelMatrix);
+
+        // Draw lamp post
+        lampModel.Draw(shaderProgram, player.camera, lampModelMatrix);
 
 		// Draw terrain
 		terrainModel.Draw(shaderProgram, player.camera, terrainModelMatrix);
