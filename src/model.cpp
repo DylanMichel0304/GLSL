@@ -266,7 +266,7 @@ void Model::loadMTL(const char* file, std::map<std::string, Material>& materials
             fs::Path fullTexturePath = mtlDir / texturePath;
             
             // Use auto-detection for texture format (pass 0 for format)
-            Texture diffuseTex(fullTexturePath.string().c_str(), "diffuse", GL_TEXTURE0);
+            Texture diffuseTex(fullTexturePath.string().c_str(), "diffuse", 0);
             materials[currentMaterial].textures.push_back(diffuseTex);
         }
     }

@@ -19,6 +19,8 @@ public:
 	void texUnit(Shader& shader, const char* uniform, GLuint unit);
 	// Binds a texture
 	void Bind();
+
+	void BindToUnit(GLuint unit);
 	// Unbinds a texture
 	void Unbind();
 	// Deletes a texture

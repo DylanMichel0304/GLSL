@@ -113,6 +113,12 @@ void Texture::Bind()
 	glBindTexture(GL_TEXTURE_2D, ID);
 }
 
+void Texture::BindToUnit(GLuint dynamicUnit)
+{
+	glActiveTexture(GL_TEXTURE0 + dynamicUnit);
+	glBindTexture(GL_TEXTURE_2D, ID);
+}
+
 void Texture::Unbind()
 {
 	glBindTexture(GL_TEXTURE_2D, 0);

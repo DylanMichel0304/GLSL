@@ -15,6 +15,6 @@ public:
 
     Light(int type, const glm::vec3& pos, const glm::vec3& dir, const glm::vec4& color, Model* mesh = nullptr);
 
-    void sendToShader(const Shader& shader, int index) const;
+    void sendToShader( Shader& shader, int index) const;
     void drawMesh( Shader& shader,Camera& camera, const glm::mat4& modelMatrix) const;
 };

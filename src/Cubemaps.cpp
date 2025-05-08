@@ -22,8 +22,8 @@ const unsigned int Cubemaps::skyboxIndices[] = {
 	0, 4, 7,
 	7, 3, 0,
 	// Top
-	4, 5, 6,
-	6, 7, 4,
+	7, 6, 5,
+	5, 4, 7,
 	// Bottom
 	0, 3, 2,
 	2, 1, 0,
