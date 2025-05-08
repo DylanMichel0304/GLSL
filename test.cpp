@@ -97,18 +97,18 @@ int main()
     // Model matrix for the terrain
     glm::mat4 terrainModelMatrix = glm::mat4(1.0f);
     terrainModelMatrix = glm::translate(terrainModelMatrix, glm::vec3(0.0f, 0.0f, 0.0f)); 
-    terrainModelMatrix = glm::scale(terrainModelMatrix, glm::vec3(100.0f, 100.0f, 100.0f));
+    terrainModelMatrix = glm::scale(terrainModelMatrix, glm::vec3(20.0f, 25.0f, 25.0f));
     terrainModel.AddTexture(tex[0]);
 
     // Model matrix for the tree
     glm::mat4 treeModelMatrix = glm::mat4(1.0f);
-    treeModelMatrix = glm::translate(treeModelMatrix, glm::vec3(-10.0f, 0.0f, -10.0f));
-    treeModelMatrix = glm::scale(treeModelMatrix, glm::vec3(10.0f, 10.0f, 10.0f));
+    treeModelMatrix = glm::translate(treeModelMatrix, glm::vec3(-12.0f, 0.0f, -12.0f));
+    treeModelMatrix = glm::scale(treeModelMatrix, glm::vec3(2.8f, 3.4f, 2.8f));
 
 
     // Model matrix for the farmhouse
     glm::mat4 farmhouseModelMatrix = glm::mat4(1.0f);
-    farmhouseModelMatrix = glm::translate(farmhouseModelMatrix, glm::vec3(10.0f, 0.0f, 10.0f));
+    farmhouseModelMatrix = glm::translate(farmhouseModelMatrix, glm::vec3(0.0f, 0.0f, 0.0f));
     farmhouseModelMatrix = glm::rotate(farmhouseModelMatrix, glm::radians(90.0f), glm::vec3(0.0f, 1.0f, 0.0f));
     farmhouseModelMatrix = glm::scale(farmhouseModelMatrix, glm::vec3(0.5f, 0.5f, 0.5f));
 
@@ -119,9 +119,9 @@ int main()
 
     // Model matrix for the lamp post
     glm::mat4 lampModelMatrix = glm::mat4(1.0f);
-    lampModelMatrix = glm::translate(lampModelMatrix, glm::vec3(-5.0f, 0.0f, 20.0f)); // Position it near the center
+    lampModelMatrix = glm::translate(lampModelMatrix, glm::vec3(-15.0f, 0.0f, 10.0f));
     lampModelMatrix = glm::rotate(lampModelMatrix, glm::radians(45.0f), glm::vec3(0.0f, 1.0f, 0.0f));
-    lampModelMatrix = glm::scale(lampModelMatrix, glm::vec3(0.7f, 0.7f, 0.7f)); // Scale it down to appropriate size
+    lampModelMatrix = glm::scale(lampModelMatrix, glm::vec3(0.7f, 0.7f, 0.7f));
     
     // Build collider for the lamp
     lampModel.buildCollider(lampModelMatrix);
@@ -152,32 +152,47 @@ int main()
         glm::vec3 originalMin = trunkCollider->getMin();
         glm::vec3 originalMax = trunkCollider->getMax();
         
-        // Calculate the center position for the cylinder (base center)
-        glm::vec3 trunkCenter = glm::vec3(
-            (originalMin.x + originalMax.x) * 0.5f,  // Center X
-            originalMin.y,                           // Base of trunk (Y)
-            (originalMin.z + originalMax.z) * 0.5f   // Center Z
-        );
-        
         // Calculate cylinder dimensions
         float trunkHeight = originalMax.y - originalMin.y;
-        
-        // Calculate trunk radius (use a fraction of the width/depth of the bounding box)
         float boxWidth = originalMax.x - originalMin.x;
         float boxDepth = originalMax.z - originalMin.z;
-        float trunkRadius = std::min(boxWidth, boxDepth) * 0.1f; 
+        float trunkRadius = std::min(boxWidth, boxDepth) * 0.1f;
+
+        // Function to create a cylinder collider at a specific position
+        auto createTreeCollider = [&](const glm::vec3& position) {
+            glm::vec3 trunkCenter = glm::vec3(
+                position.x,  // Center X
+                position.y,  // Base of trunk (Y)
+                position.z  // Center Z
+            );
+            return Collider(trunkCenter, trunkRadius, trunkHeight);
+        };
+
+        // Add colliders for all trees
+        // First tree
+        worldColliders.push_back(createTreeCollider(glm::vec3(-12.0f, 0.0f, -12.0f)));
         
-        // Create a cylindrical collider
-        Collider cylinderCollider(trunkCenter, trunkRadius, trunkHeight);
-        
-        // Debug output
-        std::cout << "Original trunk box: min(" << originalMin.x << "," << originalMin.y << "," << originalMin.z 
-                  << ") max(" << originalMax.x << "," << originalMax.y << "," << originalMax.z << ")" << std::endl;
-        std::cout << "Cylinder collider: center(" << trunkCenter.x << "," << trunkCenter.y << "," << trunkCenter.z 
-                  << ") radius=" << trunkRadius << " height=" << trunkHeight << std::endl;
-        
-        // Add the cylinder collider for the trunk
-        worldColliders.push_back(cylinderCollider);
+        // Row 1 (z = -22)
+        worldColliders.push_back(createTreeCollider(glm::vec3(-9.0f, 0.0f, -22.0f)));
+        worldColliders.push_back(createTreeCollider(glm::vec3(-3.0f, 0.0f, -22.0f)));
+        worldColliders.push_back(createTreeCollider(glm::vec3(3.0f, 0.0f, -22.0f)));
+        worldColliders.push_back(createTreeCollider(glm::vec3(9.0f, 0.0f, -22.0f)));
+
+        // Row 2 (z = -16)
+        worldColliders.push_back(createTreeCollider(glm::vec3(-15.0f, 0.0f, -16.0f)));
+        worldColliders.push_back(createTreeCollider(glm::vec3(-9.0f, 0.0f, -16.0f)));
+        worldColliders.push_back(createTreeCollider(glm::vec3(-3.0f, 0.0f, -16.0f)));
+        worldColliders.push_back(createTreeCollider(glm::vec3(3.0f, 0.0f, -16.0f)));
+        worldColliders.push_back(createTreeCollider(glm::vec3(9.0f, 0.0f, -16.0f)));
+
+        // Row 3 (z = -10)
+        worldColliders.push_back(createTreeCollider(glm::vec3(-15.0f, 0.0f, -10.0f)));
+        worldColliders.push_back(createTreeCollider(glm::vec3(-9.0f, 0.0f, -10.0f)));
+        worldColliders.push_back(createTreeCollider(glm::vec3(-3.0f, 0.0f, -10.0f)));
+        worldColliders.push_back(createTreeCollider(glm::vec3(3.0f, 0.0f, -10.0f)));
+        worldColliders.push_back(createTreeCollider(glm::vec3(9.0f, 0.0f, -10.0f)));
+
+        std::cout << "Added cylinder colliders for all 17 trees" << std::endl;
     } else {
         // If trunk collider not found, log a warning but don't add any tree collider
         std::cout << "WARNING: Trunk collider not found for tree, no tree collision will be applied" << std::endl;
@@ -232,7 +247,7 @@ int main()
         nullptr // no mesh, we'll draw the actual lamp model
     );
 
-    float sunStrength = 0.6f;
+    float sunStrength = 0.9f;
     float fadeSpeed = 0.1f; // Plus c'est grand, plus ça descend vite
 
 
@@ -272,13 +287,82 @@ int main()
         // Draw tree
         treeModel.Draw(shaderProgram, player.camera, treeModelMatrix);
         
-        // Reset material properties to default before drawing the next model to prevent leaking
-        shaderProgram.Activate();
-        glUniform3f(glGetUniformLocation(shaderProgram.ID, "material.ambient"), 1.0f, 1.0f, 1.0f);
-        glUniform3f(glGetUniformLocation(shaderProgram.ID, "material.diffuse"), 1.0f, 1.0f, 1.0f);
-        glUniform3f(glGetUniformLocation(shaderProgram.ID, "material.specular"), 1.0f, 1.0f, 1.0f);
-        glUniform1f(glGetUniformLocation(shaderProgram.ID, "material.shininess"), 32.0f);
-        
+        // Draw additional trees in a grid pattern
+        // Row 1 (z = -22)
+        glm::mat4 tree2ModelMatrix = glm::mat4(1.0f);
+        tree2ModelMatrix = glm::translate(tree2ModelMatrix, glm::vec3(-9.0f, 0.0f, -22.0f));
+        tree2ModelMatrix = glm::scale(tree2ModelMatrix, glm::vec3(3.3f, 2.6f, 3.3f));
+        treeModel.Draw(shaderProgram, player.camera, tree2ModelMatrix);
+
+        glm::mat4 tree3ModelMatrix = glm::mat4(1.0f);
+        tree3ModelMatrix = glm::translate(tree3ModelMatrix, glm::vec3(-3.0f, 0.0f, -22.0f));
+        tree3ModelMatrix = glm::scale(tree3ModelMatrix, glm::vec3(2.5f, 3.5f, 2.5f));
+        treeModel.Draw(shaderProgram, player.camera, tree3ModelMatrix);
+
+        glm::mat4 tree4ModelMatrix = glm::mat4(1.0f);
+        tree4ModelMatrix = glm::translate(tree4ModelMatrix, glm::vec3(3.0f, 0.0f, -22.0f));
+        tree4ModelMatrix = glm::scale(tree4ModelMatrix, glm::vec3(3.2f, 2.7f, 3.2f));
+        treeModel.Draw(shaderProgram, player.camera, tree4ModelMatrix);
+
+        glm::mat4 tree5ModelMatrix = glm::mat4(1.0f);
+        tree5ModelMatrix = glm::translate(tree5ModelMatrix, glm::vec3(9.0f, 0.0f, -22.0f));
+        tree5ModelMatrix = glm::scale(tree5ModelMatrix, glm::vec3(2.6f, 3.4f, 2.6f));
+        treeModel.Draw(shaderProgram, player.camera, tree5ModelMatrix);
+
+        // Row 2 (z = -16)
+        glm::mat4 tree6ModelMatrix = glm::mat4(1.0f);
+        tree6ModelMatrix = glm::translate(tree6ModelMatrix, glm::vec3(-15.0f, 0.0f, -16.0f));
+        tree6ModelMatrix = glm::scale(tree6ModelMatrix, glm::vec3(3.4f, 2.5f, 3.4f));
+        treeModel.Draw(shaderProgram, player.camera, tree6ModelMatrix);
+
+        glm::mat4 tree7ModelMatrix = glm::mat4(1.0f);
+        tree7ModelMatrix = glm::translate(tree7ModelMatrix, glm::vec3(-9.0f, 0.0f, -16.0f));
+        tree7ModelMatrix = glm::scale(tree7ModelMatrix, glm::vec3(2.7f, 3.3f, 2.7f));
+        treeModel.Draw(shaderProgram, player.camera, tree7ModelMatrix);
+
+        glm::mat4 tree8ModelMatrix = glm::mat4(1.0f);
+        tree8ModelMatrix = glm::translate(tree8ModelMatrix, glm::vec3(-3.0f, 0.0f, -16.0f));
+        tree8ModelMatrix = glm::scale(tree8ModelMatrix, glm::vec3(3.5f, 2.6f, 3.5f));
+        treeModel.Draw(shaderProgram, player.camera, tree8ModelMatrix);
+
+        glm::mat4 tree9ModelMatrix = glm::mat4(1.0f);
+        tree9ModelMatrix = glm::translate(tree9ModelMatrix, glm::vec3(3.0f, 0.0f, -16.0f));
+        tree9ModelMatrix = glm::scale(tree9ModelMatrix, glm::vec3(2.5f, 3.5f, 2.5f));
+        treeModel.Draw(shaderProgram, player.camera, tree9ModelMatrix);
+
+        glm::mat4 tree10ModelMatrix = glm::mat4(1.0f);
+        tree10ModelMatrix = glm::translate(tree10ModelMatrix, glm::vec3(9.0f, 0.0f, -16.0f));
+        tree10ModelMatrix = glm::scale(tree10ModelMatrix, glm::vec3(3.3f, 2.7f, 3.3f));
+        treeModel.Draw(shaderProgram, player.camera, tree10ModelMatrix);
+
+        // Row 3 (z = -10)
+        glm::mat4 tree11ModelMatrix = glm::mat4(1.0f);
+        tree11ModelMatrix = glm::translate(tree11ModelMatrix, glm::vec3(-15.0f, 0.0f, -10.0f));
+        tree11ModelMatrix = glm::scale(tree11ModelMatrix, glm::vec3(2.6f, 3.4f, 2.6f));
+        treeModel.Draw(shaderProgram, player.camera, tree11ModelMatrix);
+
+        glm::mat4 tree12ModelMatrix = glm::mat4(1.0f);
+        tree12ModelMatrix = glm::translate(tree12ModelMatrix, glm::vec3(-9.0f, 0.0f, -10.0f));
+        tree12ModelMatrix = glm::scale(tree12ModelMatrix, glm::vec3(3.4f, 2.5f, 3.4f));
+        treeModel.Draw(shaderProgram, player.camera, tree12ModelMatrix);
+
+        glm::mat4 tree13ModelMatrix = glm::mat4(1.0f);
+        tree13ModelMatrix = glm::translate(tree13ModelMatrix, glm::vec3(-3.0f, 0.0f, -10.0f));
+        tree13ModelMatrix = glm::scale(tree13ModelMatrix, glm::vec3(2.7f, 3.3f, 2.7f));
+        treeModel.Draw(shaderProgram, player.camera, tree13ModelMatrix);
+
+        glm::mat4 tree14ModelMatrix = glm::mat4(1.0f);
+        tree14ModelMatrix = glm::translate(tree14ModelMatrix, glm::vec3(3.0f, 0.0f, -10.0f));
+        tree14ModelMatrix = glm::scale(tree14ModelMatrix, glm::vec3(3.5f, 2.6f, 3.5f));
+        treeModel.Draw(shaderProgram, player.camera, tree14ModelMatrix);
+
+        glm::mat4 tree15ModelMatrix = glm::mat4(1.0f);
+        tree15ModelMatrix = glm::translate(tree15ModelMatrix, glm::vec3(9.0f, 0.0f, -10.0f));
+        tree15ModelMatrix = glm::scale(tree15ModelMatrix, glm::vec3(2.5f, 3.5f, 2.5f));
+        treeModel.Draw(shaderProgram, player.camera, tree15ModelMatrix);
+
+       
+
         // Draw farmhouse with custom material properties
         farmhouseModel.Draw(shaderProgram, player.camera, farmhouseModelMatrix);
 
@@ -302,12 +386,12 @@ int main()
         // Set terrain material properties to increase luminosity (brightness)
         shaderProgram.Activate();
         // Increase ambient to brighten the texture in shadowed areas (values > 1.0 increase brightness)
-        glUniform3f(glGetUniformLocation(shaderProgram.ID, "material.ambient"), 1.5f, 1.5f, 1.5f);
+        glUniform3f(glGetUniformLocation(shaderProgram.ID, "material.ambient"), 1.0f, 1.0f, 1.0f);
         // Increase diffuse to brighten the texture in lit areas
-        glUniform3f(glGetUniformLocation(shaderProgram.ID, "material.diffuse"), 1.3f, 1.3f, 1.3f);
+        glUniform3f(glGetUniformLocation(shaderProgram.ID, "material.diffuse"), 1.0f, 1.0f, 1.0f);
         // Adjust specular for highlights
         glUniform3f(glGetUniformLocation(shaderProgram.ID, "material.specular"), 0.5f, 0.5f, 0.5f);
-        glUniform1f(glGetUniformLocation(shaderProgram.ID, "material.shininess"), 32.0f);
+        glUniform1f(glGetUniformLocation(shaderProgram.ID, "material.shininess"), 10.0f);
 
 		// Draw terrain
 		terrainModel.Draw(shaderProgram, player.camera, terrainModelMatrix);
