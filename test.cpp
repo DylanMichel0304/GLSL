@@ -141,9 +141,13 @@ int main()
     // Add colliders to world colliders
     std::vector<Collider> worldColliders;
     
-    // Add lamp collider to world colliders
-    worldColliders.push_back(lampModel.collider);
-    
+    // Create a new cylinder collider for the lamp
+    glm::vec3 lampBaseCenter = glm::vec3(-15.0f, 0.0f, 10.0f); // Base center of the lamp
+    float lampRadius = 0.6f; // Radius of the cylinder
+    float lampHeight = 2.5f; // Height of the cylinder
+    Collider lampCollider(lampBaseCenter, lampRadius, lampHeight);
+    worldColliders.push_back(lampCollider);
+
     // Always use the trunk collider - if it exists, create a cylinder collider
     if (trunkCollider != nullptr) {
         std::cout << "Using cylinder collider for the tree trunk" << std::endl;
