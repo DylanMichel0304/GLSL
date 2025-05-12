@@ -21,33 +21,8 @@
 const unsigned int width = 800;
 const unsigned int height = 800;
 
-Vertex lightVertices[] = {
-	Vertex{glm::vec3(-0.1f, -0.1f,  0.1f)}, Vertex{glm::vec3(-0.1f, -0.1f, -0.1f)},
-	Vertex{glm::vec3( 0.1f, -0.1f, -0.1f)}, Vertex{glm::vec3( 0.1f, -0.1f,  0.1f)},
-	Vertex{glm::vec3(-0.1f,  0.1f,  0.1f)}, Vertex{glm::vec3(-0.1f,  0.1f, -0.1f)},
-	Vertex{glm::vec3( 0.1f,  0.1f, -0.1f)}, Vertex{glm::vec3( 0.1f,  0.1f,  0.1f)}
-};
 
-GLuint lightIndices[] = {
-	0,1,2, 0,2,3, 0,4,7, 0,7,3, 3,7,6, 3,6,2,
-	2,6,5, 2,5,1, 1,5,4, 1,4,0, 4,5,6, 4,6,7
-};
 
-// Add this struct before main()
-struct SceneTree {
-    glm::vec3 position;
-    glm::vec3 scale;
-};
-
-// Utility function to draw all trees
-void DrawTrees(const std::vector<SceneTree>& trees, Model& treeModel, Shader& shader, Camera& camera) {
-    for (const auto& tree : trees) {
-        glm::mat4 treeModelMatrix = glm::mat4(1.0f);
-        treeModelMatrix = glm::translate(treeModelMatrix, tree.position);
-        treeModelMatrix = glm::scale(treeModelMatrix, tree.scale);
-        treeModel.Draw(shader, camera, treeModelMatrix);
-    }
-}
 
 int main()
 {
@@ -86,6 +61,7 @@ int main()
     Texture textures[]
     {
         Texture((texPath + "herbe.png").c_str(), "diffuse", 0),
+        //Texture((texPath + "planksSpec.png").c_str(), "specular", 1, GL_RED, GL_UNSIGNED_BYTE)
     };
 
     // Create the bronze texture for the lamp - using same syntax as other textures
@@ -285,30 +261,6 @@ int main()
     float sunStrength = 0.9f;
     float fadeSpeed = 0.1f; // Plus c'est grand, plus ça descend vite
 
-    // List of all trees (position, scale)
-    std::vector<SceneTree> trees = {
-        // First tree
-        { glm::vec3(-12.0f, 0.0f, -12.0f), glm::vec3(2.8f, 3.4f, 2.8f) },
-        // Row 1 (z = -22)
-        { glm::vec3(-9.0f, 0.0f, -22.0f), glm::vec3(3.3f, 2.6f, 3.3f) },
-        { glm::vec3(-3.0f, 0.0f, -22.0f), glm::vec3(2.5f, 3.5f, 2.5f) },
-        { glm::vec3(3.0f, 0.0f, -22.0f), glm::vec3(3.2f, 2.7f, 3.2f) },
-        { glm::vec3(9.0f, 0.0f, -22.0f), glm::vec3(2.6f, 3.4f, 2.6f) },
-        // Row 2 (z = -16)
-        { glm::vec3(-15.0f, 0.0f, -16.0f), glm::vec3(3.4f, 2.5f, 3.4f) },
-        { glm::vec3(-9.0f, 0.0f, -16.0f), glm::vec3(2.7f, 3.3f, 2.7f) },
-        { glm::vec3(-3.0f, 0.0f, -16.0f), glm::vec3(3.5f, 2.6f, 3.5f) },
-        { glm::vec3(3.0f, 0.0f, -16.0f), glm::vec3(2.5f, 3.5f, 2.5f) },
-        { glm::vec3(9.0f, 0.0f, -16.0f), glm::vec3(3.3f, 2.7f, 3.3f) },
-        // Row 3 (z = -10)
-        { glm::vec3(-15.0f, 0.0f, -10.0f), glm::vec3(2.6f, 3.4f, 2.6f) },
-        { glm::vec3(-9.0f, 0.0f, -10.0f), glm::vec3(3.4f, 2.5f, 3.4f) },
-        { glm::vec3(-3.0f, 0.0f, -10.0f), glm::vec3(2.7f, 3.3f, 2.7f) },
-        { glm::vec3(3.0f, 0.0f, -10.0f), glm::vec3(3.5f, 2.6f, 3.5f) },
-        { glm::vec3(9.0f, 0.0f, -10.0f), glm::vec3(2.5f, 3.5f, 2.5f) }
-    };
-
-    float time = 0.0f; // Add this before the main loop
 
     // Main while loop
     while (!glfwWindowShouldClose(window))
@@ -322,30 +274,8 @@ int main()
         // Update du joueur
         float deltaTime = glfwGetTime(); 
         glfwSetTime(0); // Remettre à 0 pour le frame suivant
-        time += deltaTime;
         player.Update(window, worldColliders, deltaTime);
 
-
-        if (sceneLights.size() >= 3) {
-            sceneLights[1].color = glm::vec4(1.0f, 0.0f, 0.0f, 1.0f) * (0.5f + 0.5f * sin(time));
-            sceneLights[2].color = glm::vec4(0.0f, 0.0f, 1.0f, 1.0f) * (0.5f + 0.5f * cos(time));
-            sceneLights[0].color = glm::vec4(1.0f) * (0.3f + 0.7f * abs(sin(time * 0.5f)));
-        }
-
-        shaderProgram.Activate();
-        glUniform1i(glGetUniformLocation(shaderProgram.ID, "lightCount"), sceneLights.size());
-        for (int i = 0; i < sceneLights.size(); ++i)
-            sceneLights[i].sendToShader(shaderProgram, i);
-
-        // Draw light meshes (if you want to visualize them)
-        lightShader.Activate();
-        for (const auto& light : sceneLights) {
-            glm::mat4 lightModelMatrix = glm::translate(glm::mat4(1.0f), light.position);
-            lightModelMatrix = glm::scale(lightModelMatrix, glm::vec3(1.0f));
-            glUniformMatrix4fv(glGetUniformLocation(lightShader.ID, "model"), 1, GL_FALSE, glm::value_ptr(lightModelMatrix));
-            glUniform4fv(glGetUniformLocation(lightShader.ID, "lightColor"), 1, glm::value_ptr(light.color));
-            // If you have a mesh for the light, draw it here (e.g., lightMesh.Draw(lightShader, player.camera);)
-        }
 
         sunStrength = glm::max(sunStrength, 0.0f);
         sceneLights[0].color = glm::vec4(1.0f, 1.0f, 0.9f, 1.0f) * sunStrength;
@@ -364,20 +294,91 @@ int main()
         // Affichage du mesh associé à la lumière (exemple pour la lampe)
         glm::mat4 lightModelMatrix = glm::mat4(1.0f);
         lightModelMatrix = glm::translate(lightModelMatrix, sceneLights[1].position);
-        lightModelMatrix = glm::scale(lightModelMatrix, glm::vec3(5.0f, 5.0f, -5.0f));
+        lightModelMatrix = glm::scale(lightModelMatrix, glm::vec3(5.0f, 5.0f, 5.0f));
         sceneLights[1].drawMesh(lightShader, player.camera, lightModelMatrix);
 
-        // Draw all trees using the utility function
-        DrawTrees(trees, treeModel, shaderProgram, player.camera);
+        // Draw tree
+        treeModel.Draw(shaderProgram, player.camera, treeModelMatrix);
+        
+        // Draw additional trees in a grid pattern
+        // Row 1 (z = -22)
+        glm::mat4 tree2ModelMatrix = glm::mat4(1.0f);
+        tree2ModelMatrix = glm::translate(tree2ModelMatrix, glm::vec3(-9.0f, 0.0f, -22.0f));
+        tree2ModelMatrix = glm::scale(tree2ModelMatrix, glm::vec3(3.3f, 2.6f, 3.3f));
+        treeModel.Draw(shaderProgram, player.camera, tree2ModelMatrix);
 
-        particleShader.Activate();
-        glm::vec3 front = glm::normalize(player.camera.Orientation);
-        glm::vec3 firePos = player.camera.Position + front * 3.0f;
-        firePos.y = 0.0f; // Set fire on the ground level
+        glm::mat4 tree3ModelMatrix = glm::mat4(1.0f);
+        tree3ModelMatrix = glm::translate(tree3ModelMatrix, glm::vec3(-3.0f, 0.0f, -22.0f));
+        tree3ModelMatrix = glm::scale(tree3ModelMatrix, glm::vec3(2.5f, 3.5f, 2.5f));
+        treeModel.Draw(shaderProgram, player.camera, tree3ModelMatrix);
+
+        glm::mat4 tree4ModelMatrix = glm::mat4(1.0f);
+        tree4ModelMatrix = glm::translate(tree4ModelMatrix, glm::vec3(3.0f, 0.0f, -22.0f));
+        tree4ModelMatrix = glm::scale(tree4ModelMatrix, glm::vec3(3.2f, 2.7f, 3.2f));
+        treeModel.Draw(shaderProgram, player.camera, tree4ModelMatrix);
+
+        glm::mat4 tree5ModelMatrix = glm::mat4(1.0f);
+        tree5ModelMatrix = glm::translate(tree5ModelMatrix, glm::vec3(9.0f, 0.0f, -22.0f));
+        tree5ModelMatrix = glm::scale(tree5ModelMatrix, glm::vec3(2.6f, 3.4f, 2.6f));
+        treeModel.Draw(shaderProgram, player.camera, tree5ModelMatrix);
+
+        // Row 2 (z = -16)
+        glm::mat4 tree6ModelMatrix = glm::mat4(1.0f);
+        tree6ModelMatrix = glm::translate(tree6ModelMatrix, glm::vec3(-15.0f, 0.0f, -16.0f));
+        tree6ModelMatrix = glm::scale(tree6ModelMatrix, glm::vec3(3.4f, 2.5f, 3.4f));
+        treeModel.Draw(shaderProgram, player.camera, tree6ModelMatrix);
+
+        glm::mat4 tree7ModelMatrix = glm::mat4(1.0f);
+        tree7ModelMatrix = glm::translate(tree7ModelMatrix, glm::vec3(-9.0f, 0.0f, -16.0f));
+        tree7ModelMatrix = glm::scale(tree7ModelMatrix, glm::vec3(2.7f, 3.3f, 2.7f));
+        treeModel.Draw(shaderProgram, player.camera, tree7ModelMatrix);
+
+        glm::mat4 tree8ModelMatrix = glm::mat4(1.0f);
+        tree8ModelMatrix = glm::translate(tree8ModelMatrix, glm::vec3(-3.0f, 0.0f, -16.0f));
+        tree8ModelMatrix = glm::scale(tree8ModelMatrix, glm::vec3(3.5f, 2.6f, 3.5f));
+        treeModel.Draw(shaderProgram, player.camera, tree8ModelMatrix);
+
+        glm::mat4 tree9ModelMatrix = glm::mat4(1.0f);
+        tree9ModelMatrix = glm::translate(tree9ModelMatrix, glm::vec3(3.0f, 0.0f, -16.0f));
+        tree9ModelMatrix = glm::scale(tree9ModelMatrix, glm::vec3(2.5f, 3.5f, 2.5f));
+        treeModel.Draw(shaderProgram, player.camera, tree9ModelMatrix);
+
+        glm::mat4 tree10ModelMatrix = glm::mat4(1.0f);
+        tree10ModelMatrix = glm::translate(tree10ModelMatrix, glm::vec3(9.0f, 0.0f, -16.0f));
+        tree10ModelMatrix = glm::scale(tree10ModelMatrix, glm::vec3(3.3f, 2.7f, 3.3f));
+        treeModel.Draw(shaderProgram, player.camera, tree10ModelMatrix);
+
+        // Row 3 (z = -10)
+        glm::mat4 tree11ModelMatrix = glm::mat4(1.0f);
+        tree11ModelMatrix = glm::translate(tree11ModelMatrix, glm::vec3(-15.0f, 0.0f, -10.0f));
+        tree11ModelMatrix = glm::scale(tree11ModelMatrix, glm::vec3(2.6f, 3.4f, 2.6f));
+        treeModel.Draw(shaderProgram, player.camera, tree11ModelMatrix);
+
+        glm::mat4 tree12ModelMatrix = glm::mat4(1.0f);
+        tree12ModelMatrix = glm::translate(tree12ModelMatrix, glm::vec3(-9.0f, 0.0f, -10.0f));
+        tree12ModelMatrix = glm::scale(tree12ModelMatrix, glm::vec3(3.4f, 2.5f, 3.4f));
+        treeModel.Draw(shaderProgram, player.camera, tree12ModelMatrix);
+
+        glm::mat4 tree13ModelMatrix = glm::mat4(1.0f);
+        tree13ModelMatrix = glm::translate(tree13ModelMatrix, glm::vec3(-3.0f, 0.0f, -10.0f));
+        tree13ModelMatrix = glm::scale(tree13ModelMatrix, glm::vec3(2.7f, 3.3f, 2.7f));
+        treeModel.Draw(shaderProgram, player.camera, tree13ModelMatrix);
+
+        glm::mat4 tree14ModelMatrix = glm::mat4(1.0f);
+        tree14ModelMatrix = glm::translate(tree14ModelMatrix, glm::vec3(3.0f, 0.0f, -10.0f));
+        tree14ModelMatrix = glm::scale(tree14ModelMatrix, glm::vec3(3.5f, 2.6f, 3.5f));
+        treeModel.Draw(shaderProgram, player.camera, tree14ModelMatrix);
+
+        glm::mat4 tree15ModelMatrix = glm::mat4(1.0f);
+        tree15ModelMatrix = glm::translate(tree15ModelMatrix, glm::vec3(9.0f, 0.0f, -10.0f));
+        tree15ModelMatrix = glm::scale(tree15ModelMatrix, glm::vec3(2.5f, 3.5f, 2.5f));
+        treeModel.Draw(shaderProgram, player.camera, tree15ModelMatrix);
+
+       
 
         // Draw farmhouse with custom material properties
         farmhouseModel.Draw(shaderProgram, player.camera, farmhouseModelMatrix);
-        campfireSmoke.emit(glm::vec3(10.0f, 0.0f, -10.0f)); // fire origin
+        campfireSmoke.emit(glm::vec3(-10.0f, 0.0f, -10.0f)); // fire origin
         campfireSmoke.update(deltaTime);
         campfireSmoke.draw(player.camera);
         // Reset material properties to default before drawing the lamp

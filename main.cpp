@@ -131,6 +131,7 @@ int main() {
 		{1, glm::vec3(-12.0f, 12.0f, 7.0f), glm::vec3(0.0f), glm::vec4(1.0f, 0.5f, 0.0f, 10.0f)}, // Point light
 		{2, glm::vec3(20.0f, 3.0f, 0.0f), glm::vec3(0.0f, -1.0f, 0.0f), glm::vec4(0.0f, 0.5f, 1.0f, 2.0f)}  // Spot light
 	};
+    std::vector<Collider> worldColliders;
 
     // Load the models
 	Model terrainModel("assets/objects/plane.obj");
@@ -143,30 +144,7 @@ int main() {
     treeModel.SetTextureTiling(1.0f);
     glm::mat4 treeModelMatrix = glm::mat4(1.0f);
     treeModelMatrix = glm::translate(treeModelMatrix, glm::vec3(-12.0f, 0.0f, -12.0f));
-    treeModelMatrix = glm::scale(treeModelMatrix, glm::vec3(2.8f, 3.4f, 2.8f)); 
-
-
-    Model farmhouseModel("assets/textures/newhouse/farmhouse_obj.obj");
-    farmhouseModel.SetTextureTiling(1.0f); 
-    glm::mat4 farmhouseModelMatrix = glm::mat4(1.0f);
-    farmhouseModelMatrix = glm::translate(farmhouseModelMatrix, glm::vec3(0.0f, 0.0f, 0.0f));
-    farmhouseModelMatrix = glm::rotate(farmhouseModelMatrix, glm::radians(90.0f), glm::vec3(0.0f, 1.0f, 0.0f));
-    farmhouseModelMatrix = glm::scale(farmhouseModelMatrix, glm::vec3(0.5f, 0.5f, 0.5f));
-
-    Model lampModel("assets/objects/LAMP/rv_lamp_post_4.obj", true);
-    lampModel.SetTextureTiling(1.0f);
-    glm::mat4 lampModelMatrix = glm::mat4(1.0f);
-    lampModelMatrix = glm::translate(lampModelMatrix, glm::vec3(-15.0f, 0.0f, 10.0f));
-    lampModelMatrix = glm::rotate(lampModelMatrix, glm::radians(45.0f), glm::vec3(0.0f, 1.0f, 0.0f));
-    lampModelMatrix = glm::scale(lampModelMatrix, glm::vec3(0.7f, 0.7f, 0.7f));
-    lampModel.AddTexture(bronzeTexture);
-    
-	Player player(width, height, glm::vec3(20.0f, 1.7f, 20.0f));
-	player.speed = 10.0f;
-	glEnable(GL_DEPTH_TEST);
-	float time = 0.0f;
-
-    // Only keep the first column of trees (i.e., those with the same x as the first tree)
+    treeModelMatrix = glm::scale(treeModelMatrix, glm::vec3(2.8f, 3.4f, 2.8f));
     std::vector<glm::vec3> treePositions;
     if (!trees.empty()) {
         float firstX = trees[0].position.x;
@@ -181,8 +159,43 @@ int main() {
     treeModel.buildComponentColliders(treeModelMatrix);
     Collider* trunkCollider = treeModel.getComponentCollider("Trank_bark");
 
-    // Create tree colliders using the refactored function
+    for (const auto& tree : trees) {
+        treePositions.push_back(tree.position);
+    }
+
+    // Create all tree colliders (one per tree)
     std::vector<Collider> treeColliders = CreateTreeColliders(trunkCollider, treePositions);
+
+    // Add all tree colliders to worldColliders
+    worldColliders.insert(worldColliders.end(), treeColliders.begin(), treeColliders.end());
+
+    Model farmhouseModel("assets/textures/newhouse/farmhouse_obj.obj");
+    farmhouseModel.SetTextureTiling(1.0f); 
+    glm::mat4 farmhouseModelMatrix = glm::mat4(1.0f);
+    farmhouseModelMatrix = glm::translate(farmhouseModelMatrix, glm::vec3(0.0f, 0.0f, 0.0f));
+    farmhouseModelMatrix = glm::rotate(farmhouseModelMatrix, glm::radians(90.0f), glm::vec3(0.0f, 1.0f, 0.0f));
+    farmhouseModelMatrix = glm::scale(farmhouseModelMatrix, glm::vec3(0.5f, 0.5f, 0.5f));
+    farmhouseModel.buildCollider(farmhouseModelMatrix);
+    worldColliders.push_back(farmhouseModel.collider);
+
+    Model lampModel("assets/objects/LAMP/rv_lamp_post_4.obj", true);
+    lampModel.SetTextureTiling(1.0f);
+    glm::mat4 lampModelMatrix = glm::mat4(1.0f);
+    lampModelMatrix = glm::translate(lampModelMatrix, glm::vec3(-15.0f, 0.0f, 10.0f));
+    lampModelMatrix = glm::rotate(lampModelMatrix, glm::radians(45.0f), glm::vec3(0.0f, 1.0f, 0.0f));
+    lampModelMatrix = glm::scale(lampModelMatrix, glm::vec3(0.7f, 0.7f, 0.7f));
+    lampModel.AddTexture(bronzeTexture);
+    glm::vec3 lampBaseCenter = glm::vec3(-15.0f, 0.0f, 10.0f); // Base center of the lamp
+    float lampRadius = 0.6f; // Radius of the cylinder
+    float lampHeight = 2.5f; // Height of the cylinder
+    Collider lampCollider(lampBaseCenter, lampRadius, lampHeight);
+    worldColliders.push_back(lampCollider);
+    
+	Player player(width, height, glm::vec3(20.0f, 1.7f, 20.0f));
+	player.speed = 10.0f;
+	glEnable(GL_DEPTH_TEST);
+	float time = 0.0f;
+
 
 	while (!glfwWindowShouldClose(window)) {
 		glClearColor(0.07f, 0.13f, 0.17f, 1.0f);
@@ -190,7 +203,7 @@ int main() {
 		float deltaTime = glfwGetTime();
 		glfwSetTime(0);
 		time += deltaTime;
-		player.Update(window, {}, deltaTime);
+		player.Update(window, worldColliders, deltaTime);
 
 		// Animate lights
 		lights[1].color = glm::vec4(2.0f, 1.0f, 0.0f, 1.0f);
@@ -205,6 +218,14 @@ int main() {
         lampModel.Draw(shaderProgram, player.camera, lampModelMatrix);
         farmhouseModel.Draw(shaderProgram, player.camera, farmhouseModelMatrix);
         DrawTrees(trees, treeModel, shaderProgram, player.camera);
+
+        // --- Campfire Particle System ---
+        // Campfire position (adjust as needed)
+        glm::vec3 campfirePos = glm::vec3(-12.0f, 0.3f, 12.0f);
+        // Emit a few particles per frame for a steady fire
+        for (int i = 0; i < 4; ++i) campfireSmoke.emit(campfirePos);
+        campfireSmoke.update(deltaTime);
+        campfireSmoke.draw(player.camera);
 
 		lightShader.Activate();
 		for (const auto& light : lights) {
