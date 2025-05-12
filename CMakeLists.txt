@@ -57,6 +57,9 @@ set(SOURCES_COMMON
     src/Player.h src/Player.cpp
     src/Cubemaps.h src/Cubemaps.cpp
     src/Collider.cpp
+    src/Particle.h
+    src/ParticleSystem.h src/ParticleSystem.cpp
+    src/tree_collider_utils.h
 )
 
 set(SOURCES_main

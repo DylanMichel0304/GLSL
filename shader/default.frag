@@ -54,9 +54,12 @@ void main()
         float ambientStrength = 0.2;
         float specularStrength = 0.5;
 
+        float intensity = 1.0; // Valeur par défaut
+
         if (light.type == 0) // Directional
         {
             lightDir = normalize(-light.direction);
+            intensity = 0.3; // <-- Diminue l'intensité de la lumière directionnelle ici (0.3 = 30%)
         }
         else if (light.type == 1 || light.type == 2) // Point ou Spot
         {
@@ -65,8 +68,8 @@ void main()
             // Calcul de l'atténuation pour point lights et spotlights
             float dist = length(light.position - crntPos);
             float constant = 1.0;
-            float linear = 0.7;
-            float quadratic = 1.8;
+            float linear = 0.2;
+            float quadratic = 0.032;
             attenuation = 1.0 / (constant + linear * dist + quadratic * (dist * dist));
         }
 
@@ -81,8 +84,8 @@ void main()
 		if (light.type == 2)
 		{
 			float theta = dot(lightDir, normalize(-light.direction));
-			float outerCutOff = 0.85;
-			float innerCutOff = 0.95;
+			float outerCutOff = 0.7;
+			float innerCutOff = 0.85;
 			float epsilon = innerCutOff - outerCutOff;
 			float intensity = clamp((theta - outerCutOff) / epsilon, 0.0, 1.0);
 			diff *= intensity;
@@ -91,9 +94,9 @@ void main()
 		}
 
 
-        vec3 ambient = ambientStrength * vec3(light.color);
-        vec3 diffuse = diff * vec3(light.color);
-        vec3 specular = specularStrength * spec * vec3(light.color) * specMap.r;
+        vec3 ambient = ambientStrength * vec3(light.color) * intensity * 2.0; // x2 ambient
+        vec3 diffuse = diff * vec3(light.color) * intensity * 2.0;            // x2 diffuse
+        vec3 specular = specularStrength * spec * vec3(light.color) * specMap.r * intensity * 2.0; // x2 specular
 
         finalColor += vec4(ambient + diffuse + specular, 1.0) * texColor * attenuation;
     }
