@@ -141,3 +141,9 @@ void Cubemaps::Delete()
     glDeleteTextures(1, &cubemapTexture);
     skyboxShader.Delete();
 }
+
+void Cubemaps::setAlpha(float alpha)
+{
+    skyboxShader.Activate();
+    glUniform1f(glGetUniformLocation(skyboxShader.ID, "alpha"), alpha);
+}

@@ -13,6 +13,7 @@
 #include <GLFW/glfw3.h>
 #include <cmath>
 #include "src/tree_collider_utils.h"
+#include "src/Cubemaps.h"
 
 // Define this before including stb_image.h
 #define STB_IMAGE_IMPLEMENTATION
@@ -125,6 +126,33 @@ int main() {
     Texture smokeTexture("assets/textures/smoke.png", "diffuse", 0);
     ParticleSystem campfireSmoke(&particleShader, smokeTexture.ID);
 
+    Shader reflectionShader("shader/reflect.vert", "shader/reflect.frag");
+    Shader refractionShader("shader/refrac.vert", "shader/refrac.frag");
+
+    // --- Mirror geometry setup ---
+    // Simple quad for mirrors (XZ plane, centered at origin)
+    std::vector<Vertex> mirrorVertices = {
+        Vertex{glm::vec3(-1.0f, 0.0f, -1.0f), glm::vec3(0,1,0), glm::vec3(1.0f), glm::vec2(0,0)},
+        Vertex{glm::vec3( 1.0f, 0.0f, -1.0f), glm::vec3(0,1,0), glm::vec3(1.0f), glm::vec2(1,0)},
+        Vertex{glm::vec3( 1.0f, 0.0f,  1.0f), glm::vec3(0,1,0), glm::vec3(1.0f), glm::vec2(1,1)},
+        Vertex{glm::vec3(-1.0f, 0.0f,  1.0f), glm::vec3(0,1,0), glm::vec3(1.0f), glm::vec2(0,1)}
+    };
+    std::vector<GLuint> mirrorIndices = {0,1,2, 0,2,3};
+    std::vector<Texture> emptyTex; // No texture needed for mirror
+    Mesh mirrorMesh(mirrorVertices, mirrorIndices, emptyTex);
+
+    // Mirror 1: Reflection (vertical, like a wall)
+    glm::mat4 mirror1Model = glm::mat4(1.0f);
+    mirror1Model = glm::translate(mirror1Model, glm::vec3(- 10.0f, 1.0f, 0.0f)); // position
+    mirror1Model = glm::rotate(mirror1Model, glm::radians(90.0f), glm::vec3(1,0,0)); // vertical
+    mirror1Model = glm::scale(mirror1Model, glm::vec3(10.0f, 10.0f, 10.0f)); // size
+
+    // Mirror 2: Refraction (horizontal, like a pool)
+    glm::mat4 mirror2Model = glm::mat4(1.0f);
+    mirror2Model = glm::translate(mirror2Model, glm::vec3(-5.0f, 0.2f, 0.0f)); // position
+    mirror1Model = glm::rotate(mirror1Model, glm::radians(90.0f), glm::vec3(1,0,0)); // vertical
+    mirror2Model = glm::scale(mirror2Model, glm::vec3(10.0f, 10.0f, 10.0f)); // size
+
 
 	std::vector<Light> lights = {
 		{0, glm::vec3(-1.0f), glm::vec3(-0.0f, -1.0f, -0.0f), glm::vec4(1.0f)}, // Directional light, mesh at origin
@@ -194,7 +222,24 @@ int main() {
 	Player player(width, height, glm::vec3(20.0f, 1.7f, 20.0f));
 	player.speed = 10.0f;
 	glEnable(GL_DEPTH_TEST);
+    glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
 	float time = 0.0f;
+
+
+    // --- Cubemap setup ---
+    const std::string skyboxFaces[6] = {
+        "assets/cubesmaps/night/right.jpg",
+        "assets/cubesmaps/night/left.jpg",
+        "assets/cubesmaps/night/top.jpg",
+        "assets/cubesmaps/night/bottom.jpg",
+        "assets/cubesmaps/night/front.jpg",
+        "assets/cubesmaps/night/back.jpg"
+    };
+    Cubemaps skybox(skyboxFaces, "shader/skybox.vert", "shader/skybox.frag");
+
+    // Enable blending for skybox alpha
+    glEnable(GL_BLEND);
+    glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
 
 
 	while (!glfwWindowShouldClose(window)) {
@@ -205,7 +250,6 @@ int main() {
 		time += deltaTime;
 		player.Update(window, worldColliders, deltaTime);
 
-		// Animate lights
 		lights[1].color = glm::vec4(2.0f, 1.0f, 0.0f, 1.0f);
 		lights[2].color = glm::vec4(0.0f, 0.0f, 1.0f, 1.0f) * (0.5f + 0.5f * cos(time));
 		lights[0].color = glm::vec4(1.0f) * (0.3f + 0.7f * abs(sin(time * 0.5f)));
@@ -219,13 +263,38 @@ int main() {
         farmhouseModel.Draw(shaderProgram, player.camera, farmhouseModelMatrix);
         DrawTrees(trees, treeModel, shaderProgram, player.camera);
 
-        // --- Campfire Particle System ---
-        // Campfire position (adjust as needed)
-        glm::vec3 campfirePos = glm::vec3(-12.0f, 0.3f, 12.0f);
-        // Emit a few particles per frame for a steady fire
-        for (int i = 0; i < 4; ++i) campfireSmoke.emit(campfirePos);
-        campfireSmoke.update(deltaTime);
-        campfireSmoke.draw(player.camera);
+        // --- Draw Mirror 1 (Reflection) ---
+        reflectionShader.Activate();
+
+        // Passe les uniforms
+        glUniformMatrix4fv(glGetUniformLocation(reflectionShader.ID, "model"), 1, GL_FALSE, glm::value_ptr(mirror1Model));
+        glUniform3fv(glGetUniformLocation(reflectionShader.ID, "u_view_pos"), 1, glm::value_ptr(player.camera.Position));
+        glUniform1i(glGetUniformLocation(reflectionShader.ID, "cubemapSampler"), 0);
+
+        // Active la texture cubemap de skybox
+        glActiveTexture(GL_TEXTURE0);
+        glBindTexture(GL_TEXTURE_CUBE_MAP, skybox.getCubemapID()); // <- nécessite une méthode getter
+
+        // Matrice de vue/projection
+        player.camera.Matrix(reflectionShader, "camMatrix");
+
+        // Dessine le miroir
+        mirrorMesh.Draw(reflectionShader, player.camera);
+
+        // --- Draw Mirror 2 (Refraction) ---
+        refractionShader.Activate();
+
+        glUniformMatrix4fv(glGetUniformLocation(refractionShader.ID, "model"), 1, GL_FALSE, glm::value_ptr(mirror2Model));
+        glUniform3fv(glGetUniformLocation(refractionShader.ID, "u_view_pos"), 1, glm::value_ptr(player.camera.Position));
+        glUniform1f(glGetUniformLocation(refractionShader.ID, "refractionIndice"), 1.52f); // Verre standard
+        glUniform1i(glGetUniformLocation(refractionShader.ID, "cubemapSampler"), 0);
+
+        glActiveTexture(GL_TEXTURE0);
+        glBindTexture(GL_TEXTURE_CUBE_MAP, skybox.getCubemapID());
+
+        player.camera.Matrix(refractionShader, "camMatrix");
+        mirrorMesh.Draw(refractionShader, player.camera);
+
 
 		lightShader.Activate();
 		for (const auto& light : lights) {
@@ -236,12 +305,18 @@ int main() {
 			lightMesh.Draw(lightShader, player.camera);
 		}
 
+        float animated = 0.3f + 0.7f * std::abs(std::sin(time * 0.5f));
+        float skyboxAlpha = glm::clamp(animated, 0.2f, 1.0f);
+        skybox.setAlpha(skyboxAlpha);
+        skybox.Draw(player.camera, width, height);
+
 		glfwSwapBuffers(window);
 		glfwPollEvents();
 	}
 
 	shaderProgram.Delete();
 	lightShader.Delete();
+	skybox.Delete();
 	glfwDestroyWindow(window);
 	glfwTerminate();
 	return 0;

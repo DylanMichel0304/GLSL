@@ -16,6 +16,8 @@ class Cubemaps {
 public:
     Cubemaps(const std::string facesCubemap[6], const char* vertexPath, const char* fragmentPath);
     void Draw(Camera& camera, int screenWidth, int screenHeight);
+    unsigned int getCubemapID() const { return cubemapTexture; }
+    void setAlpha(float alpha); // Set alpha uniform for skybox
     void Delete();
 
 private:
