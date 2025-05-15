@@ -26,7 +26,7 @@ Campfire::~Campfire() {
 
 void Campfire::initGeometry() {
     // Generate vertices for particles
-    GLfloat* vertices = new GLfloat[numParticles * 3]; 
+    GLfloat* vertices = new GLfloat[numParticles * 3 *2]; 
     int index = 0;
     int particlesGenerated = 0;
     
@@ -72,7 +72,7 @@ void Campfire::initGeometry() {
     glBindVertexArray(VAO);
     
     glBindBuffer(GL_ARRAY_BUFFER, VBO);
-    glBufferData(GL_ARRAY_BUFFER, numParticles * 3 * sizeof(GLfloat), vertices, GL_STATIC_DRAW);
+    glBufferData(GL_ARRAY_BUFFER, index * sizeof(GLfloat), vertices, GL_STATIC_DRAW);
     
     // Set up vertex attribute
     glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 3 * sizeof(GLfloat), (void*)0);

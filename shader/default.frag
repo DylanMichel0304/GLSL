@@ -6,28 +6,21 @@ in vec3 Normal;
 in vec2 texCoord;
 in vec3 crntPos;
 
-// Textures
-uniform sampler2D tex0; // diffuse map
-uniform sampler2D tex1; // specular map
+uniform sampler2D tex0;            // Diffuse texture
+uniform sampler2D tex1;            // Specular map (can be empty or white)
+uniform samplerCube cubemapSampler;
 
-// Texture tiling factor
 uniform float textureTiling;
-
-float outerCutOff = cos(radians(20.0));
-float innerCutOff = cos(radians(15.0));
-
-
-// Camera
 uniform vec3 camPos;
+uniform float reflectivity;        // <--- Ajouté : 0.0 = pas de reflet, 1.0 = miroir
 
-// Définition de la lumière
 #define MAX_LIGHTS 10
 
 struct Light {
-    vec3 position;  // Pour point light ou spot
-    vec3 direction; // Pour directionnelle ou spot
+    vec3 position;
+    vec3 direction;
     vec4 color;
-    int type; // 0 = Directional, 1 = Point, 2 = Spot
+    int type;
 };
 
 uniform Light lights[MAX_LIGHTS];
@@ -36,10 +29,8 @@ uniform int lightCount;
 void main()
 {
     vec3 norm = normalize(Normal);
-    // Apply texture tiling factor to the texture coordinates
     vec4 texColor = texture(tex0, texCoord * textureTiling);
     vec4 specMap = texture(tex1, texCoord * textureTiling);
-
     vec3 viewDir = normalize(camPos - crntPos);
 
     vec4 finalColor = vec4(0.0);
@@ -53,53 +44,49 @@ void main()
         float spec = 0.0;
         float ambientStrength = 0.2;
         float specularStrength = 0.5;
+        float intensity = 1.0;
 
-        float intensity = 1.0; // Valeur par défaut
-
-        if (light.type == 0) // Directional
+        if (light.type == 0)
         {
             lightDir = normalize(-light.direction);
-            intensity = 0.3; // <-- Diminue l'intensité de la lumière directionnelle ici (0.3 = 30%)
+            intensity = 0.3;
         }
-        else if (light.type == 1 || light.type == 2) // Point ou Spot
+        else
         {
             lightDir = normalize(light.position - crntPos);
-
-            // Calcul de l'atténuation pour point lights et spotlights
             float dist = length(light.position - crntPos);
-            float constant = 1.0;
-            float linear = 0.2;
-            float quadratic = 0.032;
-            attenuation = 1.0 / (constant + linear * dist + quadratic * (dist * dist));
+            attenuation = 1.0 / (1.0 + 0.2 * dist + 0.032 * dist * dist);
         }
 
-        // Diffuse
         diff = max(dot(norm, lightDir), 0.0);
-
-        // Specular
         vec3 halfwayDir = normalize(lightDir + viewDir);
         spec = pow(max(dot(norm, halfwayDir), 0.0), 16.0);
 
-        // Spotlight : limiter l'angle
-		if (light.type == 2)
-		{
-			float theta = dot(lightDir, normalize(-light.direction));
-			float outerCutOff = 0.7;
-			float innerCutOff = 0.85;
-			float epsilon = innerCutOff - outerCutOff;
-			float intensity = clamp((theta - outerCutOff) / epsilon, 0.0, 1.0);
-			diff *= intensity;
-			spec *= intensity;
-			attenuation *= intensity;
-		}
+        if (light.type == 2)
+        {
+            float theta = dot(lightDir, normalize(-light.direction));
+            float outer = 0.7;
+            float inner = 0.85;
+            float epsilon = inner - outer;
+            float spotIntensity = clamp((theta - outer) / epsilon, 0.0, 1.0);
+            diff *= spotIntensity;
+            spec *= spotIntensity;
+            attenuation *= spotIntensity;
+        }
 
-
-        vec3 ambient = ambientStrength * vec3(light.color) * intensity * 2.0; // x2 ambient
-        vec3 diffuse = diff * vec3(light.color) * intensity * 2.0;            // x2 diffuse
-        vec3 specular = specularStrength * spec * vec3(light.color) * specMap.r * intensity * 2.0; // x2 specular
+        vec3 ambient = ambientStrength * vec3(light.color) * intensity * 2.0;
+        vec3 diffuse = diff * vec3(light.color) * intensity * 2.0;
+        vec3 specular = specularStrength * spec * vec3(light.color) * specMap.r * intensity * 2.0;
 
         finalColor += vec4(ambient + diffuse + specular, 1.0) * texColor * attenuation;
     }
+
+    // --- REFLECTION ENVIRONMENT MAPPING ---
+    vec3 reflectedDir = reflect(-viewDir, norm);
+    vec3 reflection = texture(cubemapSampler, reflectedDir).rgb;
+
+    // Mélange avec la couleur calculée
+    finalColor.rgb = mix(finalColor.rgb, reflection, reflectivity);
 
     FragColor = finalColor;
 }

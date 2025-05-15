@@ -276,7 +276,6 @@ int main() {
 			// Update campfire scale
 			campfire.SetScale(currentScale);
 		}
-		
 		player.Update(window, worldColliders, deltaTime);
 
 		lights[1].color = glm::vec4(2.0f, 1.0f, 0.0f, 1.0f);
@@ -290,8 +289,16 @@ int main() {
 		glUniform1i(glGetUniformLocation(shaderProgram.ID, "lightCount"), lights.size());
 		for (int i = 0; i < lights.size(); ++i) lights[i].sendToShader(shaderProgram, i);
 
+        glUseProgram(shaderProgram.ID);
+        glUniform1i(glGetUniformLocation(shaderProgram.ID, "cubemapSampler"), 3);
+        glActiveTexture(GL_TEXTURE3);
+        glBindTexture(GL_TEXTURE_CUBE_MAP, skybox.getCubemapID());
+
+        glUniform1f(glGetUniformLocation(shaderProgram.ID, "reflectivity"), 0.0f);
 		terrainModel.Draw(shaderProgram, player.camera, terrainModelMatrix);
+        glUniform1f(glGetUniformLocation(shaderProgram.ID, "reflectivity"), 0.2f);
         lampModel.Draw(shaderProgram, player.camera, lampModelMatrix);
+        glUniform1f(glGetUniformLocation(shaderProgram.ID, "reflectivity"), 0.0f);
         farmhouseModel.Draw(shaderProgram, player.camera, farmhouseModelMatrix);
         DrawTrees(trees, treeModel, shaderProgram, player.camera);
 
