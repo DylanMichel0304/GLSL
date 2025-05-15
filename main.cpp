@@ -13,6 +13,7 @@
 #include <GLFW/glfw3.h>
 #include <cmath>
 #include "src/tree_collider_utils.h"
+#include "src/Campfire.h"
 
 // Define this before including stb_image.h
 #define STB_IMAGE_IMPLEMENTATION
@@ -121,15 +122,11 @@ int main() {
 	std::vector<GLuint> lightInd(lightIndices, lightIndices + 36);
 	Mesh lightMesh(lightVerts, lightInd, tex);
 
-    Shader particleShader("shader/particle.vert", "shader/particle.frag");
-    Texture smokeTexture("assets/textures/smoke.png", "diffuse", 0);
-    ParticleSystem campfireSmoke(&particleShader, smokeTexture.ID);
-
-
 	std::vector<Light> lights = {
 		{0, glm::vec3(-1.0f), glm::vec3(-0.0f, -1.0f, -0.0f), glm::vec4(1.0f)}, // Directional light, mesh at origin
 		{1, glm::vec3(-12.0f, 12.0f, 7.0f), glm::vec3(0.0f), glm::vec4(1.0f, 0.5f, 0.0f, 10.0f)}, // Point light
-		{2, glm::vec3(20.0f, 3.0f, 0.0f), glm::vec3(0.0f, -1.0f, 0.0f), glm::vec4(0.0f, 0.5f, 1.0f, 2.0f)}  // Spot light
+		{2, glm::vec3(20.0f, 3.0f, 0.0f), glm::vec3(0.0f, -1.0f, 0.0f), glm::vec4(0.0f, 0.5f, 1.0f, 2.0f)},  // Spot light
+		{1, glm::vec3(5.0f, 1.0f, 0.0f), glm::vec3(0.0f), glm::vec4(1.0f, 0.7f, 0.2f, 5.0f)}  // Campfire light
 	};
     std::vector<Collider> worldColliders;
 
@@ -191,11 +188,20 @@ int main() {
     Collider lampCollider(lampBaseCenter, lampRadius, lampHeight);
     worldColliders.push_back(lampCollider);
     
-	Player player(width, height, glm::vec3(20.0f, 1.7f, 20.0f));
+	Player player(width, height, glm::vec3(-15.0f, 1.7f, 15.0f));
 	player.speed = 10.0f;
 	glEnable(GL_DEPTH_TEST);
 	float time = 0.0f;
+	
+	// Campfire growth parameters
+	float growthStartTime = 5.0f;    // Start growing after 5 seconds
+	float growthDuration = 20.0f;    // Take 20 seconds to reach full size
+	float minScale = 1.0f;          // Starting scale
+	float maxScale = 12.0f;         // Target scale
+	bool growthComplete = false;
 
+	// Create campfire at specific position (start with small scale)
+	Campfire campfire(glm::vec3(5.0f, 0.05f, 0.0f), minScale);
 
 	while (!glfwWindowShouldClose(window)) {
 		glClearColor(0.07f, 0.13f, 0.17f, 1.0f);
@@ -203,12 +209,32 @@ int main() {
 		float deltaTime = glfwGetTime();
 		glfwSetTime(0);
 		time += deltaTime;
+		
+		// Handle campfire growth
+		if (!growthComplete && time > growthStartTime) {
+			float growthProgress = (time - growthStartTime) / growthDuration;
+			if (growthProgress >= 1.0f) {
+				growthProgress = 1.0f;
+				growthComplete = true;
+			}
+			
+			// Calculate current scale using smooth interpolation
+			float currentScale = minScale + (maxScale - minScale) * 
+			                     (growthProgress * growthProgress * (3.0f - 2.0f * growthProgress)); // Smooth step
+			                     
+			// Update campfire scale
+			campfire.SetScale(currentScale);
+		}
+		
 		player.Update(window, worldColliders, deltaTime);
 
 		// Animate lights
 		lights[1].color = glm::vec4(2.0f, 1.0f, 0.0f, 1.0f);
 		lights[2].color = glm::vec4(0.0f, 0.0f, 1.0f, 1.0f) * (0.5f + 0.5f * cos(time));
 		lights[0].color = glm::vec4(1.0f) * (0.3f + 0.7f * abs(sin(time * 0.5f)));
+		
+		// Animate campfire light with flickering effect
+		lights[3].color = glm::vec4(1.0f, 0.7f, 0.2f, 1.0f) * (0.8f + 0.2f * sin(time * 10.0f));
 
 		shaderProgram.Activate();
 		glUniform1i(glGetUniformLocation(shaderProgram.ID, "lightCount"), lights.size());
@@ -219,20 +245,19 @@ int main() {
         farmhouseModel.Draw(shaderProgram, player.camera, farmhouseModelMatrix);
         DrawTrees(trees, treeModel, shaderProgram, player.camera);
 
-        // --- Campfire Particle System ---
-        // Campfire position (adjust as needed)
-        glm::vec3 campfirePos = glm::vec3(-12.0f, 0.3f, 12.0f);
-        // Emit a few particles per frame for a steady fire
-        for (int i = 0; i < 4; ++i) campfireSmoke.emit(campfirePos);
-        campfireSmoke.update(deltaTime);
-        campfireSmoke.draw(player.camera);
+        // Update and draw the campfire
+        campfire.Update(deltaTime);
+        campfire.Draw(player.camera);
 
 		lightShader.Activate();
-		for (const auto& light : lights) {
-			glm::mat4 lightModelMatrix = glm::translate(glm::mat4(1.0f), light.position);
+		for (int i = 0; i < lights.size(); ++i) {
+			// Skip rendering the light mesh for the campfire light (index 3)
+			if (i == 3) continue;
+			
+			glm::mat4 lightModelMatrix = glm::translate(glm::mat4(1.0f), lights[i].position);
 			lightModelMatrix = glm::scale(lightModelMatrix, glm::vec3(1.0f)); // Increased scale
 			glUniformMatrix4fv(glGetUniformLocation(lightShader.ID, "model"), 1, GL_FALSE, glm::value_ptr(lightModelMatrix));
-			glUniform4fv(glGetUniformLocation(lightShader.ID, "lightColor"), 1, glm::value_ptr(light.color));
+			glUniform4fv(glGetUniformLocation(lightShader.ID, "lightColor"), 1, glm::value_ptr(lights[i].color));
 			lightMesh.Draw(lightShader, player.camera);
 		}
 

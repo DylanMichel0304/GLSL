@@ -1,534 +1,321 @@
 # GLSL 3D Graphics Engine
 
-This repository contains a comprehensive 3D graphics engine built with OpenGL and GLSL (OpenGL Shading Language). The project implements a modern rendering pipeline with advanced lighting, texturing, camera movement, collision detection, and model loading capabilities.
+This project is a modern 3D graphics engine built with C++, OpenGL, and GLSL. It demonstrates a complete real-time rendering pipeline, advanced lighting, model loading, collision detection, a particle system, and interactive camera/player controls. The codebase is modular, extensible, and suitable for both learning and further development.
 
-## Project Structure in Detail
+---
 
-### Core Files
+## Table of Contents
 
-- **main.cpp**: The entry point of the application.
-  - Initializes GLFW and OpenGL context
-  - Creates the rendering window
-  - Sets up the player, lights, and scene objects
-  - Contains the main rendering loop
-  - Manages input handling via GLFW callbacks
+- [Project Structure](#project-structure)
+- [Core Concepts and Implementations](#core-concepts-and-implementations)
+  - [1. Windowing and OpenGL Context](#1-windowing-and-opengl-context)
+  - [2. Rendering Pipeline](#2-rendering-pipeline)
+  - [3. Lighting System (Detailed)](#3-lighting-system-detailed)
+    - [3.1 Directional Light](#31-directional-light)
+    - [3.2 Point Light](#32-point-light)
+    - [3.3 Spot Light](#33-spot-light)
+  - [4. Object and Scene System](#4-object-and-scene-system)
+    - [4.1 Model and Mesh System](#41-model-and-mesh-system)
+    - [4.2 Collider System](#42-collider-system)
+    - [4.3 Scene Composition and Setup](#43-scene-composition-and-setup)
+  - [5. Shaders](#5-shaders)
+  - [6. Texturing](#6-texturing)
+  - [7. Camera and Player Controls](#7-camera-and-player-controls)
+  - [8. Particle System](#8-particle-system)
+  - [9. Utility and Helper Systems](#9-utility-and-helper-systems)
+- [Assets and Resources](#assets-and-resources)
+- [Build and Run](#build-and-run)
+- [Extending the Engine](#extending-the-engine)
 
-- **CMakeLists.txt**: The CMake configuration that:
-  - Defines the project and its version
-  - Locates necessary dependencies (OpenGL, GLFW, GLM)
-  - Sets up compilation flags and options
-  - Configures the build process
-  - Sets up executable targets and links libraries
+---
 
-- **default.frag**: The main fragment shader that:
-  - Implements the lighting system (point, directional, spot lights)
-  - Calculates material properties with ambient, diffuse, and specular components
-  - Handles texture sampling and tiling
-  - Calculates lighting attenuation
-  - Applies post-processing effects
+## Project Structure
 
-- **test.cpp**: A demo application that:
-  - Sets up a 3D scene with various models (terrain, trees, farmhouse)
-  - Demonstrates lighting with directional and spot lights
-  - Implements collision detection between player and scene objects
-  - Shows how to use textures and materials
-  - Features a player-controlled camera with WASD movement
+```
+GLSL/
+  assets/         # Textures, models, cubemaps
+  import/         # Third-party libraries (GLAD, GLFW, GLM, stb)
+  shader/         # GLSL shaders (vertex, fragment)
+  src/            # Engine source code (C++)
+  main.cpp        # Main application entry point
+  CMakeLists.txt  # Build configuration
+  README.md       # This documentation
+```
 
-### Source Directory (`src/`)
+---
 
-#### Rendering Primitives
+## Core Concepts and Implementations
 
-- **VBO (Vertex Buffer Object)**:
-  - `VBO.h`, `VBO.cpp`: Manages GPU memory for vertex data
-  - Handles creation, binding, data loading, and deletion of vertex buffers
-  - Provides methods for sending vertex attributes to the GPU
+### 1. Windowing and OpenGL Context
 
-- **VAO (Vertex Array Object)**:
-  - `VAO.h`, `VAO.cpp`: Manages vertex attribute configurations
-  - Links attributes to VBOs
-  - Configures the vertex layout (positions, normals, UVs, etc.)
-  - Provides methods for binding and unbinding VAOs during rendering
+- **GLFW** is used for window creation, input handling, and OpenGL context management.
+- **GLAD** is used for loading OpenGL function pointers.
+- The window is initialized with a 3.3 core profile context, and the viewport is set to 1200x1200 pixels.
+- The main loop runs until the window is closed, handling buffer swaps and event polling.
 
-- **EBO (Element Buffer Object)**:
-  - `EBO.h`, `EBO.cpp`: Manages index data for indexed rendering
-  - Optimizes rendering by allowing vertex reuse
-  - Provides methods for binding, loading data, and deletion
+### 2. Rendering Pipeline
 
-#### Shader Management
+- **Depth Testing** is enabled to ensure correct 3D rendering order.
+- The main loop:
+  - Clears the color and depth buffers.
+  - Updates the player and camera.
+  - Animates lights and updates their properties.
+  - Draws all scene objects (terrain, trees, farmhouse, lamp, etc.).
+  - Renders light sources as visible meshes.
+  - Draws the particle system (e.g., campfire smoke).
+- **Frame Timing**: Delta time is calculated each frame for smooth, frame-rate-independent movement and animation.
 
-- **shaderClass**:
-  - `shaderClass.h`, `shaderClass.cpp`: Core shader functionality
-  - Loads and compiles vertex, fragment, and geometry shaders
-  - Handles shader linking and program creation
-  - Provides uniform setting methods for various data types
-  - Error checking and shader validation
+---
 
-#### Texturing System
+### 3. Lighting System (Detailed)
 
-- **Texture**:
-  - `Texture.h`, `Texture.cpp`: Handles texture loading and management
-  - Supports different texture types (diffuse, specular, normal maps)
-  - Configures texture parameters (filtering, wrapping)
-  - Uses stb_image for image file loading
-  - Supports various pixel formats (RGB, RGBA, etc.)
+Lighting is a core feature of the engine, supporting multiple light types, each with unique properties, behaviors, and shader logic. All lights are managed in a vector and sent to the shader as an array of structs. The fragment shader loops over all active lights and applies their effects per-pixel.
 
-#### Model Loading
+#### 3.1 Directional Light
+
+- **Concept**: Simulates sunlight or other infinitely distant sources. All rays are parallel, and the light has a direction but no position.
+- **Properties**:
+  - `type = 0` (in code and shader)
+  - `direction`: The direction the light is shining (vec3)
+  - `color`: RGBA color and intensity (vec4)
+- **Implementation**:
+  - Created in C++ as `Light(0, glm::vec3(-1.0f), glm::vec3(-0.0f, -1.0f, -0.0f), glm::vec4(1.0f))`
+  - Animated in the main loop by modulating its color intensity with a sine function for day/night simulation:
+    ```cpp
+    lights[0].color = glm::vec4(1.0f) * (0.3f + 0.7f * abs(sin(time * 0.5f)));
+    ```
+- **Shader Logic**:
+  - In `default.frag`, if `light.type == 0`, the light direction is used for diffuse and specular calculations.
+  - No attenuation is applied (infinite source).
+  - Intensity can be adjusted in the shader for ambient/diffuse/specular.
+- **Usage in Scene**:
+  - Provides global illumination, simulating sunlight.
+  - Affects all objects equally, regardless of their position.
+
+#### 3.2 Point Light
+
+- **Concept**: Emits light in all directions from a single point, like a bulb or torch.
+- **Properties**:
+  - `type = 1`
+  - `position`: The world-space position of the light (vec3)
+  - `color`: RGBA color and intensity (vec4)
+  - Attenuation parameters (hardcoded in shader): `constant`, `linear`, `quadratic`
+- **Implementation**:
+  - Created in C++ as `Light(1, glm::vec3(-12.0f, 12.0f, 7.0f), glm::vec3(0.0f), glm::vec4(1.0f, 0.5f, 0.0f, 10.0f))`
+  - Animated in the main loop for effects like flickering:
+    ```cpp
+    lights[1].color = glm::vec4(2.0f, 1.0f, 0.0f, 1.0f);
+    ```
+- **Shader Logic**:
+  - In `default.frag`, if `light.type == 1`, the light direction is calculated as the vector from the fragment to the light position.
+  - Attenuation is computed based on distance:
+    ```glsl
+    float dist = length(light.position - crntPos);
+    float attenuation = 1.0 / (constant + linear * dist + quadratic * (dist * dist));
+    ```
+  - Affects only objects within its effective radius.
+- **Usage in Scene**:
+  - Used for local light sources, e.g., lamps, fires.
+  - Visualized as a small mesh (cube) at the light's position.
+
+#### 3.3 Spot Light
+
+- **Concept**: Emits a cone of light, like a flashlight or car headlamp. Has a position, direction, and cutoff angles.
+- **Properties**:
+  - `type = 2`
+  - `position`: The world-space position (vec3)
+  - `direction`: The direction the cone is pointing (vec3)
+  - `color`: RGBA color and intensity (vec4)
+  - Inner and outer cutoff angles (hardcoded in shader)
+- **Implementation**:
+  - Created in C++ as `Light(2, glm::vec3(20.0f, 3.0f, 0.0f), glm::vec3(0.0f, -1.0f, 0.0f), glm::vec4(0.0f, 0.5f, 1.0f, 2.0f))`
+  - Animated in the main loop for effects like pulsing:
+    ```cpp
+    lights[2].color = glm::vec4(0.0f, 0.0f, 1.0f, 1.0f) * (0.5f + 0.5f * cos(time));
+    ```
+- **Shader Logic**:
+  - In `default.frag`, if `light.type == 2`, the light direction and cutoff angles are used to compute the spotlight effect:
+    ```glsl
+    float theta = dot(lightDir, normalize(-light.direction));
+    float outerCutOff = 0.7;
+    float innerCutOff = 0.85;
+    float epsilon = innerCutOff - outerCutOff;
+    float intensity = clamp((theta - outerCutOff) / epsilon, 0.0, 1.0);
+    diff *= intensity;
+    spec *= intensity;
+    attenuation *= intensity;
+    ```
+  - Attenuation and intensity are modulated by the angle between the fragment and the spotlight direction.
+- **Usage in Scene**:
+  - Used for focused light sources, e.g., spotlights, searchlights.
+  - Visualized as a mesh at the light's position.
+
+---
+
+### 4. Object and Scene System
+
+All object-related features are grouped here, including model and mesh management, collider setup, and scene composition.
+
+#### 4.1 Model and Mesh System
 
 - **Mesh**:
-  - `Mesh.h`, `Mesh.cpp`: Represents a single mesh within a 3D model
-  - Stores vertices, indices, and textures
-  - Contains methods for setup and drawing
-  - Manages VAOs, VBOs, and EBOs for each mesh
-
+  - Represents a single drawable object, storing vertices, indices, textures, and a VAO.
+  - Handles VBO/EBO setup and attribute linking.
+  - Draws itself with a given shader and camera.
+  - Provides min/max vertex queries for collider generation.
 - **Model**:
-  - `model.h`, `model.cpp`: Loads and manages complex 3D models
-  - Uses Assimp library to import various 3D file formats
-  - Processes model data (vertices, normals, textures)
-  - Handles material properties from model files
-  - Organizes hierarchical mesh structures
+  - Loads and manages complex 3D models (OBJ/MTL).
+  - Supports multiple meshes and materials per model.
+  - Loads geometry, normals, UVs, and material properties.
+  - Handles texture assignment and tiling.
+  - Can build a single collider for the whole model or per-material/component colliders.
+  - Exposes methods for adding textures, setting tiling, and drawing with transformation matrices.
+- **Texture Assignment**:
+  - Models and meshes can have their textures replaced or tiled as needed.
+  - Texture tiling is controlled via a uniform and per-model property.
 
-#### Camera System
+#### 4.2 Collider System
+
+- **Collider Types**:
+  - **Box**: Axis-aligned bounding box, used for most objects and the player.
+  - **Cylinder**: Used for tree trunks and lamp posts, with custom intersection logic.
+- **Collider Generation**:
+  - Each model can generate a collider (box or per-component).
+  - Trees use a utility to generate a cylinder collider for each trunk, based on a reference trunk collider and their positions.
+  - The player has a box collider (capsule-like) for first-person collision.
+- **Collision Detection**:
+  - Collision checks are performed before moving the player, axis by axis, to allow sliding along surfaces.
+  - Specialized intersection logic for box-box, box-cylinder, and cylinder-cylinder (approximate).
+  - All static scene objects (trees, farmhouse, lamp) have colliders added to a global list for collision checks.
+
+#### 4.3 Scene Composition and Setup
+
+- **Terrain**: Large plane mesh with grass texture, tiled for realism.
+- **Trees**: Multiple tree models placed at various positions and scales, each with its own collider.
+- **Farmhouse**: Imported model, rotated and scaled, with a box collider.
+- **Lamp Post**: Imported model, rotated and scaled, with a cylinder collider.
+- **Lighting**: Three lights (directional, point, spot) with animated properties.
+- **Campfire**: Simulated with a particle system for smoke.
+- **Draw Order**: Opaque objects are drawn first, then transparent particles.
+- **Scene Setup in Code**:
+  - All objects are loaded, transformed, and their colliders are created in `main.cpp`.
+  - The scene is rendered each frame, with all objects, lights, and effects drawn in the correct order.
+
+---
+
+### 5. Shaders
+
+- **Shader Management**: Shaders are loaded, compiled, and linked via a `Shader` class.
+- **default.vert**: Vertex shader that transforms vertices, passes normals, colors, and texture coordinates.
+- **default.frag**: Fragment shader implementing a Phong lighting model with support for multiple lights (directional, point, spot), texture tiling, and material properties.
+- **light.vert/light.frag**: Minimal shaders for rendering light source meshes.
+- **particle.vert/particle.frag**: Shaders for the particle system, supporting alpha blending and soft edges.
+- **Uniforms**: Camera matrices, model matrices, light arrays, and material properties are passed as uniforms.
+
+---
+
+### 6. Texturing
+
+- **Texture Class**: Loads images (using stb_image), creates OpenGL textures, and manages binding.
+- **Texture Types**: Supports diffuse and specular maps.
+- **Texture Tiling**: Uniform scaling of texture coordinates for repeating patterns (e.g., grass terrain).
+- **Texture Assignment**: Models and meshes can have their textures replaced or tiled as needed.
+
+---
+
+### 7. Camera and Player Controls
 
 - **Camera**:
-  - `Camera.h`, `Camera.cpp`: Implements a 3D camera system
-  - Manages view and projection matrices
-  - Provides movement functions (forward, backward, strafe)
-  - Handles mouse input for camera rotation
-  - Implements perspective projection and field of view adjustments
-
-#### Player and Collision
-
+  - Implements a first-person perspective.
+  - Supports movement (WASD), mouse look, and adjustable speed.
+  - Maintains view and projection matrices.
 - **Player**:
-  - `Player.h`, `Player.cpp`: Represents the user/player entity
-  - Contains the camera and manages player position
-  - Handles user input for movement
-  - Manages collision detection with the environment
-  - Updates player state based on delta time
+  - Encapsulates the camera and a collider.
+  - Handles gravity, jumping, and ground detection.
+  - Processes input for movement and jumping.
+  - Updates position based on collision checks and physics.
+  - Prevents movement through objects using collision detection.
 
-- **Collider**:
-  - `Collider.h`: Implements collision detection
-  - Defines collision shapes (boxes, spheres)
-  - Provides methods for collision testing
-  - Used to prevent camera/player from moving through objects
+---
 
-#### Lighting System
+### 8. Particle System
 
-- **Light**:
-  - `Light.h`, `Light.cpp`: Manages different light types
-  - Implements point lights (omni-directional)
-  - Implements directional lights (sun-like)
-  - Implements spotlights (cone-shaped)
-  - Stores light properties (position, direction, color, intensity)
+- **ParticleSystem Class**:
+  - Manages a list of particles, each with position, velocity, life, size, and alpha.
+  - Emits new particles at a given origin (e.g., campfire).
+  - Updates particle positions, fades them out, and removes dead particles.
+  - Renders particles as textured quads with alpha blending.
+- **Shaders**: Particle shaders support soft edges and transparency.
+- **Usage**: In the main loop, several smoke particles are emitted per frame at the campfire position, creating a continuous smoke effect.
 
-#### Skybox/Environment
+---
 
-- **Cubemaps**:
-  - `Cubemaps.h`, `Cubemaps.cpp`: Implements skybox functionality
-  - Loads and renders environment cube maps
-  - Provides methods for binding and rendering the skybox
-  - Handles special texture sampling for environment reflections
+### 9. Utility and Helper Systems
 
-### Shader Directory (`shader/`)
+- **tree_collider_utils.h**: Utility to generate colliders for all trees based on a reference trunk collider and their positions.
+- **GLM**: Used for all vector/matrix math (positions, transformations, directions).
+- **stb_image**: Used for loading image files as textures.
+- **CMake**: Build system configuration for cross-platform compilation.
 
-- **default.vert**: The main vertex shader that:
-  - Transforms vertices using model-view-projection matrices
-  - Calculates and outputs vertex normals
-  - Passes texture coordinates to the fragment shader
-  - Handles vertex attributes (position, normal, color, UV)
+---
 
-- **default.frag**: The main fragment shader (described above)
+## Assets and Resources
 
-- **light.vert**, **light.frag**: Simplified shaders for rendering light sources
-  - Minimal processing for light objects
-  - Simple transformation and basic coloring
+- **assets/textures/**: Contains all texture images (grass, brick, smoke, etc.).
+- **assets/objects/**: Contains 3D models (OBJ format) for terrain, trees, farmhouse, lamp.
+- **assets/cubemaps/**: Contains skybox/environment textures (not always used in the main loop, but supported).
 
-- **skybox.vert**, **skybox.frag**: Specialized shaders for rendering the skybox
-  - Handles cubemap texture sampling
-  - Ensures the skybox is always centered around the camera
+---
 
-### Assets Directory (`assets/`)
+## Build and Run
 
-- **textures/**: Contains texture files:
-  - Diffuse textures (color/albedo maps) like "herbe.png"
-  - Specular maps for controlling shininess
-  - Normal maps for surface detail
-
-- **objects/**: Contains 3D model files:
-  - Various OBJ format models with materials
-  - Includes primitives and complex models
-
-- **cubemaps/**: Environment map textures for skyboxes
-  - Six-sided cube maps for environment rendering
-
-## Detailed Technical Implementation
-
-### Rendering Pipeline
-
-1. **Initialization**:
-   - GLFW window creation
-   - OpenGL context setup
-   - Shader compilation and linking
-   - Texture loading
-   - Model loading
-
-2. **Main Loop**:
-   - Clear buffers
-   - Update player position and camera
-   - Process input
-   - Update scene state (lights, animations)
-   - Render objects with appropriate shaders
-   - Apply post-processing effects
-   - Swap buffers and poll events
-
-3. **Shutdown**:
-   - Clean up OpenGL resources
-   - Terminate GLFW
-   - Free allocated memory
-
-### Lighting System in Detail
-
-The project implements a Phong lighting model with three components:
-
-1. **Ambient Lighting**: 
-   - Basic illumination present in all parts of the scene
-   - Controlled by material ambient properties
-   - Provides minimum visibility even in shadows
-
-2. **Diffuse Lighting**:
-   - Directional illumination based on light-surface angle
-   - Calculated using the dot product of surface normal and light direction
-   - Creates the primary shading effect on surfaces
-
-3. **Specular Lighting**:
-   - Creates highlights on reflective surfaces
-   - Calculated using the reflection vector and view direction
-   - Controlled by material shininess property
-   - Enhances the appearance of glossy/metallic surfaces
-
-The engine supports three light types:
-
-1. **Point Light** (`pointLight()` in default.frag):
-   - Emits light in all directions
-   - Features distance attenuation (quadratic and linear)
-   - Simulates light bulbs or small light sources
-
-2. **Directional Light** (`direcLight()` in default.frag):
-   - Light from a consistent direction (like sunlight)
-   - No attenuation with distance
-   - Uniform illumination across the scene
-
-3. **Spotlight** (`spotLight()` in default.frag):
-   - Cone-shaped light with inner and outer boundaries
-   - Controlled angle and falloff
-   - Simulates flashlights, headlamps, etc.
-
-### Material System
-
-Materials are represented by a struct in the shaders:
-```glsl
-struct Material {
-    vec3 ambient;   // Ka: Ambient reflection color
-    vec3 diffuse;   // Kd: Diffuse reflection color
-    vec3 specular;  // Ks: Specular reflection color
-    float shininess; // Ns: Specular exponent
-};
-```
-
-These properties control how surfaces interact with light:
-- Higher ambient values make objects visible even in shadow
-- Diffuse controls the main surface color under direct light
-- Specular determines the color and intensity of highlights
-- Shininess controls the size of specular highlights (higher = smaller, sharper)
-
-### Texture System
-
-The engine supports multiple texture types:
-1. **Diffuse Maps**: Control surface color
-2. **Specular Maps**: Control shininess distribution
-
-Textures are loaded using stb_image and bound to appropriate texture units. The fragment shader samples these textures and applies tiling based on the `textureTiling` uniform.
-
-### Camera System
-
-The camera uses a standard first-person setup with:
-- Position vector (location in 3D space)
-- Front vector (direction the camera is facing)
-- Up vector (orientation)
-- Right vector (for strafing)
-
-Camera movement is controlled via keyboard inputs:
-- W/A/S/D for forward/left/backward/right movement
-- Space for upward movement
-- Left Control for downward movement
-
-Camera rotation is controlled via mouse movement:
-- Mouse X controls yaw (horizontal rotation)
-- Mouse Y controls pitch (vertical rotation)
-- Includes constraints to prevent gimbal lock
-
-### Collision System
-
-The `Collider` class implements basic collision detection to prevent the player from moving through objects:
-- Defines collision shapes (primarily boxes)
-- Tests player position against world objects
-- Adjusts player position when collisions occur
-
-## Building and Running the Project
-
-### Prerequisites
-
-- OpenGL 3.3+ compatible graphics card and drivers
-- CMake 3.10+
-- C++11 compatible compiler
-- GLFW3
-- GLM (OpenGL Mathematics)
-
-### Build Instructions
-
-1. Clone the repository
-2. Navigate to the project directory
-3. Run CMake:
-   ```
-   cmake .
-   ```
-4. Build the project:
-   ```
+1. **Dependencies**: Requires CMake, OpenGL, GLFW, GLM, and a C++17 compiler.
+2. **Build**:
+   ```sh
+   mkdir build
+   cd build
+   cmake ..
    make
    ```
-5. Run the executable:
+3. **Run**:
+   ```sh
+   ./3D_game
    ```
-   ./bin/3D_Game_main
-   ```
-   
-   Or run the test application:
-   ```
-   ./bin/3D_Game_test
-   ```
+4. **Controls**:
+   - `WASD`: Move player
+   - `Mouse`: Look around
+   - `Space`: Jump
+   - `Shift`: Sprint
 
-### Controls
+---
 
-- **W, A, S, D**: Move forward, left, backward, right
-- **Space**: Move up
-- **Left Control**: Move down
-- **Mouse**: Look around
-- **Escape**: Close the application
+## Extending the Engine
 
-## Running the Test Application (test.cpp)
+- **Add new models**: Place OBJ files in `assets/objects/` and load them in `main.cpp`.
+- **Add new textures**: Place images in `assets/textures/` and assign to models/meshes.
+- **Add new lights**: Push new `Light` objects to the `lights` vector and update the shader.
+- **Add new particle effects**: Instantiate new `ParticleSystem` objects with different textures and emission logic.
+- **Implement new shaders**: Add GLSL files to `shader/` and load them via the `Shader` class.
 
-The repository includes a demo application (`test.cpp`) that demonstrates the core features of the engine. The test application:
+---
 
-1. **Creates a 3D scene** with:
-   - A large flat terrain
-   - A tree model with textures
-   - A farmhouse model with textures
-   - Light sources (directional and spotlight)
+## Conceptual Summary
 
-2. **Implements lighting system** with:
-   - A directional light representing the sun
-   - A spotlight at a high position pointing downward
-   - Dynamic lighting control with adjustable intensity
+This engine demonstrates the following advanced graphics concepts:
 
-3. **Sets up collision detection**:
-   - The tree and farmhouse have collision boxes
-   - The player cannot pass through these objects
-   - Collision events are logged to the console
+- **OpenGL context and window management**
+- **Modern shader-based rendering pipeline**
+- **OBJ/MTL model loading and material parsing**
+- **Multiple mesh/material support per model**
+- **Texture mapping and tiling**
+- **Phong lighting with multiple light types**
+- **Real-time light animation**
+- **First-person camera and player physics**
+- **Robust collision detection (box and cylinder)**
+- **Particle systems for effects (smoke, fire, etc.)**
+- **Efficient scene management and draw order**
+- **Extensible, modular C++ architecture**
 
-4. **Demonstrates texture mapping**:
-   - Loads and applies textures to terrain and models
-   - Uses material properties from model files
-   - Shows different texture types (diffuse maps)
+---
 
-### Running the Test Application
-
-To build and run the test application:
-
-```bash
-# Build the project
-cmake .
-make
-
-# Run the test application
-./bin/3D_Game_test
-```
-
-### Test Application Structure
-
-The test application follows these steps:
-
-1. **Initialization**:
-   ```cpp
-   // Initialize GLFW and create window
-   glfwInit();
-   GLFWwindow* window = glfwCreateWindow(width, height, "3D_game", NULL, NULL);
-   
-   // Load GLAD for OpenGL function access
-   gladLoadGL();
-   ```
-
-2. **Asset Loading**:
-```cpp
-   // Load textures
-   Texture textures[] { Texture((texPath + "herbe.png").c_str(), "diffuse", 0) };
-   
-   // Load shaders
-   Shader shaderProgram("shader/default.vert", "shader/default.frag");
-   
-   // Load 3D models
-   Model terrainModel("assets/objects/plane.obj");
-   Model treeModel("assets/objects/Tree 02/Tree.obj");
-   Model farmhouseModel("assets/textures/newhouse/farmhouse_obj.obj");
-```
-
-3. **Scene Setup**:
-   ```cpp
-   // Set up model transformations
-   glm::mat4 terrainModelMatrix = glm::mat4(1.0f);
-   terrainModelMatrix = glm::scale(terrainModelMatrix, glm::vec3(100.0f, 100.0f, 100.0f));
-   
-   // Create colliders for scene objects
-   treeModel.buildCollider(treeModelMatrix);
-   farmhouseModel.buildCollider(farmhouseModelMatrix);
-   
-   // Setup lighting
-   std::vector<Light> sceneLights;
-   sceneLights.emplace_back(0, glm::vec3(0.0f), glm::vec3(-0.2f, -1.0f, -0.3f), 
-                          glm::vec4(1.0f, 1.0f, 0.9f, 1.0f), nullptr);
-   ```
-
-4. **Main Loop**:
-   ```cpp
-   while (!glfwWindowShouldClose(window))
-   {
-       // Clear buffers
-       glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
-       
-       // Update player
-       player.Update(window, worldColliders, deltaTime);
-       
-       // Update lighting
-       sceneLights[0].color = glm::vec4(1.0f, 1.0f, 0.9f, 1.0f) * sunStrength;
-       
-       // Draw models
-       treeModel.Draw(shaderProgram, player.camera, treeModelMatrix);
-       farmhouseModel.Draw(shaderProgram, player.camera, farmhouseModelMatrix);
-       terrainModel.Draw(shaderProgram, player.camera, terrainModelMatrix);
-       
-       // Swap buffers and handle events
-       glfwSwapBuffers(window);
-       glfwPollEvents();
-   }
-   ```
-
-5. **Cleanup**:
-   ```cpp
-   // Delete resources
-   shaderProgram.Delete();
-   lightShader.Delete();
-   glfwDestroyWindow(window);
-   glfwTerminate();
-   ```
-
-## Modifying the Project
-
-### Adding New Models
-
-1. Add your OBJ file to the `assets/objects/` directory
-2. Load the model in `main.cpp`:
-   ```cpp
-   Model yourModel("assets/objects/your_model.obj");
-   ```
-3. Render the model in the main loop:
-   ```cpp
-   yourModel.Draw(shaderProgram, camera);
-   ```
-
-### Adding New Textures
-
-1. Add texture files to `assets/textures/`
-2. Create texture objects in `main.cpp`:
-   ```cpp
-   Texture textures[]
-   {
-       Texture((texPath + "your_texture.png").c_str(), "diffuse", 0),
-       Texture((texPath + "your_specular.png").c_str(), "specular", 1)
-   };
-   ```
-
-### Customizing Lighting
-
-1. Modify light parameters in `main.cpp`:
-```cpp
-   // Create a point light
-   sceneLights.emplace_back(
-       1, // type (0=directional, 1=point, 2=spot)
-       glm::vec3(x, y, z), // position
-       glm::vec3(0.0f), // direction (not used for point lights)
-       glm::vec4(r, g, b, a), // color and intensity
-       nullptr // associated mesh
-   );
-   ```
-
-2. Adjust lighting calculations in `default.frag`:
-   - Change attenuation parameters for point lights
-   - Modify cone angles for spotlights
-   - Adjust ambient, diffuse, or specular factors
-
-### Creating Custom Shaders
-
-1. Create new .vert and .frag files in the shader directory
-2. Load them in `main.cpp`:
-```cpp
-   Shader customShader("shader/custom.vert", "shader/custom.frag");
-```
-3. Update uniforms and use for rendering:
-```cpp
-   customShader.Activate();
-   customShader.setVec3("camPos", camera.Position);
-   // Set other uniforms
-   model.Draw(customShader);
-```
-
-## Advanced Features
-
-### Depth-Based Effects
-
-The `linearrizeDepth` function in the fragment shader converts non-linear depth values to linear ones, enabling:
-- Fog effects
-- Depth-based color adjustments
-- Distance attenuation effects
-
-### Material-Based Rendering
-
-The material system allows for:
-- Physically-based rendering approaches
-- Material-specific shader behaviors
-- Complex surface appearance simulation
-
-### Multi-Light Scene Management
-
-The `sceneLights` vector allows for dynamic management of multiple light sources:
-- Add/remove lights during runtime
-- Animate light positions and colors
-- Create complex lighting scenarios
-
-### Collision-Aware Camera
-
-The player-collider integration prevents camera clipping through:
-- Terrain
-- Buildings
-- Props and scene objects
-
-## Performance Considerations
-
-- **VBO/VAO/EBO Management**: Optimizes GPU memory usage
-- **Shader Optimization**: Keeps shader complexity reasonable
-- **Model Loading**: Efficiently processes 3D model data
-- **Texture Management**: Properly handles texture units and bindings
-
-## Future Improvements
-
-- Shadow mapping for realistic shadows
-- Deferred rendering for better performance with many lights
-- PBR (Physically-Based Rendering) implementation
-- Post-processing effects (bloom, ambient occlusion, etc.)
-- Animation system for skeletal mesh animation
+**This README is designed to be a complete technical reference for the project, suitable for use as the basis of a detailed report.** If you need further breakdowns (e.g., per-class, per-shader, or per-feature), let me know!

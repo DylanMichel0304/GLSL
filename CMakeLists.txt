@@ -60,16 +60,14 @@ set(SOURCES_COMMON
     src/Particle.h
     src/ParticleSystem.h src/ParticleSystem.cpp
     src/tree_collider_utils.h
+    src/Campfire.h src/Campfire.cpp
 )
 
 set(SOURCES_main
     main.cpp
     ${SOURCES_COMMON}
 )
-set(SOURCES_TEST
-    test.cpp
-    ${SOURCES_COMMON}
-)
+
 
 add_compile_definitions(PATH_TO_OBJECTS="${CMAKE_CURRENT_SOURCE_DIR}/assets/objects")
 add_compile_definitions(PATH_TO_TEXTURE="${CMAKE_CURRENT_SOURCE_DIR}/assets/textures")
@@ -80,15 +78,10 @@ if (NOT glfw3_FOUND)
     target_include_directories(${PROJECT_NAME}_main PUBLIC ${GLAD_INCLUDE} import/glfw/include/ src)
     target_link_libraries(${PROJECT_NAME}_main PUBLIC OpenGL::GL glfw glad)
 
-    add_executable(${PROJECT_NAME}_test ${SOURCES_TEST})
-    target_include_directories(${PROJECT_NAME}_test PUBLIC ${GLAD_INCLUDE} import/glfw/include/ src)
-    target_link_libraries(${PROJECT_NAME}_test PUBLIC OpenGL::GL glfw glad)
 else()
     add_executable(${PROJECT_NAME}_main ${SOURCES_main})
     target_include_directories(${PROJECT_NAME}_main PUBLIC ${GLAD_INCLUDE} src)
     target_link_libraries(${PROJECT_NAME}_main PUBLIC OpenGL::GL glfw glad)
 
-    add_executable(${PROJECT_NAME}_test ${SOURCES_TEST})
-    target_include_directories(${PROJECT_NAME}_test PUBLIC ${GLAD_INCLUDE} src)
-    target_link_libraries(${PROJECT_NAME}_test PUBLIC OpenGL::GL glfw glad)
+
 endif()
