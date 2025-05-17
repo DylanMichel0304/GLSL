@@ -43,12 +43,14 @@ GLuint lightIndices[] = {
 	0,1,2, 0,2,3, 0,4,7, 0,7,3, 3,7,6, 3,6,2,
 	2,6,5, 2,5,1, 1,5,4, 1,4,0, 4,5,6, 4,6,7
 };
+// Represents a tree instance in the scene with position and scale
 struct SceneTree {
-    glm::vec3 position;
-    glm::vec3 scale;
+    glm::vec3 position; // World position of the tree
+    glm::vec3 scale;    // Scale of the tree
 };
 
-// Utility function to draw all trees
+// Utility function to draw all trees in the scene
+// Iterates over the list of SceneTree and draws each tree model at its position and scale
 void DrawTrees(const std::vector<SceneTree>& trees, Model& treeModel, Shader& shader, Camera& camera) {
     for (const auto& tree : trees) {
         glm::mat4 treeModelMatrix = glm::mat4(1.0f);
@@ -109,7 +111,9 @@ int main() {
 	if (!window) return -1;
 
 	std::string texPath = "assets/textures/";
-	Texture textures[] = { Texture((texPath + "herbe.png").c_str(), "diffuse", 0) };
+	Texture textures[] = { Texture((texPath + "planks.png").c_str(), "diffuse", 0),
+                        Texture((texPath + "planksSpec.png").c_str(), "specular", 1)
+                        };  
     Texture bronzeTexture((texPath + "brick.png").c_str(), "diffuse", 0);
 
 	Shader shaderProgram("shader/default.vert", "shader/default.frag");
@@ -163,7 +167,7 @@ int main() {
 	};
     std::vector<Collider> worldColliders;
 
-    // Load the models
+    // Load the models/objects
 	Model terrainModel("assets/objects/plane.obj");
 	terrainModel.SetTextureTiling(150.0f);
 	glm::mat4 terrainModelMatrix = glm::scale(glm::mat4(1.0f), glm::vec3(40.0f));

@@ -1,8 +1,12 @@
+// ParticleSystem.cpp - Implementation of a simple billboard particle system for OpenGL
+// Each ParticleSystem manages a set of particles, emits, updates, and draws them as camera-facing quads
+
 #include "ParticleSystem.h"
 #include <cstdlib>
 #include <glm/gtc/matrix_transform.hpp>
 #include <iostream>
 
+// Constructor: initializes OpenGL buffers and quad geometry for rendering particles
 ParticleSystem::ParticleSystem(Shader* shader, GLuint textureID)
     : shader(shader), textureID(textureID)
 {
@@ -25,33 +29,37 @@ ParticleSystem::ParticleSystem(Shader* shader, GLuint textureID)
     std::cout << "ParticleSystem created with texture ID: " << textureID << std::endl;
 }
 
+// Destructor: cleans up OpenGL resources
 ParticleSystem::~ParticleSystem() {
     glDeleteVertexArrays(1, &VAO);
     glDeleteBuffers(1, &VBO);
 }
 
+// Emit a new particle at the given origin with random velocity
 void ParticleSystem::emit(glm::vec3 origin) {
     glm::vec3 velocity(
-        (rand() % 100 - 50) / 100.0f,
-        (rand() % 100) / 100.0f + 1.0f,
-        (rand() % 100 - 50) / 100.0f
+        (rand() % 100 - 50) / 100.0f, // random X velocity
+        (rand() % 100) / 100.0f + 1.0f, // random upward Y velocity
+        (rand() % 100 - 50) / 100.0f  // random Z velocity
     );
-    particles.emplace_back(origin, velocity, 1.5f, 0.5f);
+    particles.emplace_back(origin, velocity, 1.5f, 0.5f); // life, size
 }
 
+// Update all particles: move, fade, and remove dead ones
 void ParticleSystem::update(float dt) {
     for (auto it = particles.begin(); it != particles.end();) {
-        it->life -= dt;
+        it->life -= dt; // decrease life
         if (it->life <= 0.0f) {
-            it = particles.erase(it);
+            it = particles.erase(it); // remove dead particle
         } else {
-            it->position += it->velocity * dt;
-            it->alpha = it->life / 1.5f;
+            it->position += it->velocity * dt; // move
+            it->alpha = it->life / 1.5f; // fade out
             ++it;
         }
     }
 }
 
+// Draw all particles as camera-facing billboards
 void ParticleSystem::draw(Camera& camera) {
     if (particles.empty()) {
         return; // Don't bother drawing if there are no particles
