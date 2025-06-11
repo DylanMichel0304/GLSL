@@ -105,7 +105,7 @@ void ParticleSystem::draw(Camera& camera) {
         drawnCount++;
     }
 
-    // Occasionally show debugging info
+  
     if (rand() % 1000 == 0) {
         std::cout << "Drew " << drawnCount << " particles" << std::endl;
     }
